@@ -1,7 +1,0 @@
-//
-// Prefix header for all source files of the 'CheckWriter' target in the 'CheckWriter' project
-//
-
-#ifdef __OBJC__
-    #import <Cocoa/Cocoa.h>
-#endif
