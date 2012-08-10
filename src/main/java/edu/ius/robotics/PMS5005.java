@@ -2,334 +2,1458 @@ package edu.ius.robotics;
 
 public class PMS5005
 {
-
-	public byte crc(byte[] buf) {
+	/* 
+	 * Java implmentation written by Jesse Riddle, with significant documentation 
+	 * taken from the DrRobot WiRobot SDK Application Programming Interface 
+	 * (API) Reference Manual - (For MS Windows) Version: 1.0.8 Feb. 2004 by 
+	 * DrRobot, Inc. and some parts from the DrRobot Java motion control demo 
+	 * program.
+	 */
+	
+	/*
+	 * The structure for a packet to the PMS5005 is the following: STX0 = 94
+	 * (always) STX1 = 2 (always) RID = 1 (generally) Reserved = 0 (generally)
+	 * DID (Data ID) = <DID> (your choice of DID) LENGTH = <len> (Length from
+	 * next element to crc byte) DATA = <data> (may be more than 1 byte in
+	 * length) CHECKSUM = <cksum> (use crc() method to calculate on cmd) ETX0 =
+	 * 94 (always) ETX1 = 13 (always)
+	 */
+	
+	/* Start transmission, End transmission */
+	public static final byte STX0 = 94;
+	public static final byte STX1 = 2;
+	public static final byte ETX0 = 94;
+	public static final byte ETX1 = 13;
+	
+	/* Data ID (DID) descriptor listing */
+	public static final byte DID_POSITIONCTRL = 3;
+	public static final byte DID_POSITIONCTRLALL = 4;
+	public static final byte DID_PWMCTRL = 5;
+	public static final byte DID_PWMCTRLALL = 6;
+	public static final byte DID_PARAMSET = 7;
+	public static final byte DID_POWERCTRL = 22;
+	public static final byte DID_LCDCTRL = 23;
+	public static final byte DID_VELOCITYCTRL = 26;
+	public static final byte DID_VELOCITYCTRLALL = 27;
+	public static final byte DID_SERVOCTRL = 28;
+	public static final byte DID_SERVOCTRLALL = 29;
+	public static final byte DID_MOTORCTRL = 30;
+	public static final byte DID_CONSTELLATIONCTRL = 80;
+	public static final byte DID_GETMOTORSIGNAL = 123;
+	public static final byte DID_GETCUSTOMSIGNAL = 124;
+	public static final byte DID_GETSENSORDATA = 125;
+	public static final byte DID_GETSENSORDATAALL = 127;
+	// to use as ubyte: (byte)(DID_SETUPCOM & 0xff)
+	public static final int DID_SETUPCOM = 255;
+	/* End Data ID (DID) descriptor listing */
+	
+	public static final byte DCMOTORCTRLMODE = 14;
+	
+	public static final byte DCPOSITIONPID = 7; // positon PID Control
+	public static final byte DCVELOCITYPID = 8; // velocity PID Control
+	
+	public static final byte PWMCTRL = 0;
+	public static final byte POSITIONCTRL = 1;
+	public static final byte VELOCITYCTRL = 2;
+	
+	public static final byte KpID = 1; // progressive id
+	public static final byte KdID = 2; // derivative id
+	public static final byte KiID = 3; // integral id
+	
+	public static final int NONCTRLCMD = 0xffff; // no ctrl command
+	public static final int NO_CONTROL = 0x8000;
+	
+    /**
+     * Calculates a valid crc value to be used in order to check the integrity 
+     * of the contents of a request packet.
+     *
+     * @param buf is the buffer from which the crc value will be calculated.
+     *
+     * @return The crc value calculated from the given buffer.
+     */
+	public static byte crc(byte[] buf)
+	{
+		byte shift_reg, sr_lsb, data_bit, v;
+		byte fb_bit;
+		int z;
+		shift_reg = 0; // initialize the shift register
+		z = buf.length - 5;
+		for (int i = 0; i < z; ++i)
+		{
+			v = (byte) (buf[2 + i]); // start from RID
+			// for each bit
+			
+			for (int j = 0; j < 8; ++j)
+			{
+				// isolate least sign bit
+				data_bit = (byte) ((v & 0x01) & 0xff);
+				sr_lsb = (byte) ((shift_reg & 0x01) & 0xff);
+				// calculate the feed back bit
+				fb_bit = (byte) (((data_bit ^ sr_lsb) & 0x01) & 0xff);
+				shift_reg = (byte) ((shift_reg & 0xff) >>> 1);
+				
+				if (fb_bit == 1)
+				{
+					shift_reg = (byte) ((shift_reg ^ 0x8C) & 0xff);
+				}
+				
+				v = (byte) ((v & 0xff) >>> 1);
+			}
+		}
+		
+		return shift_reg;
+	}
+	
+    /**
+     * Sends a request command to the Sensing and Motion Controller (PMS5005) 
+     * in order to get the sensor data related to motor control.
+     *
+     * @param packetNumber describes how many times sampled data should be sent
+     *     packetNumber == 0 -- Stop sending the sensor data packets.
+     *     packetNumber == 1 -- Send sensor data packets continuously 
+     *                          until being asked to stop (default).
+     *     packetNumber > 0 -- Send n = packetNumber packets of sensor data 
+     *                         and then stop sending.
+     *
+     * Please Note:
+     * Though adjustable, the maximum refresh rate for the PMS5005 is 20Hz or 
+     * 50ms (default).
+     *
+     * See Also: setMotorSensorPeriod
+     */
+	public static byte[] motorSensorRequest(int packetNumber)
+	{
+		byte[] cmd = new byte[10];
+		
+		cmd[0] = STX0;
+		cmd[1] = STX1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = DID_GETMOTORSIGNAL;
+		cmd[5] = 2; // len
+		cmd[6] = (byte) (packetNumber & 0xff);
+		cmd[7] = crc(cmd);
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
+		
+		return cmd;
+	}
+	
+    /**
+     * Sends a request command to the Sensing and Motion Controller (PMS5005) 
+     * in order to get all the standard sensor data.
+     *
+     * @param packetNumber describes how many times sampled data should be 
+     * sent.
+     *     packetNumber == 0 -- Stop sending the sensor data packets.
+     *     packetNumber == 1 -- Send sensor data packets continuously 
+     *                          until being asked to stop.
+     *     packetNumber > 0 -- Send n = packetNumber packets of sensor data 
+     *                         and then stop sending.
+     *
+     * Please Note:
+     * Though adjustable, the maximum refresh rate for the PMS5005 is 20Hz or 
+     * 50ms (default).
+     *
+     * See Also: setStandardSensorPeriod
+     */
+	public static byte[] standardSensorRequest(int packetNumber)
+	{
+		byte[] cmd = new byte[10];
+		
+		cmd[0] = STX0;
+		cmd[1] = STX1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = DID_GETMOTORSIGNAL;
+		cmd[5] = 2; // len
+		cmd[6] = (byte) (packetNumber & 0xff);
+		cmd[7] = crc(cmd);
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
+		
+		return cmd;
+	}
+	
+    /**
+     * Sends a request command to the Sensing and Motion Controller (PMS5005) 
+     * in order to get all custom sensor data.
+     *
+     * @param packetNumber describes how many times sampled data should be 
+     * sent.
+     *     packetNumber == 0 -- Stop sending the sensor data packets.
+     *     packetNumber == 1 -- Send sensor data packets continuously 
+     *                          until being asked to stop (default).
+     *     packetNumber > 0 -- Send n = packetNumber packets of sensor data 
+     *                         and then stop sending.
+     *
+     * Please Note:
+     * Though adjustable, the maximum refresh rate for the PMS5005 is 20Hz or 
+     * 50ms (default).
+     *
+     * See Also: setCustomSensorPeriod
+     */
+	public static byte[] customSensorRequest(int packetNumber)
+	{
+		
+	}
+	
+    /**
+     * Sends a request command to the Sensing and Motion Controller (PMS5005) 
+     * in order to get all sensor data.
+     *
+     * @param packetNumber describes how many times sampled data should be 
+     * sent.
+     *     packetNumber == 0 -- Stop sending the sensor data packets.
+     *     packetNumber == 1 -- Send sensor data packets continuously 
+     *                          until being asked to stop.
+     *     packetNumber > 0 -- Send n = packetNumber packets of sensor data 
+     *                         and then stop sending.
+     *
+     * Please note:
+     * Though adjustable, the maximum refresh rate for the PMS5005 is 20Hz or 
+     * 50ms (default).
+     *
+     * See Also: setAllSensorPeriod
+     */
+	public static byte[] allSensorRequest(int packetNumber)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Enables batch updating of motor-related sensor packets.
+     *
+     * Please note:
+     * 1) The latest request setting of the packet number and the update rates 
+     *    are used.
+     * 2) By default, "all sensor data sending" is enabled.
+     *
+     * @see motorSensorRequest
+     */
+	public static byte[] enableMotorSensorSending()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Enables batch updating of standard sensor packets.
+     *
+     * Please note:
+     * 1) The latest request setting of the packet number and the update rates 
+     *   are used.
+     * 2) By default, "all sensor data sending" is enabled.
+     *
+     * @see disableMotorSensorSending
+     */
+	public static byte[] enableStandardSensorSending()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Enables batch updating of custom sensor packets.
+     *
+     * Please note:
+     * 1) The latest request setting of the packet number and the update rates 
+     *    are used.
+     * 2) By default, "all sensor data sending" is enabled.
+     *
+     * @see disableStandardSensorSending
+     */
+	public static byte[] enableCustomSensorSending()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Enables batch updating of all sensor packets.
+     *
+     * Please note:
+     * 1) The latest request setting of the packet number and the update rates 
+     *    are used.
+     * 2) By default, "all sensor data sending" is enabled.
+     *
+     * @see disableCustomSensorSending
+     */
+	public static byte[] enableAllSensorSending()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Disables batch updating of motor-related sensor packets.
+     *
+     * @see enableMotorSensorSending
+     */
+	public static byte[] disableMotorSensorSending()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Disables batch updating of standard sensor packets.
+     *
+     * @see enableStandardSensorSending
+     */
+	public static byte[] disableStandardSensorSending()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Disables batch updating of custom sensor packets.
+     *
+     * @see enableCustomSensorSending
+     */
+	public static byte[] disableCustomSensorSending()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Disables batch updating of all sensor packets.
+     *
+     * @see enableAllSensorSending
+     */
+	public static byte[] disableAllSensorSending()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Sets the refresh rate for batch updating by motor-related sensor packets.
+     *
+     * @param timePeriod The update period in milliseconds for batch sensing 
+     * packets to the PC central controller.
+     *
+     * Please note: The default timePeriod is 50ms.  The maximum refresh rate 
+     * possible for the PMS5005 Sensing and Motion Controller is 50ms @ 20Hz.
+     *
+     * @see motorSensorRequest
+     */
+	public static byte[] setMotorSensorPeriod(int timePeriod)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Sets the refresh rate for batch updating by standard sensor packets.
+     *
+     * @param timePeriod The update period in milliseconds for batch sensing 
+     * packets to the PC central controller.
+     *
+     * Please note: The default timePeriod is 50ms.  The maximum refresh rate 
+     * possible for the PMS5005 Sensing and Motion Controller is 50ms @ 20Hz.
+     *
+     * @see standardSensorRequest
+     */
+	public static byte[] setStandardSensorPeriod(int timePeriod)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Sets the refresh rate for batch updating by custom sensor packets.
+     *
+     * @param timePeriod The update period in milliseconds for batch sensing 
+     * packets to the PC central controller.
+     *
+     * Please note: The default timePeriod is 50ms.  The maximum refresh rate 
+     * possible for the PMS5005 Sensing and Motion Controller is 50ms @ 20Hz.
+     *
+     * @see customSensorRequest
+     */
+	public static byte[] setCustomSensorPeriod(int timePeriod)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Sets the refresh rate for batch updating of all sensor packets.
+     *
+     * @param timePeriod The update period in milliseconds for batch sensing 
+     * packets to the PC central controller.
+     *
+     * Please note: The default timePeriod is 50ms.  The maximum refresh rate 
+     * possible for the PMS5005 Sensing and Motion Controller is 50ms @ 20Hz.
+     *
+     * @see allSensorRequest
+     */
+	public static byte[] setAllSensorPeriod(int timePeriod)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Returns the current distance value between the relevant ultrasonic 
+     * range sensor module (DUR5200) and the object in front of it.
+     *
+     * @param channel 0, 1, 2, 3, 4 or 5 for Sonar #1 through #6.
+     *
+     * @return 4 means a distance of 0 to 4 cm to object.
+     * 4 to 254 means a distance of 4 to 254 cm to object.
+     * 255 means 255 cm or longer distance to object.
+     *
+     * Please note: By default, the sensors are indexed clockwise, starting 
+     * with the left-front sensor (robot first person perspective) at Sonar #1 
+     * (channel 0).
+     */
+	public static int getSensorSonar(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public void systemMotorSensorRequest(int packetNumber) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void systemStandardSensorRequest(int packetNumber) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void systemCustomSensorRequest(int packetNumber) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void systemAllSensorRequest(int packetNumber) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void enableMotorSensorSending() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void enableStandardSensorSending() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void enableCustomSensorSending() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void enableAllSensorSending() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void disableMotorSensorSending() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void disableStandardSensorSending() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void disableCustomSensorSending() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void disableAllSensorSending() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setSysMotorSensorPeriod() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setSysStandardSensorPeriod() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setSysCustomSensorPeriod() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setSysAllSensorPeriod() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public int getSensorSonar(int channel) {
+	
+    /**
+     * Returns the current distance measurement value between an infrared 
+     * sensor and the object in front of it.
+     *
+     * @param channel 0, 1, 2, 3, 4 or 5 for IR #1 through #6.
+     *
+     * @return <= 585 means a distance of 80 cm or longer to object.
+     * 585 to 3446 means a distance of 80 to 8 cm to object.
+     * >= 3446 means a distance of 0 to 8 cm to object.
+     *
+     * Please Note: The relationship between the return data and the distance 
+     * is not linear.  Please refer to the sensor's datashee for distance-
+     * voltage curve.  The data returned is the raw data of the analog to 
+     * digital converter.  The output voltage of the sensor can be calculated 
+     * from the following equation: sensorOutputVoltage = (ival)*3.0/4095(v)
+     */
+	public static int getSensorIrRange(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getSensorIrRange(int channel) {
+	
+    /**
+     * Returns the current human alarm data from the DHM5150 Human Motion 
+     * Sensor Module.  Please refer to the DHM5150 hardware manual for 
+     * detailed information.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     *
+     * @return the raw value from the analog to digital converter indicating 
+     * the amplified (5x) output voltage of the sensor device.  The data range 
+     * is between 0 and 4095.  When there is no human present, the module 
+     * output voltage is ~1.5V and the return value is about 2047.
+     *
+     * Please note: To detect human presence, the application should compare 
+     * the difference of two samples (to detect the change from "absence" to 
+     * "presence"), and also compare the sample data to a user defined 
+     * threshold (to determine whether to report an alarm or not).  The 
+     * threshold determines the sensitivity of the sensor.  The higher the 
+     * threshold, the lower the sensitivity will be.
+     */
+	public static int getSensorHumanAlarm(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getSensorHumanAlarm(int channel) {
+	
+    /**
+     * Returns the current human motion value from the DHM5150 Human Motion 
+     * Sensor Module.  Please refer to the DHM5150 hardware manual for 
+     * detailed information.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     *
+     * @return the un-amplified raw value of the analog to digital converter 
+     * indicating the output voltage of the sensor device.  The data ranges 
+     * between 0 and 4095.
+     *
+     * Please note: To detect human motion direction, the application should 
+     * compare the difference of two samples of each sensor module's output 
+     * (to detect the change from "absence" to "presence"), and then compare 
+     * the sample data of the two sensor modules.  For a single source of 
+     * human motion, the different patterns of the two sensor modules manifest 
+     * the direction of motion.  The relationship can be obtained emperically.
+     */
+	public static int getSensorHumanMotion(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getSensorHumanMotion(int channel) {
+	
+    /**
+     * Returns the current tilt angle value in the horizontal direction from 
+     * the DTA5102 Tilting and Acceleration Sensor Module.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     *
+     * @return Tilting Angle = arcsin((ival - ZeroGValue)/abs(90DegreeGValue - 
+     * ZeroGValue));
+     * Where 90DegreeGValue and ZeroGValue are module-specific values that can 
+     * be measured by experiment:
+     * 1) Place the sensor level, so that the gravity vector is perpendicular 
+     *    to the measured sensor axis.
+     * 2) Take the measurement and this value would be the ZeroGValue.
+     * 3) Rotate the sensor so that the gravity vector is parallel with the 
+     *    measured axis.
+     * 4) Take the measurement and this value would be the 90DegreeGValue.
+     * 5) Repeat this step for the other direction.
+     * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
+     * ZeroGValue) is about 1250.
+     */
+	public static int getSensorTiltingX(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getSensorTiltingX(int channel) {
+	
+    /**
+     * Returns the current tilt angle value in the vertical direction from 
+     * the DTA5102 Tilting and Acceleration Sensor Module.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     *
+     * @return Tilting Angle = arcsin((ival - ZeroGValue)/abs(90DegreeGValue - 
+     * ZeroGValue));
+     * Where 90DegreeGValue and ZeroGValue are module-specific values that can 
+     * be measured by experiment:
+     * 1) Place the sensor level, so that the gravity vector is perpendicular 
+     *    to the measured sensor axis.
+     * 2) Take the measurement and this value would be the ZeroGValue.
+     * 3) Rotate the sensor so that the gravity vector is parallel with the 
+     *    measured axis.
+     * 4) Take the measurement and this value would be the 90DegreeGValue.
+     * 5) Repeat this step for the other direction.
+     * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
+     * ZeroGValue) is about 1250.
+     */
+	public static int getSensorTiltingY(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getSensorTiltingY(int channel) {
+	
+    /**
+     * Returns the current air temperature values near the relevant DC motor 
+     * drive modules (MDM5253).
+     *
+     * The current air temperature values could be used for 
+     * monitoring whether the motor drivers are overheating or not.  This 
+     * situation usually occurs if the motor currents are kept high (but still 
+     * lower than the current limit of the motor driver module) for a 
+     * significant amount of time, which may result in unfavorable inner or 
+     * external system conditions and is not recommended for regular system 
+     * operations.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     * 
+     * @return The raw value of the analog to digital converter indicating the 
+     * output voltage of the sensor.  The data range of the return value is 
+     * between 0 and 4095.  The output voltage of the sensor can be calculated 
+     * from the following equation: Temperature = 100 - (ival - 980)/11.6 
+     * where Temperature is in degrees Celsius.
+     */
+	public static int getSensorOverheat(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getSensorOverheat(int channel) {
+	
+    /**
+     * Returns the current temperature value from the 
+     * DA5280 Ambient Temperature Sensor Module.
+     *
+     * @return Temperature = (ival - 1256) / 34.8, where Temperature is in 
+     * degrees Celsius.
+     */
+	public static int getSensorTemperature()
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getSensorTemperature() {
+	
+    /**
+     * Returns the four parts of a two-16-bit-code infrared 
+     * remote control command captured by the Sensing and Motion Controller 
+     * (PMS5005) through the Infrared Remote Controller Module (MIR5500).
+     *
+     * @param index Refers to byte 0, 1, 2, or 3.  See return value for details
+     *
+     * @return The infrared remote control command (4 byte code) is as follows:
+     * Key Code: byte[2] byte[1] byte[0]
+     * Repeat Code: byte[3]
+     * Where the repeat byte would be 255 if the button is pressed continuously
+     */
+	public static int getSensorIrCode(int index)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getSensorIrCode(int index) {
+	
+    /**
+     * Sends two 16-bit words of infrared communication output data to the 
+     * Sensing and Motion Controller (PMS5005).
+     *
+     * The PMS5005 will then send the data out through the infrared Remote 
+     * Controller Module (MIR5500).  In the case it is used as an infrared 
+     * remote control, the output data serves as the remote control command.
+     *
+     * @param lowWord First word
+     * @param highWord Second word
+     *
+     * Please note:
+     * 1) With infrared communication, the data format and interpretation can 
+     *    be defined by the user at the application level.
+     * 2) The control command should be compatible with the device to which 
+     *    the command is sent.
+     * 3) This API method is under development and will be available soon.
+     */
+	public static byte[] setInfraredControlOutput(int lowWord, int highWord)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+    /**
+     * Returns the current value of the power supply voltage for the channel 
+     * specified.
+     *
+     * Returns the current value of the relevant power supply voltage if the 
+     * battery voltage monitor is enabled (default).
+     * If the battery voltage monitor is disabled, this method  
+     * returns the relevant custom A/D inputs, if the custom A/D input is 
+     * enabled -- which may be configured by the jumpers on the PMS5005 board.
+     * Please refer to the PMS5005 Robot Sensing and Motion Controller User 
+     * Manual for detailed information on hardware settings.
+     *
+     * @param channel 0 -- battery of DSP circuits (or custom A/D channel #1)
+     * channel 1 -- battery of DC motors (or custom A/D channel #2)
+     * channel 2 -- battery for servo motors (or custom A/D channel #3)
+     *
+     * @return The raw value of the analog to digital converter indicating 
+     * the output voltage of the monitor.  The data range is between 0 and 4095
+     *
+     * Please note: When monitoring the voltage of the power supply, the 
+     * following equations can be used to calculate the real voltage values.
+     * 1) Power supply voltage of DSP circuits = 9v*(ival/4095)
+     * 2) Power supply voltage of DC motors = 24v*(ival/4095)
+     * 3) Power supply voltage of servo motors = 9v*(ival/4095)
+     */
+	public static int getSensorBatteryAd(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public void setInfraredControlOutput(int lowWord, int highWord) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public int getSensorBatteryAd(int channel) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public int getSensorRefVoltage() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public int getSensorPotVoltage() {
+	
+    /**
+     * Returns the current value of the reference voltage of the A/D converter 
+     * of the controller DSP.
+     *
+     * @return The raw value of the analog to digital converter indicating the 
+     * output voltage of the monitor.  The data range is between 0 and 4095.  
+     * The following equation can be used to calculate the actual voltage 
+     * values: Voltage = 6v*(ival/4095)
+     */
+	public static int getSensorRefVoltage()
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getSensorPot(int channel) {
+	
+    /**
+     * Returns the current value of the reference voltage of the A/D converter 
+     * of the controller DSP.
+     *
+     * @return The raw value of the analog to digital converter indicating the 
+     * output voltage of the monitor.  The data range is between 0 and 4095.  
+     * The following equation can be used to calculate the actual voltage 
+     * values: Voltage = 6v*(ival/4095)
+     */
+	public static int getSensorPotVoltage()
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getMotorCurrent(int channel) {
+	
+    /**
+     * Returns the current value of the specified potentiometer position sensor
+     *
+     * @param channel 0, 1, 2, 3, 4, or 5 for Potentiometer sensor #1 through 6
+     *
+     * @return The raw value given by the analog to digital converter 
+     * indicating the output voltage of the sensor.  The data range is between 
+     * 0 and 4095.  The angular position can be calculated as follows, with the 
+     * 180 degree position defind at the sensors' physical middle position.  
+     * Single sensor or dual sensor can be used for rotation measurement.
+     *
+     * Please note:
+     * 1) Single sensor mode is mainly used for the control of a robot joint 
+     *    with a limited rotation range.  The effective mechanical rotation 
+     *    range is 14 degrees to 346 degrees, corresponding to the effective 
+     *    electrical rotation range 0 degrees to 332 degrees.
+     *      Angle position (degrees) = (ival - 2048)/4095*333 + 180
+     * 2) Dual-sensor mode is mainly used for continuous rotating joint control 
+     *    (e.g. a wheel).  The effective rotation range is 0 degrees to 360 
+     *    degrees.  Dual sensorconfiguration is only available for channel 0 
+     *    and channel 1.  By connecting two potentiometers to potentiometer 
+     *    channel 0 and channel 5, and by specifying the sensor type with 
+     *    command setDcMotorSensorUsage set to "Dual potentiometer sensor" 
+     *    the channel 0 reading will combine these two sensor readings into 
+     *    0 degrees to 360 degree range.  For channel 1, channel 1 and channel 
+     *    4 would be combined instead.
+     *      Angle position (degrees) = (ival - 2214)/2214*180 + 180
+     *
+     * @see setDcMotorSensorUsage
+     */
+	public static int getSensorPot(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getEncoderDir(int channel) {
+	
+    /**
+     * Returns the sampling value of the selected motor current sensor.
+     *
+     * @param channel 0, 1, 2, 3, 4, or 5 for sensor #1, #2, #3, #4, #5, or #6.
+     *
+     * @return The raw value of the analog to digital converter indicating the 
+     * motor current.  The data range is between 0 and 4095.  The actual 
+     * current value can be calculated with the following formula: 
+     * Motor Current (amperes) = ival/728 ( = ival*3*375/200/4095)
+     */
+	public static int getMotorCurrent(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getEncoderPulse(int channel) {
+	
+    /**
+     * Returns +1, 0, or -1 to indicate the direction of rotation.
+     *
+     * @param channel 0 for left encoder, 1 for right encoder (robot first 
+     * person perspective).
+     *
+     * @return 1 to indicate positive direction, 0 to indicate no movement, 
+     * and -1 to indicate negative direction.
+     */
+	public static int getEncoderDir(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getEncoderSpeed(int channel) {
+	
+    /**
+     * Returns the current pulse counter to indicate the position of rotation.
+     *
+     * @param channel 0 for left encoder, 1 for right encoder (robot first 
+     * person perspective).
+     *
+     * @return Pulse counter, an integral value to rotation with range of 
+     * 0 to 32767 in cycles.
+     */
+	public static int getEncoderPulse(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getCustomAd(int channel) {
+	
+    /**
+     * Returns the rotation speed.  The unit is defined as the absolute value 
+     * of the pulse change within 1 second.
+     *
+     * @param channel 0 for left encoder, 1 for right encoder (robot first 
+     * person perspective).
+     *
+     * @see setDcMotorSensorUsage
+     */
+	public static int getEncoderSpeed(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public int getCustomDin(int channel) {
+	
+    /**
+     * Returns the sampling value of the custom analog to digital 
+     * input signals.  By default, custom AD1 - AD3 are used as the inputs of 
+     * power supply voltage monitors for DSP circuits, DC motors, and servo 
+     * motors.  Users may change this setting by configuring the jumpers on 
+     * the PMS5005.  Please refer to the PMS5005 Robot Sensing and Motion 
+     * Controller hardware user's manual for detailed information on hardware 
+     * jumper settings.
+     *
+     * @param channel 0, 1, 2, 3, 4, 5, 6, or 7 for channel #1 through #8
+     *
+     * @return The raw value from the analog to digital converter indicating 
+     * the input voltage levels.  The data range is between 0 and 4095. The 
+     * voltage levels can be calculated from the following equation: 
+     * Sensor output voltage = (ival) * 3.0v/4095
+     *
+     * @see getSensorBatteryAd
+     */
+	public static int getCustomAd(int channel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	public void setCustomDout(int ival) {
+	
+    /**
+     * Returns a value with the lower 8 bits corresponding to the 8 channel 
+     * custom digital inputs.
+     *
+     * @param channel 0, 1, 2, 3, 4, 5, 6, or 7 for channel #1 through #8.
+     */
+	public static int getCustomDIn(int channel)
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+    /**
+     * Sets the 8-channel custom digital outputs.
+     *
+     * @param ival -- only the lower 8 bits are valid and can change the 
+     * corresponding outputs of the 8 channels.  The MSB of the lower byte 
+     * represents channel #8 and LSB of the lower byte represents channel #1.
+     */
+	public static byte[] setCustomDOut(int ival)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void setMotorPolarity(int channel, int polarity) {
+	
+    /**
+     * Sets the motor polarity to 1 or -1 for the motor channel specified.
+     * 
+     * When the motor is running in the positive dirction, the pontentiometer 
+     * value is also increasing; motor polarity should be set to 1 (default).
+     * When the motor is running in the negative direction, the value is 
+     * decreasing, and the motor polarity should be set to -1 to change the 
+     * sensor mounting value so that the potentiometer value increases.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     * 
+     * @param polarity 1 or -1
+     */
+	public static byte[] setMotorPolarity(int channel, int polarity)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void enableDcMotor(int channel) {
+	
+    /**
+     * Enables the specified DC motor control channel.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     *
+     * @deprecated
+     *
+     * @see resumeDcMotor
+     */
+	public static byte[] enableDcMotor(int channel)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void disableDcMotor(int channel) {
+	
+	/**
+     * Disables the specified DC motor control channel.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     *
+     * @deprecated
+     *
+     * @see suspendDcMotor
+     */
+	public static byte[] disableDcMotor(int channel)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void resumeDcMotor(int channel) {
+	
+	/**
+     * Resumes the specified DC motor control channel.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     */
+	public static byte[] resumeDcMotor(int channel)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void suspendDcMotor(int channel) {
+	
+	/**
+     * Suspends the specified DC motor control channel.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     *
+     * All motor control channels are initially suspended at boot-up.
+     */
+	public static byte[] suspendDcMotor(int channel)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void setDcMotorPositionControlPid(int channel, int Kp, int Kd,
-			int Ki_x100) {
+	
+	/**
+     * Sets up the PID control parameters of the specified DC motor channel 
+     * for position control.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     * @param Kp proportional gain (default is 50)
+     * @param Kd derivative gain (default is 5)
+     * @param Ki_x100 the desired integral gain * 100.  when Ki_100 = 100, 
+     * the actual integral control term is Ki = 1.  Ki_x100 has a range of 
+     * 0 to 25599, where 0 means no integral control (default).
+     *
+     * @see setDcMotorControlMode
+     */
+	public static byte[] setDcMotorPositionControlPid(int channel, int Kp, int Kd, int Ki_x100)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void setDcMotorSensorFilter(int channel, int filterMethod) {
+	
+	/**
+     * This filtering feature is still under development. All data will be 
+     * treated as raw data.
+     */
+	public static byte[] setDcMotorSensorFilter(int channel, int filterMethod)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void setDcMotorSensorUsage(int channel, int sensorType) {
+	
+	/**
+     * Set the sensor type for the specified DC motor control channel on the 
+     * Sensing and Motion Controller (PMS5005).
+     * 
+     * The available sensor types are 
+     * single potentiometer, dual potentiometers, and quadrature encoder.  The 
+     * single potentiometer sensor is for the control of robot joint with 
+     * limited rotation range (0 degrees to 332 degrees).  The dual 
+     * potentiometers and the quadrature sensor are for use with continuously 
+     * rotating joints (e.g. wheels).
+     *
+     * @param channel 0, 1, 2, 3, 4, or 5 for single potentiometer sensor
+     * channel 0, 1, or 2 for dual potentiometer sensor
+     * channel 0 or 1 for quadrature encoder
+     * @param sensorType 0 -- single potentiometer sensor
+     * 1 -- dual potentiometer sensor
+     * 2 -- quadrature encoder
+     *
+     * Please note
+     * 1) The electrical angular range of the potentiometer position sensor is 
+     *    0 degrees to 332 degrees and the corresponding mechanical rotation 
+     *    range is 14 degrees to 346 degrees, with the 180 degree position 
+     *    defined as the sensor's physical middle position.
+     * 2) Each DC motor channel for dual potentiometer sensors utilizes two 
+     *    potentiometer channels.  DC motor channel 0 
+     *
+     * @see getSensorPot
+     */
+	public static byte[] setDcMotorSensorUsage(int channel, int sensorType)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void setDcMotorControlMode(int channel, int controlMode) {
+	
+	/**
+     * Sets the control mode of the specified DC motor control channel on the 
+     * Sensing and Motion Controller (PMS5005).  The available control modes 
+     * are open-loop PWM control, closed-loop position control, and closed-
+     * loop velocity control.
+     *
+     * @param channel 0, 1, 2, 3, 4, or 5
+     * @param controlMode 0 == open-loop PWM control, 1 == closed-loop position
+     * control, 2 == closed-loop velocity control
+     *
+     * @see setDcMotorPositionControlPid
+     * @see setDcMotorVelocityControlPid
+     */
+	public static byte[] setDcMotorControlMode(int channel, int controlMode)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void dcMotorPositionTimeCtr(int channel, int cmdValue, int timePeriod) {
+	
+	/**
+     * Sends the position control command to the specified motion control 
+     * channel on the Sensing and Motion Controller (PMS5005).  
+     * The command includes the target position and the target time 
+     * period to execute the command.  The current trajectory planning method 
+     * with time control is linear.
+     * 
+     * @param channel 0, 1, 2, 3, 4, or 5
+     * @param cmdValue Target position value
+     * @param timePeriod Executing time in milliseconds
+     */
+	public static byte[] dcMotorPositionTimeCtrl(int channel, int cmdValue, int timePeriod)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void dcMotorPositionNonTimeCtr(int channel, int cmdValue) {
+	
+	/**
+     * Sends the position control command to the specified motion control 
+     * channel on the Sensing and Motion Controller (PMS5005).  The command 
+     * includes the target position but no time period specified to execute 
+     * the command.  The motion controller will drive the motor to the target 
+     * position at the maximum speed.
+     *
+     * @param channel 0, 1, 2, 3, 4, or 5
+     * @param cmdValue Target position value
+     *
+     * 1) Motor will be enabled automatically by the system when this command 
+     *    is received.
+     * 2) No velocity is available for motor channel using single potentiometer 
+     *    sensor.
+     * 3) The unit of the velocity is (Position change in A/D sampling data) / 
+     *    second when using dual potentiometer sensor for rotational postion 
+     *    measurement and pulse/second when using quadrature encoder.
+     * 
+     * @see dcMotorVelocityTimeCtrl
+     * @see getSensorPot
+     */
+	public static byte[] dcMotorPositionNonTimeCtrl(int channel, int cmdValue)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void dcMotorPwmTimeCtr(int channel, int cmdValue, int timePeriod) {
+	
+	/**
+     * Sends the PWM control command to the specified motion control channel on 
+     * the Sensing and Motion Controller (PMS5005).  The command includes the 
+     * target pulse width value and the time period to execute the command. 
+     * The current trajectory planning method for time control is linear.
+     * 
+     * @param channel 0, 1, 2, 3, 4, or 5
+     * @param cmdValue Target pulse width value
+     * @param timePeriod Executing time in milliseconds
+     * 
+     * 1) The specified channel (motor) will be enabled automatically by the 
+     *    system when this command is received.
+     * 2) Target pulse width value range is 0 to 32767 (0x7FFF), corresponding 
+     *    to the duty cycle of 0 to 100% linearly.
+     * 3) A pulse width value of 16383 means 50% duty cycle, putting the motor 
+     *    in the stop (neutral) stage.  Any value in between 16384 - 32767 will 
+     *    cause the motor to turn clockwise (facing the front side of the 
+     *    motor) and any value in between 0 - 16362 will cause the motor to 
+     *    turn counter-clockwise.
+     * 
+     * @see dcMotorPwmNonTimeCtrl
+     */
+	public static byte[] dcMotorPwmTimeCtrl(int channel, int cmdValue, int timePeriod)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void dcMotorPwmNonTimeCtr(int channel, int cmdValue) {
+	
+	/**
+     * Sends the PWM control command to the specified motion control channel on 
+     * the Sensing and Motion Controller (PMS5005).  The command includes the 
+     * target pulse width value without an execution time period specified.  
+     * The motion controller will set the PWM output of this channel to the 
+     * target value immediately.
+     * 
+     * @param channel 0, 1, 2, 3, 4, or 5
+     * @param cmdValue Target pulse width value
+     * 
+     * 1) The specified channel (motor) will be enabled automatically by the 
+     *    system when this command is received.
+     * 2) Target pulse width value range is 0 to 32767 (0x7FFF), corresponding 
+     *    to the duty cycle of 0 to 100% linearly.
+     * 3) A pulse width value of 16383 means 50% duty cycle, putting the motor 
+     *    in the "Stop" stage.  Any value between 16364 - 32767 will cause the 
+     *    motor to turn clockwise (facing the front side of the motor) and any 
+     *    value in between 0 - 16362 will cause the motor to turn 
+     *    counter-clockwise.
+     * 
+     * @see dcMotorPwmTimeCtrl
+     */
+	public static byte[] dcMotorPwmNonTimeCtrl(int channel, int cmdValue)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void dcMotorPositionTimeCtrAll(int pos1, int pos2, int pos3,
-			int pos4, int pos5, int pos6, int timePeriod) {
+	
+	/**
+     * Sends the position control command to all 6 DC motor control channels on 
+     * the sensing and motion controller (PMS5005) at the same time.  The 
+     * command includes the target positions and the time period to execute the 
+     * command.  The current trajectory planning method for time control is 
+     * linear.
+     * 
+     * @param pos1 Target position for channel #1
+     * @param pos2 Target position for channel #2
+     * @param pos3 Target position for channel #3
+     * @param pos4 Target position for channel #4
+     * @param pos5 Target position for channel #5
+     * @param pos6 Target position for channel #6
+     * @param timePeriod Execution time in milliseconds
+     * 
+     * 1) All DC Motors will be enabled automatically by the system when this 
+     *    command is received.
+     * 2) Target position value is the A/D sampling data range 0 to 4095 when 
+     *    using single potentiometer, 0-4428 when using dual potentiometers.
+     * 3) Please refer to the description of getSensorPot for data conversion 
+     *    between angular values and the A/D sampling data values.
+     * 4) When using the encoder as sensor input, the target position value is 
+     *    the pulse count in the range of 0-32767.
+     * 5) When omitting motor channels from control, the command value should 
+     *    be set to -32768 (0x8000), which implies NO_CONTROL.
+     * 
+     * @see getSensorPot
+     * @see dcMotorPositionTimeCtrl
+     */
+	public static byte[] dcMotorPositionTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void dcMotorPositionNonTimeCtrlAll(int pos1, int pos2, int pos3,
-			int pos4, int pos5, int pos6) {
+	
+	/**
+     * Sends the position control command to all 6 DC motor control channels on 
+     * the Sensing and Motion Controller (PMS5005) at the same time.  The 
+     * command includes the target positions without a specified time period 
+     * for execution.  The motion controller will drive the motor to reach the 
+     * target position with maximum effort.
+     * 
+     * @param pos1 Target position for channel #1
+     * @param pos2 Target position for channel #2
+     * @param pos3 Target position for channel #3
+     * @param pos4 Target position for channel #4
+     * @param pos5 Target position for channel #5
+     * @param pos6 Target position for channel #6
+     * 
+     * 1) All DC Motors will be enabled automatically by the system when this 
+     *    command is received.
+     * 2) Target position value is the A/D sampling data range 0 to 4095 when 
+     *    using single potentiometer, 0-4428 when using dual potentiometers.
+     * 3) Please refer to the description of getSensorPot for data conversion 
+     *    between angular values and the A/D sampling data values.
+     * 4) When using the encoder as sensor input, the target position value is 
+     *    the pulse count in the range of 0-32767.
+     * 5) When omitting motor channels from control, the command value should 
+     *    be set to -32768 (0x8000), which implies NO_CONTROL.
+     * 
+     * @see getSensorPot
+     * @see dcMotorPositionNonTimeCtrl
+     */
+	public static byte[] dcMotorPositionNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void dcMotorVelocityTimeCtrlAll(int pos1, int pos2, int pos3,
-			int pos4, int pos5, int pos6, int timePeriod) {
+	
+	/**
+     * Sends the velocity control command to all 6 DC motor control channels on 
+     * the Sensing and Motion Controller (PMS5005) at the same time.  The 
+     * command includes the target velocities and the time period to execute 
+     * the command.  The trajectory planning method for time control is linear.
+     * 
+     * @param pos1 Target velocity for channel #1
+     * @param pos2 Target velocity for channel #2
+     * @param pos3 Target velocity for channel #3
+     * @param pos4 Target velocity for channel #4
+     * @param pos5 Target velocity for channel #5
+     * @param pos6 Target velocity for channel #6
+     * @param timePeriod Execution time in milliseconds
+     * 
+     * 1) Motor will be enabled automatically by the system when this command 
+     *    is received.
+     * 2) No velocity control is available for a motor channel operating in 
+     *    single potentiometer mode.
+     * 3) The unit of the velocity is (Position change in A/D sampling data) / 
+     *    second when using dual potentiometer sensors for rotational position 
+     *    measurements and pulse/second when using quadrature encoder.
+     * 4) Please refer to the description of getSensorPot for data conversion 
+     *    between angular values and the A/D sampling data values.
+     * 5) When omitting motors from control, send the command value -32768
+     *    (0x8000), which implies NO_CONTROL.
+     * 
+     * @see dcMotorVelocityTimeCtrl
+     */
+	public static byte[] dcMotorVelocityTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void dcMotorVelocityNonTimeCtrAll(int pos1, int pos2, int pos3,
-			int pos4, int pos5, int pos6) {
+	
+	/**
+     * Sends the velocity control command to all 6 DC motor control channels on 
+     * the Sensing and Motion Controller (PMS5005) at the same time.  The 
+     * command includes the target velocities without specifying an execution 
+     * time period.  The motion controller will drive the motor to achieve 
+     * the target velocity with maximum effort.
+     * 
+     * @param pos1 Target velocity for channel #1
+     * @param pos2 Target velocity for channel #2
+     * @param pos3 Target velocity for channel #3
+     * @param pos4 Target velocity for channel #4
+     * @param pos5 Target velocity for channel #5
+     * @param pos6 Target velocity for channel #6
+     * 
+     * 1) Motor will be enabled automatically by the system when this command 
+     *    is received.
+     * 2) No velocity control is available for a motor channel operating in 
+     *    single potentiometer mode.
+     * 3) The unit of the velocity is (Position change in A/D sampling data) / 
+     *    second when using dual potentiometer sensors for rotational position 
+     *    measurements and pulse/second when using quadrature encoder.
+     * 4) Please refer to the description of getSensorPot for data conversion 
+     *    between angular values and the A/D sampling data values.
+     * 5) When omitting motors from control, send the command value -32768
+     *    (0x8000), which implies NO_CONTROL.
+     * 
+     * @see dcMotorVelocityNonTimeCtrl
+     */
+	public static byte[] dcMotorVelocityNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void dcMotorPwmTimeCtrAll(int pos1, int pos2, int pos3, int pos4,
-			int pos5, int pos6, int timePeriod) {
+	
+	/**
+     * Sends the PWM control command to all 6 DC motor control channels on the 
+     * Sensing and Motion Controller (PMS5005) at the same time.  The command 
+     * includes the target PWM values and the time period for execution.  The 
+     * current trajectory planning method for time control is linear.
+     * 
+     * @param pos1 Target PWM value for channel #1
+     * @param pos2 Target PWM value for channel #2
+     * @param pos3 Target PWM value for channel #3
+     * @param pos4 Target PWM value for channel #4
+     * @param pos5 Target PWM value for channel #5
+     * @param pos6 Target PWM value for channel #6
+     * @param timePeriod Execution time in milliseconds
+     * 
+     * 1) All channels (motors) will be enable automatically by the system when 
+     *    this command is received.
+     * 2) Target pulse width value range is 0 to 32767 (0x7FFF), corresponding 
+     *    to the duty cycle of 0 to 100% linearly.
+     * 3) A pulse width value of 16383 means 50% duty cycle, putting the motor 
+     *    in the stop (neutral) stage.  Any value in between 16384 - 32767 will 
+     *    cause the motor to turn clockwise (facing the front side of the 
+     *    motor) and any value in between 0 - 16362 will cause the motor to 
+     *    turn counter-clockwise.
+     * 4) When omitting motors from control, the command value of -32768
+     *    (0x8000), should be sent.  This implies NO_CONTROL.
+     */
+	public static byte[] dcMotorPwmTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void dcMotorPwmNonTimeCtrAll(int pos1, int pos2, int pos3, int pos4,
-			int pos5, int pos6) {
+	
+	/**
+     * Sends the PWM control command to all 6 DC motor control channels on the 
+     * Sensing and Motion Controller (PMS5005) at the same time.  The command 
+     * includes the target PWM values without a specified time period for 
+     * execution.  The motion controller will adjust the pulse width right away.
+     * 
+     * @param pos1 Target PWM value for channel #1
+     * @param pos2 Target PWM value for channel #2
+     * @param pos3 Target PWM value for channel #3
+     * @param pos4 Target PWM value for channel #4
+     * @param pos5 Target PWM value for channel #5
+     * @param pos6 Target PWM value for channel #6
+     * @param timePeriod Execution time in milliseconds
+     * 
+     * 1) All channels (motors) will be enable automatically by the system when 
+     *    this command is received.
+     * 2) Target pulse width value range is 0 to 32767 (0x7FFF), corresponding 
+     *    to the duty cycle of 0 to 100% linearly.
+     * 3) A pulse width value of 16383 means 50% duty cycle, putting the motor 
+     *    in the stop (neutral) stage.  Any value in between 16384 - 32767 will 
+     *    cause the motor to turn clockwise (facing the front side of the 
+     *    motor) and any value in between 0 - 16362 will cause the motor to 
+     *    turn counter-clockwise.
+     * 4) When omitting motors from control, the command value of -32768
+     *    (0x8000), should be sent.  This implies NO_CONTROL.
+     */
+	public static byte[] dcMotorPwmNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void enableServo(int channel) {
+	
+	/**
+     * Enables the specified servo motor control channel.
+     * 
+     * @param channel 0, 1, 2, 3, 4, or 5
+     * 
+     * All servo motor channels are disable initially at system startup.  They 
+     * need to be enabled explicitly before use.
+     * 
+     * @see disableServo
+     */
+	public static byte[] enableServo(int channel)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void disableServo(int channel) {
+	
+	/**
+     * Disables the specified servo motor control channel.
+     * 
+     * @param channel 0, 1, 2, 3, 4, or 5
+     * 
+     * All servo motor channels are disable initially at system startup.  They 
+     * need to be enabled explicitly before use.
+     * 
+     * @see enableServo
+     */
+	public static byte[] disableServo(int channel)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void servoTimeCtr(int channel, int cmdValue, int timePeriod) {
+	
+	/**
+     * Sends the position control command to the specified servo motor control 
+     * channel on the Sensing and Motion Controller (PMS5005).  The command 
+     * includes the target position command and the time period to execute the 
+     * command.  The current trajectory planning method for time control is 
+     * linear.
+     * 
+     * @param channel 0, 1, 2, 3, 4, or 5
+     * @param cmdValue Target Pulse Width (in milliseconds) * 2250
+     * @param timePeriod Executing time in milliseconds
+     * 
+     * Usually, a standard remote control servo motor expects to get the 
+     * specified pulse width every 20 seconds in order to hold the 
+     * corresponding angle position.  The pulse width value in milliseconds 
+     * for 0 degrees, 90 degrees, and 180 degrees are servo manufacturer and 
+     * model dependent.  They are around 1ms, 1.5ms, and 2.0ms respectively for 
+     * most common servos.  Experiments are required to obtain the exact value 
+     * for a specific servo motor.
+     * 
+     * @see servoNonTimeCtrl
+     */
+	public static byte[] servoTimeCtrl(int channel, int cmdValue, int timePeriod)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void servoNonTimeCtr(int channel, int cmdValue) {
+	
+	/**
+     * Sends the position control command to the specified servo motor control 
+     * channel on the Sensing and Motion Controller (PMS5005).  The command 
+     * includes the target position command without a specific time period for 
+     * execution.  The motion controller will send the desired pulse width to 
+     * the servo motor right away.
+     * 
+     * @param channel 0, 1, 2, 3, 4, or 5
+     * @param cmdValue Target pulse width (ms) * 2250
+     * 
+     * @see servoTimeCtrl
+     */
+	public static byte[] servoNonTimeCtrl(int channel, int cmdValue)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void servoTimeCtrAll(int pos1, int pos2, int pos3, int pos4,
-			int pos5, int pos6, int timePeriod) {
+	
+	/**
+     * Sends the position control command to all 6 servo motor 
+     * control channels on the Sensing and Motion Controller (PMS5005) at the 
+     * same time.
+     *
+     * The command includes the target position commands and the 
+     * time period to execute the command.  The current trajectory planning 
+     * method for time control is linear.
+     *
+     * @param pos1 Target position for channel #1 (Left Motor on X80Pro)
+     * @param pos2 Target position for channel #2 (-Right Motor on X80Pro)
+     * @param pos3 Target position for channel #3 (NO_CONTROL on X80Pro)
+     * @param pos4 Target position for channel #4 (NO_CONTROL on X80Pro)
+     * @param pos5 Target position for channel #5 (NO_CONTROL on X80Pro)
+     * @param pos6 Target position for channel #6 (NO_CONTROL on X80Pro)
+     * @param timePeriod Executing time in milliseconds
+     * 
+     * When omitting servo motors from control, please send the command value 
+     * -32768 (0x8000), which implies NO_CONTROL.
+     * 
+     * @see servoTimeCtrl
+     */
+	public static byte[] servoTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	{
+		byte[] cmd = new byte[23];
+		
+		cmd[0] = STX0;
+		cmd[1] = STX1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = DID_SERVOCTRLALL;
+		cmd[5] = 14; // len
+		cmd[6] = (byte) (pos1 & 0xff);
+		cmd[7] = (byte) ((pos1 >>> 8) & 0xff);
+		cmd[8] = (byte) (pos2 & 0xff);
+		cmd[9] = (byte) ((pos2 >>> 8) & 0xff);
+		cmd[10] = (byte) (pos3 & 0xff);
+		cmd[11] = (byte) ((pos3 >>> 8) & 0xff);
+		cmd[12] = (byte) (pos4 & 0xff);
+		cmd[13] = (byte) ((pos4 >>> 8) & 0xff);
+		cmd[14] = (byte) (pos5 & 0xff);
+		cmd[15] = (byte) ((pos5 >>> 8) & 0xff);
+		cmd[16] = (byte) (pos6 & 0xff);
+		cmd[17] = (byte) ((pos6 >>> 8) & 0xff);
+		cmd[18] = (byte) (timePeriod & 0xff);
+		cmd[19] = (byte) ((timePeriod >>> 8) & 0xff);
+		cmd[20] = crc(cmd);
+		cmd[21] = ETX0;
+		cmd[22] = ETX1;
+		
+		return cmd;
+	}
+	
+	/**
+     * Sends the position control command to all 6 servo motor 
+     * control channels on the Sensing and Motion Controller (PMS5005) at the 
+     * same time.
+     *
+     * The command includes the target position commands without specifying a 
+     * time period in which to execute the command.  The motion controller 
+     * sends the desired pulse width to the servo motor right away.
+     *
+     * @param pos1 Target position for channel #1 (Left Motor on X80Pro)
+     * @param pos2 Target position for channel #2 (-Right Motor on X80Pro)
+     * @param pos3 Target position for channel #3 (NO_CONTROL on X80Pro)
+     * @param pos4 Target position for channel #4 (NO_CONTROL on X80Pro)
+     * @param pos5 Target position for channel #5 (NO_CONTROL on X80Pro)
+     * @param pos6 Target position for channel #6 (NO_CONTROL on X80Pro)
+     * 
+     * When omitting servo motors from control, please send the command value 
+     * -32768 (0x8000), which implies NO_CONTROL.
+     * 
+     * @see servoNonTimeCtrl
+     */
+	public static byte[] servoNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void servoNonTimeCtrAll(int pos1, int pos2, int pos3, int pos4,
-			int pos5, int pos6) {
+	
+	/**
+     * Displays the image data in the file bmpFileName (BMP format) on the 
+     * graphic LCD connected to the Sensing and Motion Controller (PMS5005).
+     * 
+     * @param bmpFileName Full path of the BMP file for displaying
+     * 
+     * The graphic LCD display is monochrome with dimensions 128 by 64 pixels.  
+     * The bmp image must be 128x64 pixels in mono.
+     */
+	public static byte[] lcdDisplayPMS(String bmpFileName)
+	{
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void lcdDisplayPMS(String bmpFileName) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

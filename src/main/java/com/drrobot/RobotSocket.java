@@ -7,157 +7,279 @@ import java.net.*;
 /**
  *
  * @author Bo Wei
- * nearly original, but modified by Jesse Riddle
+ * modifications by Jesse Riddle
  */
-public class RobotSocket extends Thread {
-
-    private DatagramSocket sock = null;
-    private String robotip;
-    private int robotport;
-    private DatagramPacket rxpkt = null;
-    private DatagramPacket txpkt = null;
-    private InetAddress server = null;
-    private byte[] rxbuf;
-    private byte[] txbuf;
-    private int[] tmp;
-    private ByteArrayInputStream bin = null;
-    private DataInputStream din = null;
-    private DataOutputStream out = null;
-    private InputStream in = null;
-    private BufferedReader reader = null;
-    private String strCommand = "";
-    public int[] EncoderPos = { 0, 0 };
-    public double[] IRDis = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 };
+public class RobotSocket implements Runnable
+{
+	public final int minTimeSlice = 20;
+	
+    private DatagramSocket socket;
+    private String robotIp;
+    private int robotPort;
+    private DatagramPacket rxPkt;
+    private DatagramPacket txPkt;
+    private InetAddress server;
+    private byte[] rxBuf;
+    private byte[] txBuf;
+    public int[] sensorDataAry;
+    //private ByteArrayInputStream byteArrIn;
+    //private DataInputStream dataIn;
+    //private DataOutputStream dataOut;
+    //private InputStream inputStream;
+    //private BufferedReader reader;
+    //private String command;
+    public int[] encoderPos;
+    public double[] irDis;
     //motor sensor 
-    public int[] EncoderSpeed = { 0, 0 };
-    public double[] MotorCurrent = { 0.0, 0.0 };
+    public int[] encoderSpeed;
+    public double[] motorCurrent;
     //custom sensor data
-    public int[] customAD = { 0, 0, 0, 0, 0, 0, 0, 0 };
-    public int customIO = 0;
+    public int[] customAd;
+    public int customIo;
     //standard sensor data
-    public double[] USDis = { 0, 0, 0, 0, 0, 0 };
-    public int[] HumanAlarm = { 0, 0 };
-    public int[] HumanMotion = { 0, 0 };
-    public int IRRange = 0;
-    public double BoardVol = 0;
-    public double DCMotorVol = 0;
-
+    public double[] usDis;
+    public int[] humanAlarm;
+    public int[] humanMotion;
+    public int irRange;
+    public double boardVol;
+    public double dcMotorVol;
+    
     /** Creates a new instance of robotSocket */
-    public RobotSocket(String robotIP, int robotPort) {
-        this.robotip = robotIP;
-        this.robotport = robotPort;
-        try {
-            server = InetAddress.getByName(robotip);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(3);
-            return;
+    public RobotSocket(String robotIp, int robotPort) 
+    {
+    	this.makeSensorData();
+    	this.clearSensorData();
+    	
+        if (this.connectRobot(robotIp, robotPort))
+        {
+            try
+            {
+            	// socket connect 
+                socket = new DatagramSocket();
+                socket.setSoTimeout(minTimeSlice);
+            } 
+            catch (IOException ex) 
+            {
+                ex.printStackTrace();
+                System.exit(3);
+                return;
+            }
+            
+            rxBuf = new byte[1024];
+            rxPkt = new DatagramPacket(rxBuf, rxBuf.length);
+            
+            txBuf = new byte[256];
+            txPkt = new DatagramPacket(txBuf, txBuf.length, server, robotPort);
+            
+            try 
+            {
+                socket.send(txPkt);
+            } 
+            catch (IOException ex) 
+            {
+                ex.printStackTrace();
+            }
         }
-        //socket connect
-        try {
-            sock = new DatagramSocket();
-            sock.setSoTimeout(20);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(3);
-            return;
-        }
-        rxbuf = new byte[1024];
-        rxpkt = new DatagramPacket(rxbuf, rxbuf.length);
-
-        txbuf = new byte[256];
-        txpkt = new DatagramPacket(txbuf, txbuf.length, server, robotport);
-        try {
-            sock.send(txpkt);
-        } catch (IOException e) {
-            e.printStackTrace();
+        else
+        {
+        	System.exit(3);
         }
     }
+    
+    public void makeSensorData()
+    {
+    	this.encoderPos = new int[2];
+    	this.irDis = new double[8];
+    	this.encoderSpeed = new int[2];
+    	this.motorCurrent = new double[2];
+    	this.customAd = new int[9];
+    	this.usDis = new double[6];
+    	this.humanAlarm = new int[2];
+    	this.humanMotion = new int[2];
+    }
+    
+    public void clearSensorData()
+    {
+    	int c, z;
+    	
+    	for (c = 0, z = this.encoderPos.length; c < z; ++c)
+    	{
+    		this.encoderPos[c] = 0;
+    	}
+    	
+    	for (c = 0, z = this.irDis.length; c < z; ++c)
+    	{
+    		this.irDis[c] = (double)(c + 1); 
+    	}
+    	
+        //motor sensor 
+    	for (c = 0, z = this.encoderSpeed.length; c < z; ++c)
+    	{
+    		this.encoderSpeed[c] = 0;
+    	}
+    	
+    	for (c = 0, z = this.motorCurrent.length; c < z; ++c)
+    	{
+    		this.motorCurrent[c] = 0.0;
+    	}
 
-    @Override
-    public void run() {
-        try {
-            sock.setSoTimeout(10);
-            sock.receive(rxpkt);
-        } catch (IOException e) {
-            e.printStackTrace();
+    	//custom sensor data
+    	for (c = 0, z = this.customAd.length; c < z; ++c)
+    	{
+    		this.customAd[c] = 0;
+    	}
+    	
+        this.customIo = 0;
+        
+        //standard sensor data
+        for (c = 0, z = this.usDis.length; c < z; ++c)
+        {
+        	this.usDis[c] = 0;
         }
-        int z = rxpkt.getLength();
-        if (z != 0) {
+        
+        for (c = 0, z = this.humanAlarm.length; c < z; ++c)
+        {
+        	this.humanAlarm[c] = 0;
+        }
+        
+        for (c = 0, z = this.humanMotion.length; c < z; ++c)
+        {
+            this.humanMotion[c] = 0;
+        }
+        
+        this.irRange = 0;
+        this.boardVol = 0;
+        this.dcMotorVol = 0;
+    }
+    
+    public void run() 
+    {
+        try 
+        {
+            socket.setSoTimeout(10);
+            socket.receive(rxPkt);
+        } 
+        catch (IOException ex) 
+        {
+            ex.printStackTrace();
+        }
+        
+        int z = rxPkt.getLength();
+        
+        if (0 < z) 
+        {
             //decode here
-            tmp = new int[z];
-            for (int i = 0; i < z; ++i) {
-                tmp[i] = (int) (rxbuf[i] & 0xff);
+            sensorDataAry = new int[z];
+            
+            for (int i = 0; i < z; ++i) 
+            {
+                sensorDataAry[i] = (int)(rxBuf[i] & 0xff);
             }
-            if ((tmp[0] == 94) && (tmp[1] == 2) && 
-		(tmp[z - 2] == 94) && (tmp[z - 1] == 13)) {
-                //here is a whole package
-                //first motor sensor data, please refere protocol
-                if (tmp[4] == 123) {
-                    EncoderPos[0] = tmp[5 + 25] + (tmp[5 + 26])*256;
-                    EncoderSpeed[0] = tmp[5 + 27] + (tmp[5 + 28])*256;
-                    EncoderPos[1] = tmp[5 + 29] + (tmp[5 + 30])*256;
-                    EncoderSpeed[1] = tmp[5 + 31] + (tmp[5 + 32])*256;
-
-                    MotorCurrent[0] = (double) 
-			(tmp[5 + 13] + (tmp[5 + 14])*256)/728.0;
-                    MotorCurrent[1] = (double) 
-			(tmp[5 + 15] + (tmp[5 + 16])*256)/728.0;
-                } else if (tmp[4] == 124) {
-                    //custom sensor data
-                    for (int i = 0; i < 8; i++) {
-                        customAD[i] = tmp[6 + 2*i] + tmp[6 + 2*i + 1]*256;
-                    }
-                    customIO = tmp[5 + 17];
-                } else if (tmp[4] == 125) {
-                    //standard sensor
-                    for (int i = 0; i < 6; ++i) {
-                        USDis[i] = (double) (tmp[6 + i])/100.0;
-                    }
-                    HumanAlarm[0] = tmp[5 + 7] + tmp[5 + 8]*256;
-                    HumanMotion[0] = tmp[5 + 9] + tmp[5 + 10]*256;
-                    HumanAlarm[1] = tmp[5 + 11] + tmp[5 + 12]*256;
-                    HumanMotion[1] = tmp[5 + 13] + tmp[5 + 14]*256;
-                    IRRange = (tmp[5 + 25] + tmp[5 + 26]*256);
-                    BoardVol = (double) 
-			(tmp[5 + 31] + tmp[5 + 32]*256)/4095.0*9.0;
-                    DCMotorVol = (double)
-			(tmp[5 + 33] + tmp[5 + 34]*256)/4095.0*24.0;
-                }
-            }
-            IRDis[0] = AD2Dis(IRRange);
-            for (int i = 1; i < 7; i++) {
-                IRDis[i] = AD2Dis(customAD[i + 1]);
-            }
-            rxpkt.setLength(rxbuf.length);
+            
+            rxPkt.setLength(rxBuf.length);
         }
 
     }
 
-    public void sendCommand(byte[] cmd) {
-        System.arraycopy(cmd, 0, txbuf, 0, cmd.length);
-        txpkt = new DatagramPacket(txbuf, txbuf.length, server, robotport);
-        try {
-            sock.send(txpkt);
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void sendCommand(byte[] command) 
+    {
+        System.arraycopy(command, 0, txBuf, 0, command.length);
+        txPkt = new DatagramPacket(txBuf, txBuf.length, server, robotPort);
+        
+        try 
+        {
+            socket.send(txPkt);
+        } 
+        catch (IOException ex) 
+        {
+            ex.printStackTrace();
         }
     }
-
-    private double AD2Dis(int ADValue) {
-        double Dis = 0;
-        if ((ADValue > 4095) || (ADValue <= 0)) {
-            Dis = 0;
-        } else {
-            Dis = 21.6 / ((double) (ADValue) * 3.0 / 4028 - 0.17);
-            if (Dis > 80) {
-                Dis = 0.81;
-            } else if ((Dis < 10)) {
-                Dis = 0.09;
-            } else {
-                Dis = Dis / 100.0;
+    
+    private double Ad2Dis(int AdValue) 
+    {
+        double distance = 0;
+        
+        if (AdValue > 4095 || AdValue <= 0) 
+        {
+            distance = 0;
+        } 
+        else 
+        {
+            distance = 21.6 / ((double) (AdValue) * 3.0 / 4028 - 0.17);
+            
+            if (80 < distance) 
+            {
+                distance = 0.81;
+            } 
+            else if (distance < 10) 
+            {
+                distance = 0.09;
+            } 
+            else 
+            {
+                distance = distance / 100.0;
             }
         }
-        return Dis;
+        
+        return distance;
     }
+
+	public String getRobotIp() 
+	{
+		return robotIp;
+	}
+	
+	public int getRobotPort()
+	{
+		return robotPort;
+	}
+	
+	public void setRobotIp(String robotIp)
+	{
+		this.robotIp = robotIp;
+	}
+	
+	public void setRobotPort(int robotPort)
+	{
+		this.robotPort = robotPort;
+	}
+	
+	public boolean connectRobot()
+	{
+		boolean result;
+		
+        try 
+        {
+            this.server = InetAddress.getByName(robotIp);
+            result = true;
+        } 
+        catch (IOException ex) 
+        {
+            ex.printStackTrace();
+            result = false;
+        }
+        
+        return result;
+	}
+	
+	public boolean connectRobot(String robotIp, int robotPort)
+	{
+		boolean result;
+		
+		try 
+		{
+			this.server = InetAddress.getByName(robotIp);
+			this.setRobotIp(robotIp);
+			this.setRobotPort(robotPort);
+			result = true;
+		} 
+		catch (IOException ex) 
+		{
+			ex.printStackTrace();
+			result = false;
+		}
+		
+		return result;
+	}
 }

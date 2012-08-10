@@ -1,4 +1,3 @@
-
 package edu.ius.robotics;
 
 /* 
@@ -9,18 +8,8 @@ package edu.ius.robotics;
  * program.
  */
 
-interface IPMS5005 {
-
-    /**
-     * Calculates a valid crc value to be used in order to check the integrity 
-     * of the contents of a request packet.
-     *
-     * @param buf is the buffer from which the crc value will be calculated.
-     *
-     * @return The crc value calculated from the given buffer.
-     */
-    byte crc(byte[] buf);
-
+interface IX80 
+{
     /**
      * Sends a request command to the Sensing and Motion Controller (PMS5005) 
      * in order to get the sensor data related to motor control.
@@ -36,9 +25,9 @@ interface IPMS5005 {
      * Though adjustable, the maximum refresh rate for the PMS5005 is 20Hz or 
      * 50ms (default).
      *
-     * See Also: setSysMotorSensorPeriod
+     * See Also: setMotorSensorPeriod
      */
-    void systemMotorSensorRequest(int packetNumber);
+    void motorSensorRequest(int packetNumber);
 
     /**
      * Sends a request command to the Sensing and Motion Controller (PMS5005) 
@@ -56,9 +45,9 @@ interface IPMS5005 {
      * Though adjustable, the maximum refresh rate for the PMS5005 is 20Hz or 
      * 50ms (default).
      *
-     * See Also: setSysStandardSensorPeriod
+     * See Also: setStandardSensorPeriod
      */
-    void systemStandardSensorRequest(int packetNumber);
+    void standardSensorRequest(int packetNumber);
 
     /**
      * Sends a request command to the Sensing and Motion Controller (PMS5005) 
@@ -76,9 +65,9 @@ interface IPMS5005 {
      * Though adjustable, the maximum refresh rate for the PMS5005 is 20Hz or 
      * 50ms (default).
      *
-     * See Also: setSysCustomSensorPeriod
+     * See Also: setCustomSensorPeriod
      */
-    void systemCustomSensorRequest(int packetNumber);
+    void customSensorRequest(int packetNumber);
 
     /**
      * Sends a request command to the Sensing and Motion Controller (PMS5005) 
@@ -96,9 +85,9 @@ interface IPMS5005 {
      * Though adjustable, the maximum refresh rate for the PMS5005 is 20Hz or 
      * 50ms (default).
      *
-     * See Also: setSysAllSensorPeriod
+     * See Also: setAllSensorPeriod
      */
-    void systemAllSensorRequest(int packetNumber);
+    void allSensorRequest(int packetNumber);
 
     /**
      * Enables batch updating of motor-related sensor packets.
@@ -108,7 +97,7 @@ interface IPMS5005 {
      *    are used.
      * 2) By default, "all sensor data sending" is enabled.
      *
-     * @see systemMotorSensorRequest
+     * @see motorSensorRequest
      */
     void enableMotorSensorSending();
 
@@ -179,54 +168,54 @@ interface IPMS5005 {
     /**
      * Sets the refresh rate for batch updating by motor-related sensor packets.
      *
-     * @param periodTime The update period in milliseconds for batch sensing 
+     * @param timePeriod The update period in milliseconds for batch sensing 
      * packets to the PC central controller.
      *
-     * Please note: The default periodTime is 50ms.  The maximum refresh rate 
+     * Please note: The default timePeriod is 50ms.  The maximum refresh rate 
      * possible for the PMS5005 Sensing and Motion Controller is 50ms @ 20Hz.
      *
-     * @see systemMotorSensorRequest
+     * @see motorSensorRequest
      */
-    void setSysMotorSensorPeriod();
+    void setMotorSensorPeriod(int timePeriod);
 
     /**
      * Sets the refresh rate for batch updating by standard sensor packets.
      *
-     * @param periodTime The update period in milliseconds for batch sensing 
+     * @param timePeriod The update period in milliseconds for batch sensing 
      * packets to the PC central controller.
      *
-     * Please note: The default periodTime is 50ms.  The maximum refresh rate 
+     * Please note: The default timePeriod is 50ms.  The maximum refresh rate 
      * possible for the PMS5005 Sensing and Motion Controller is 50ms @ 20Hz.
      *
-     * @see systemStandardSensorRequest
+     * @see standardSensorRequest
      */
-    void setSysStandardSensorPeriod();
+    void setStandardSensorPeriod(int timePeriod);
 
     /**
      * Sets the refresh rate for batch updating by custom sensor packets.
      *
-     * @param periodTime The update period in milliseconds for batch sensing 
+     * @param timePeriod The update period in milliseconds for batch sensing 
      * packets to the PC central controller.
      *
-     * Please note: The default periodTime is 50ms.  The maximum refresh rate 
+     * Please note: The default timePeriod is 50ms.  The maximum refresh rate 
      * possible for the PMS5005 Sensing and Motion Controller is 50ms @ 20Hz.
      *
-     * @see systemCustomSensorRequest
+     * @see customSensorRequest
      */
-    void setSysCustomSensorPeriod();
+    void setCustomSensorPeriod(int timePeriod);
 
     /**
      * Sets the refresh rate for batch updating of all sensor packets.
      *
-     * @param periodTime The update period in milliseconds for batch sensing 
+     * @param timePeriod The update period in milliseconds for batch sensing 
      * packets to the PC central controller.
      *
-     * Please note: The default periodTime is 50ms.  The maximum refresh rate 
+     * Please note: The default timePeriod is 50ms.  The maximum refresh rate 
      * possible for the PMS5005 Sensing and Motion Controller is 50ms @ 20Hz.
      *
-     * @see systemAllSensorRequest
+     * @see allSensorRequest
      */
-    void setSysAllSensorPeriod();
+    void setAllSensorPeriod(int timePeriod);
 
     /**
      * Returns the current distance value between the relevant ultrasonic 
@@ -707,7 +696,7 @@ interface IPMS5005 {
      * @param cmdValue Target position value
      * @param timePeriod Executing time in milliseconds
      */
-    void dcMotorPositionTimeCtr(int channel, int cmdValue, int timePeriod);
+    void dcMotorPositionTimeCtrl(int channel, int cmdValue, int timePeriod);
     
     /**
      * Sends the position control command to the specified motion control 
@@ -727,10 +716,10 @@ interface IPMS5005 {
      *    second when using dual potentiometer sensor for rotational postion 
      *    measurement and pulse/second when using quadrature encoder.
      * 
-     * @see dcMotorVelocityTimeCtr
+     * @see dcMotorVelocityTimeCtrl
      * @see getSensorPot
      */
-    void dcMotorPositionNonTimeCtr(int channel, int cmdValue);
+    void dcMotorPositionNonTimeCtrl(int channel, int cmdValue);
     
     /**
      * Sends the PWM control command to the specified motion control channel on 
@@ -752,9 +741,9 @@ interface IPMS5005 {
      *    motor) and any value in between 0 - 16362 will cause the motor to 
      *    turn counter-clockwise.
      * 
-     * @see dcMotorPwmNonTimeCtr
+     * @see dcMotorPwmNonTimeCtrl
      */
-    void dcMotorPwmTimeCtr(int channel, int cmdValue, int timePeriod);
+    void dcMotorPwmTimeCtrl(int channel, int cmdValue, int timePeriod);
 
     /**
      * Sends the PWM control command to the specified motion control channel on 
@@ -776,9 +765,9 @@ interface IPMS5005 {
      *    value in between 0 - 16362 will cause the motor to turn 
      *    counter-clockwise.
      * 
-     * @see dcMotorPwmTimeCtr
+     * @see dcMotorPwmTimeCtrl
      */
-    void dcMotorPwmNonTimeCtr(int channel, int cmdValue);
+    void dcMotorPwmNonTimeCtrl(int channel, int cmdValue);
     
     /**
      * Sends the position control command to all 6 DC motor control channels on 
@@ -807,9 +796,9 @@ interface IPMS5005 {
      *    be set to -32768 (0x8000), which implies NO_CONTROL.
      * 
      * @see getSensorPot
-     * @see dcMotorPositionTimeCtr
+     * @see dcMotorPositionTimeCtrl
      */
-    void dcMotorPositionTimeCtrAll(int pos1, int pos2, int pos3, int pos4, 
+    void dcMotorPositionTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
                                    int pos5, int pos6, int timePeriod);
     
     /**
@@ -838,7 +827,7 @@ interface IPMS5005 {
      *    be set to -32768 (0x8000), which implies NO_CONTROL.
      * 
      * @see getSensorPot
-     * @see dcMotorPositionNonTimeCtr
+     * @see dcMotorPositionNonTimeCtrl
      */
     void dcMotorPositionNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
                                        int pos5, int pos6);
@@ -869,7 +858,7 @@ interface IPMS5005 {
      * 5) When omitting motors from control, send the command value -32768
      *    (0x8000), which implies NO_CONTROL.
      * 
-     * @see dcMotorVelocityTimeCtr
+     * @see dcMotorVelocityTimeCtrl
      */
     void dcMotorVelocityTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
                                     int pos5, int pos6, int timePeriod);
@@ -900,9 +889,9 @@ interface IPMS5005 {
      * 5) When omitting motors from control, send the command value -32768
      *    (0x8000), which implies NO_CONTROL.
      * 
-     * @see dcMotorVelocityNonTimeCtr
+     * @see dcMotorVelocityNonTimeCtrl
      */
-    void dcMotorVelocityNonTimeCtrAll(int pos1, int pos2, int pos3, int pos4, 
+    void dcMotorVelocityNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
                                       int pos5, int pos6);
     
     /**
@@ -931,7 +920,7 @@ interface IPMS5005 {
      * 4) When omitting motors from control, the command value of -32768
      *    (0x8000), should be sent.  This implies NO_CONTROL.
      */
-    void dcMotorPwmTimeCtrAll(int pos1, int pos2, int pos3, int pos4, int pos5, 
+    void dcMotorPwmTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, 
                               int pos6, int timePeriod);
     
         /**
@@ -946,7 +935,6 @@ interface IPMS5005 {
      * @param pos4 Target PWM value for channel #4
      * @param pos5 Target PWM value for channel #5
      * @param pos6 Target PWM value for channel #6
-     * @param timePeriod Execution time in milliseconds
      * 
      * 1) All channels (motors) will be enable automatically by the system when 
      *    this command is received.
@@ -960,7 +948,7 @@ interface IPMS5005 {
      * 4) When omitting motors from control, the command value of -32768
      *    (0x8000), should be sent.  This implies NO_CONTROL.
      */
-    void dcMotorPwmNonTimeCtrAll(int pos1, int pos2, int pos3, int pos4, 
+    void dcMotorPwmNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
                                  int pos5, int pos6);
     
     /**
@@ -1006,9 +994,9 @@ interface IPMS5005 {
      * most common servos.  Experiments are required to obtain the exact value 
      * for a specific servo motor.
      * 
-     * @see servoNonTimeCtr
+     * @see servoNonTimeCtrl
      */
-    void servoTimeCtr(int channel, int cmdValue, int timePeriod);
+    void servoTimeCtrl(int channel, int cmdValue, int timePeriod);
     
     /**
      * Sends the position control command to the specified servo motor control 
@@ -1020,9 +1008,9 @@ interface IPMS5005 {
      * @param channel 0, 1, 2, 3, 4, or 5
      * @param cmdValue Target pulse width (ms) * 2250
      * 
-     * @see servoTimeCtr
+     * @see servoTimeCtrl
      */
-    void servoNonTimeCtr(int channel, int cmdValue);
+    void servoNonTimeCtrl(int channel, int cmdValue);
     
     /**
      * Sends the position control command to all 6 servo motor 
@@ -1044,9 +1032,9 @@ interface IPMS5005 {
      * When omitting servo motors from control, please send the command value 
      * -32768 (0x8000), which implies NO_CONTROL.
      * 
-     * @see servoTimeCtr
+     * @see servoTimeCtrl
      */
-    void servoTimeCtrAll(int pos1, int pos2, int pos3, int pos4, 
+    void servoTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
 			 int pos5, int pos6, int timePeriod);
 
     /**
@@ -1068,9 +1056,9 @@ interface IPMS5005 {
      * When omitting servo motors from control, please send the command value 
      * -32768 (0x8000), which implies NO_CONTROL.
      * 
-     * @see servoNonTimeCtr
+     * @see servoNonTimeCtrl
      */
-    void servoNonTimeCtrAll(int pos1, int pos2, int pos3, int pos4, int pos5, 
+    void servoNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, 
                             int pos6);
     
     /**

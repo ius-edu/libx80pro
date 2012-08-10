@@ -3,7 +3,7 @@ package edu.ius.robotics;
 
 import com.drrobot.*;
 
-public class X80Pro implements IPMS5005{
+public class X80Pro implements IX80{
 
     /* The structure for a packet to the PMS5005 is the following:
      * STX0 = 94 (always)
@@ -64,8 +64,9 @@ public class X80Pro implements IPMS5005{
 
     RobotSocket socket;
 
-    X80Pro(RobotSocket socket) {
-	this.socket = socket;
+    X80Pro(RobotSocket socket) 
+    {
+    	this.socket = socket;
     }
 
     final double WheelDis = 0.265;      //wheel distance
