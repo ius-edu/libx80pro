@@ -503,7 +503,7 @@ interface IX80
      * @return 1 to indicate positive direction, 0 to indicate no movement, 
      * and -1 to indicate negative direction.
      */
-    int getEncoderDir(int channel);
+    int getEncoderDirection(int channel);
 
     /**
      * Returns the current pulse counter to indicate the position of rotation.
@@ -553,7 +553,7 @@ interface IX80
      *
      * @param channel 0, 1, 2, 3, 4, 5, 6, or 7 for channel #1 through #8.
      */
-    int getCustomDin(int channel);
+    int getCustomDIn(int channel);
 
     /**
      * Sets the 8-channel custom digital outputs.
@@ -562,7 +562,7 @@ interface IX80
      * corresponding outputs of the 8 channels.  The MSB of the lower byte 
      * represents channel #8 and LSB of the lower byte represents channel #1.
      */
-    void setCustomDout(int ival);
+    void setCustomDOut(int ival);
 
     // Motion Control
 

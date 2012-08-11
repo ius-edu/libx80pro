@@ -357,22 +357,22 @@ public class X80 implements IX80, Runnable
 	
 	public void motorSensorRequest(int packetNumber)
 	{
-		sendCommand(PMS5005.motorSensorRequest(packetNumber));
+		sendCommand(PMS5005.motorSensorRequest((short)packetNumber));
 	}
 
 	public void standardSensorRequest(int packetNumber)
 	{
-		sendCommand(PMS5005.standardSensorRequest(packetNumber));
+		sendCommand(PMS5005.standardSensorRequest((short)packetNumber));
 	}
 
 	public void customSensorRequest(int packetNumber)
 	{
-		sendCommand(PMS5005.customSensorRequest(packetNumber));
+		sendCommand(PMS5005.customSensorRequest((short)packetNumber));
 	}
 
 	public void allSensorRequest(int packetNumber)
 	{
-		sendCommand(PMS5005.allSensorRequest(packetNumber));
+		sendCommand(PMS5005.allSensorRequest((short)packetNumber));
 	}
 
 	public void enableMotorSensorSending()
@@ -417,305 +417,277 @@ public class X80 implements IX80, Runnable
 
 	public void setMotorSensorPeriod(int timePeriod)
 	{
-		sendCommand(PMS5005.setMotorSensorPeriod(timePeriod));
+		sendCommand(PMS5005.setMotorSensorPeriod((short)timePeriod));
 	}
 
 	public void setStandardSensorPeriod(int timePeriod)
 	{
-		sendCommand(PMS5005.setStandardSensorPeriod(timePeriod));
+		sendCommand(PMS5005.setStandardSensorPeriod((short)timePeriod));
 	}
 
 	public void setCustomSensorPeriod(int timePeriod)
 	{
-		sendCommand(PMS5005.setCustomSensorPeriod(timePeriod));
+		sendCommand(PMS5005.setCustomSensorPeriod((short)timePeriod));
 	}
 
 	public void setAllSensorPeriod(int timePeriod)
 	{
-		sendCommand(PMS5005.setAllSensorPeriod(timePeriod));
+		sendCommand(PMS5005.setAllSensorPeriod((short)timePeriod));
 	}
 
 	public int getSensorSonar(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorSonar(channel);
+		return PMS5005.getSensorSonar((short)channel);
 	}
 
 	public int getSensorIrRange(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorIrRange(channel);
+		return PMS5005.getSensorIrRange((short)channel);
 	}
 
 	public int getSensorHumanAlarm(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorHumanAlarm(channel);
+		return PMS5005.getSensorHumanAlarm((short)channel);
 	}
 
 	public int getSensorHumanMotion(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorHumanMotion(channel);
+		return PMS5005.getSensorHumanMotion((short)channel);
 	}
 
 	public int getSensorTiltingX(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorTiltingX(channel);
+		return PMS5005.getSensorTiltingX((short)channel);
 	}
 
 	public int getSensorTiltingY(int channel)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getSensorTiltingY((short)channel);
 	}
 
 	public int getSensorOverheat(int channel)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getSensorOverheat((short)channel);
 	}
 
 	public int getSensorTemperature()
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getSensorTemperature();
 	}
 
 	public int getSensorIrCode(int index)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getSensorIrCode((short)index);
 	}
 
 	public void setInfraredControlOutput(int lowWord, int highWord)
 	{
-		// TODO Auto-generated method stub
-		
+		PMS5005.setInfraredControlOutput((short)lowWord, (short)highWord);
 	}
 
 	public int getSensorBatteryAd(int channel)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getSensorBatteryAd((short)channel);
 	}
 
 	public int getSensorRefVoltage()
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getSensorRefVoltage();
 	}
 
 	public int getSensorPotVoltage()
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getSensorPotVoltage();
 	}
 
 	public int getSensorPot(int channel)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getSensorPot((short)channel);
 	}
 
 	public int getMotorCurrent(int channel)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getMotorCurrent((short)channel);
 	}
 
-	public int getEncoderDir(int channel)
+	public int getEncoderDirection(int channel)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getEncoderDirection((short)channel);
 	}
 
 	public int getEncoderPulse(int channel)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getEncoderPulse((short)channel);
 	}
 
 	public int getEncoderSpeed(int channel)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getEncoderSpeed((short)channel);
 	}
 
 	public int getCustomAd(int channel)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getCustomAd((short)channel);
 	}
 
-	public int getCustomDin(int channel)
+	public int getCustomDIn(int channel)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO examine this farther
+		return PMS5005.getCustomDIn((short)channel);
 	}
 
-	public void setCustomDout(int ival)
+	public void setCustomDOut(int ival)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.setCustomDOut((short)ival));
 	}
 
 	public void setMotorPolarity(int channel, int polarity)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.setMotorPolarity((short)channel, (short)polarity));
 	}
 
+	@SuppressWarnings("deprecation")
 	public void enableDcMotor(int channel)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.enableDcMotor((short)channel));
 	}
 
+	@SuppressWarnings("deprecation")
 	public void disableDcMotor(int channel)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.disableDcMotor((short)channel));
 	}
 
 	public void resumeDcMotor(int channel)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.resumeDcMotor((short)channel));
 	}
 
 	public void suspendDcMotor(int channel)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.suspendDcMotor((short)channel));
 	}
 
 	public void setDcMotorPositionControlPid(int channel, int Kp, int Kd, int Ki_x100)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.setDcMotorPositionControlPid((short)channel, (short)Kp, (short)Kd, (short)Ki_x100));
 	}
 
 	public void setDcMotorSensorFilter(int channel, int filterMethod)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.setDcMotorSensorFilter((short)channel, (short)filterMethod));
 	}
 
 	public void setDcMotorSensorUsage(int channel, int sensorType)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.setDcMotorSensorUsage((short)channel, (short)sensorType));
 	}
 
 	public void setDcMotorControlMode(int channel, int controlMode)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.setDcMotorControlMode((short)channel, (short)controlMode));
 	}
 
 	public void dcMotorPositionTimeCtrl(int channel, int cmdValue, int timePeriod)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.dcMotorPositionTimeCtrl((short)channel, (short)cmdValue, (short)timePeriod));
 	}
 
 	public void dcMotorPositionNonTimeCtrl(int channel, int cmdValue)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.dcMotorPositionNonTimeCtrl((short)channel, (short)cmdValue));
 	}
 
 	public void dcMotorPwmTimeCtrl(int channel, int cmdValue, int timePeriod)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.dcMotorPwmTimeCtrl((short)channel, (short)cmdValue, (short)timePeriod));
 	}
 
 	public void dcMotorPwmNonTimeCtrl(int channel, int cmdValue)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.dcMotorPwmNonTimeCtrl((short)channel, (short)cmdValue));
 	}
 
 	public void dcMotorPositionTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.dcMotorPositionTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
 	}
 
 	public void dcMotorPositionNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.dcMotorPositionNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
 	}
 
 	public void dcMotorVelocityTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.dcMotorVelocityTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
 	}
 
 	public void dcMotorVelocityNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.dcMotorVelocityNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
 	}
 
 	public void dcMotorPwmTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.dcMotorPwmTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
 	}
 
 	public void dcMotorPwmNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.dcMotorPwmNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
 	}
 
 	public void enableServo(int channel)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.enableServo((short)channel));
 	}
 
 	public void disableServo(int channel)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.disableServo((short)channel));
 	}
 
 	public void servoTimeCtrl(int channel, int cmdValue, int timePeriod)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.servoTimeCtrl((short)channel, (short)cmdValue, (short)timePeriod));
 	}
 
 	public void servoNonTimeCtrl(int channel, int cmdValue)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.servoNonTimeCtrl((short)channel, (short)cmdValue));
 	}
 
 	public void servoTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.servoTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
 	}
 
 	public void servoNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.servoNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
 	}
 
 	public void lcdDisplayPMS(String bmpFileName)
 	{
-		// TODO Auto-generated method stub
-		
+		sendCommand(PMS5005.lcdDisplayPMS(bmpFileName));
 	}
-	
-	
 }

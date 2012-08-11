@@ -44,7 +44,7 @@ public class PMS5005
 	public static final byte DID_GETSENSORDATA = 125;
 	public static final byte DID_GETSENSORDATAALL = 127;
 	// to use as ubyte: (byte)(DID_SETUPCOM & 0xff)
-	public static final int DID_SETUPCOM = 255;
+	public static final short DID_SETUPCOM = 255;
 	/* End Data ID (DID) descriptor listing */
 	
 	public static final byte DCMOTORCTRLMODE = 14;
@@ -58,13 +58,13 @@ public class PMS5005
 	
 	public static final byte KpID = 1; // progressive id
 	public static final byte KdID = 2; // derivative id
-	public static final byte KiID = 3; // integral id
+	public static final byte KiID = 3; // shortegral id
 	
-	public static final int NONCTRLCMD = 0xffff; // no ctrl command
-	public static final int NO_CONTROL = 0x8000;
+	public static final short NONCTRLCMD = (short) 0xffff; // no ctrl command
+	public static final short NO_CONTROL = (short) 0x8000;
 	
     /**
-     * Calculates a valid crc value to be used in order to check the integrity 
+     * Calculates a valid crc value to be used in order to check the shortegrity 
      * of the contents of a request packet.
      *
      * @param buf is the buffer from which the crc value will be calculated.
@@ -75,15 +75,15 @@ public class PMS5005
 	{
 		byte shift_reg, sr_lsb, data_bit, v;
 		byte fb_bit;
-		int z;
+		short z;
 		shift_reg = 0; // initialize the shift register
-		z = buf.length - 5;
-		for (int i = 0; i < z; ++i)
+		z = (short) (buf.length - 5);
+		for (short i = 0; i < z; ++i)
 		{
 			v = (byte) (buf[2 + i]); // start from RID
 			// for each bit
 			
-			for (int j = 0; j < 8; ++j)
+			for (short j = 0; j < 8; ++j)
 			{
 				// isolate least sign bit
 				data_bit = (byte) ((v & 0x01) & 0xff);
@@ -121,7 +121,7 @@ public class PMS5005
      *
      * See Also: setMotorSensorPeriod
      */
-	public static byte[] motorSensorRequest(int packetNumber)
+	public static byte[] motorSensorRequest(short packetNumber)
 	{
 		byte[] cmd = new byte[10];
 		
@@ -157,7 +157,7 @@ public class PMS5005
      *
      * See Also: setStandardSensorPeriod
      */
-	public static byte[] standardSensorRequest(int packetNumber)
+	public static byte[] standardSensorRequest(short packetNumber)
 	{
 		byte[] cmd = new byte[10];
 		
@@ -193,7 +193,7 @@ public class PMS5005
      *
      * See Also: setCustomSensorPeriod
      */
-	public static byte[] customSensorRequest(int packetNumber)
+	public static byte[] customSensorRequest(short packetNumber)
 	{
 		
 	}
@@ -216,7 +216,7 @@ public class PMS5005
      *
      * See Also: setAllSensorPeriod
      */
-	public static byte[] allSensorRequest(int packetNumber)
+	public static byte[] allSensorRequest(short packetNumber)
 	{
 		// TODO Auto-generated method stub
 		
@@ -341,7 +341,7 @@ public class PMS5005
      *
      * @see motorSensorRequest
      */
-	public static byte[] setMotorSensorPeriod(int timePeriod)
+	public static byte[] setMotorSensorPeriod(short timePeriod)
 	{
 		// TODO Auto-generated method stub
 		
@@ -358,7 +358,7 @@ public class PMS5005
      *
      * @see standardSensorRequest
      */
-	public static byte[] setStandardSensorPeriod(int timePeriod)
+	public static byte[] setStandardSensorPeriod(short timePeriod)
 	{
 		// TODO Auto-generated method stub
 		
@@ -375,7 +375,7 @@ public class PMS5005
      *
      * @see customSensorRequest
      */
-	public static byte[] setCustomSensorPeriod(int timePeriod)
+	public static byte[] setCustomSensorPeriod(short timePeriod)
 	{
 		// TODO Auto-generated method stub
 		
@@ -392,7 +392,7 @@ public class PMS5005
      *
      * @see allSensorRequest
      */
-	public static byte[] setAllSensorPeriod(int timePeriod)
+	public static byte[] setAllSensorPeriod(short timePeriod)
 	{
 		// TODO Auto-generated method stub
 		
@@ -412,7 +412,7 @@ public class PMS5005
      * with the left-front sensor (robot first person perspective) at Sonar #1 
      * (channel 0).
      */
-	public static int getSensorSonar(int channel)
+	public static short getSensorSonar(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -434,7 +434,7 @@ public class PMS5005
      * digital converter.  The output voltage of the sensor can be calculated 
      * from the following equation: sensorOutputVoltage = (ival)*3.0/4095(v)
      */
-	public static int getSensorIrRange(int channel)
+	public static short getSensorIrRange(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -459,7 +459,7 @@ public class PMS5005
      * threshold determines the sensitivity of the sensor.  The higher the 
      * threshold, the lower the sensitivity will be.
      */
-	public static int getSensorHumanAlarm(int channel)
+	public static short getSensorHumanAlarm(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -483,7 +483,7 @@ public class PMS5005
      * human motion, the different patterns of the two sensor modules manifest 
      * the direction of motion.  The relationship can be obtained emperically.
      */
-	public static int getSensorHumanMotion(int channel)
+	public static short getSensorHumanMotion(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -509,7 +509,7 @@ public class PMS5005
      * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
      * ZeroGValue) is about 1250.
      */
-	public static int getSensorTiltingX(int channel)
+	public static short getSensorTiltingX(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -535,7 +535,7 @@ public class PMS5005
      * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
      * ZeroGValue) is about 1250.
      */
-	public static int getSensorTiltingY(int channel)
+	public static short getSensorTiltingY(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -561,7 +561,7 @@ public class PMS5005
      * from the following equation: Temperature = 100 - (ival - 980)/11.6 
      * where Temperature is in degrees Celsius.
      */
-	public static int getSensorOverheat(int channel)
+	public static short getSensorOverheat(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -574,7 +574,7 @@ public class PMS5005
      * @return Temperature = (ival - 1256) / 34.8, where Temperature is in 
      * degrees Celsius.
      */
-	public static int getSensorTemperature()
+	public static short getSensorTemperature()
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -592,7 +592,7 @@ public class PMS5005
      * Repeat Code: byte[3]
      * Where the repeat byte would be 255 if the button is pressed continuously
      */
-	public static int getSensorIrCode(int index)
+	public static short getSensorIrCode(short index)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -610,13 +610,13 @@ public class PMS5005
      * @param highWord Second word
      *
      * Please note:
-     * 1) With infrared communication, the data format and interpretation can 
+     * 1) With infrared communication, the data format and shorterpretation can 
      *    be defined by the user at the application level.
      * 2) The control command should be compatible with the device to which 
      *    the command is sent.
      * 3) This API method is under development and will be available soon.
      */
-	public static byte[] setInfraredControlOutput(int lowWord, int highWord)
+	public static byte[] setInfraredControlOutput(short lowWord, short highWord)
 	{
 		// TODO Auto-generated method stub
 		
@@ -647,7 +647,7 @@ public class PMS5005
      * 2) Power supply voltage of DC motors = 24v*(ival/4095)
      * 3) Power supply voltage of servo motors = 9v*(ival/4095)
      */
-	public static int getSensorBatteryAd(int channel)
+	public static short getSensorBatteryAd(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -662,7 +662,7 @@ public class PMS5005
      * The following equation can be used to calculate the actual voltage 
      * values: Voltage = 6v*(ival/4095)
      */
-	public static int getSensorRefVoltage()
+	public static short getSensorRefVoltage()
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -677,7 +677,7 @@ public class PMS5005
      * The following equation can be used to calculate the actual voltage 
      * values: Voltage = 6v*(ival/4095)
      */
-	public static int getSensorPotVoltage()
+	public static short getSensorPotVoltage()
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -695,25 +695,25 @@ public class PMS5005
      * Single sensor or dual sensor can be used for rotation measurement.
      *
      * Please note:
-     * 1) Single sensor mode is mainly used for the control of a robot joint 
+     * 1) Single sensor mode is mainly used for the control of a robot joshort 
      *    with a limited rotation range.  The effective mechanical rotation 
      *    range is 14 degrees to 346 degrees, corresponding to the effective 
      *    electrical rotation range 0 degrees to 332 degrees.
      *      Angle position (degrees) = (ival - 2048)/4095*333 + 180
-     * 2) Dual-sensor mode is mainly used for continuous rotating joint control 
+     * 2) Dual-sensor mode is mainly used for continuous rotating joshort control 
      *    (e.g. a wheel).  The effective rotation range is 0 degrees to 360 
      *    degrees.  Dual sensorconfiguration is only available for channel 0 
      *    and channel 1.  By connecting two potentiometers to potentiometer 
      *    channel 0 and channel 5, and by specifying the sensor type with 
      *    command setDcMotorSensorUsage set to "Dual potentiometer sensor" 
-     *    the channel 0 reading will combine these two sensor readings into 
+     *    the channel 0 reading will combine these two sensor readings shorto 
      *    0 degrees to 360 degree range.  For channel 1, channel 1 and channel 
      *    4 would be combined instead.
      *      Angle position (degrees) = (ival - 2214)/2214*180 + 180
      *
      * @see setDcMotorSensorUsage
      */
-	public static int getSensorPot(int channel)
+	public static short getSensorPot(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -729,7 +729,7 @@ public class PMS5005
      * current value can be calculated with the following formula: 
      * Motor Current (amperes) = ival/728 ( = ival*3*375/200/4095)
      */
-	public static int getMotorCurrent(int channel)
+	public static short getMotorCurrent(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -744,7 +744,7 @@ public class PMS5005
      * @return 1 to indicate positive direction, 0 to indicate no movement, 
      * and -1 to indicate negative direction.
      */
-	public static int getEncoderDir(int channel)
+	public static short getEncoderDirection(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -756,10 +756,10 @@ public class PMS5005
      * @param channel 0 for left encoder, 1 for right encoder (robot first 
      * person perspective).
      *
-     * @return Pulse counter, an integral value to rotation with range of 
+     * @return Pulse counter, an shortegral value to rotation with range of 
      * 0 to 32767 in cycles.
      */
-	public static int getEncoderPulse(int channel)
+	public static short getEncoderPulse(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -774,7 +774,7 @@ public class PMS5005
      *
      * @see setDcMotorSensorUsage
      */
-	public static int getEncoderSpeed(int channel)
+	public static short getEncoderSpeed(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -798,7 +798,7 @@ public class PMS5005
      *
      * @see getSensorBatteryAd
      */
-	public static int getCustomAd(int channel)
+	public static short getCustomAd(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -810,7 +810,7 @@ public class PMS5005
      *
      * @param channel 0, 1, 2, 3, 4, 5, 6, or 7 for channel #1 through #8.
      */
-	public static int getCustomDIn(int channel)
+	public static short getCustomDIn(short channel)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -823,7 +823,7 @@ public class PMS5005
      * corresponding outputs of the 8 channels.  The MSB of the lower byte 
      * represents channel #8 and LSB of the lower byte represents channel #1.
      */
-	public static byte[] setCustomDOut(int ival)
+	public static byte[] setCustomDOut(short ival)
 	{
 		// TODO Auto-generated method stub
 		
@@ -842,7 +842,7 @@ public class PMS5005
      * 
      * @param polarity 1 or -1
      */
-	public static byte[] setMotorPolarity(int channel, int polarity)
+	public static byte[] setMotorPolarity(short channel, short polarity)
 	{
 		// TODO Auto-generated method stub
 		
@@ -857,7 +857,7 @@ public class PMS5005
      *
      * @see resumeDcMotor
      */
-	public static byte[] enableDcMotor(int channel)
+	public static byte[] enableDcMotor(short channel)
 	{
 		// TODO Auto-generated method stub
 		
@@ -872,7 +872,7 @@ public class PMS5005
      *
      * @see suspendDcMotor
      */
-	public static byte[] disableDcMotor(int channel)
+	public static byte[] disableDcMotor(short channel)
 	{
 		// TODO Auto-generated method stub
 		
@@ -883,7 +883,7 @@ public class PMS5005
      *
      * @param channel 0 for left, 1 for right (robot first person perspective)
      */
-	public static byte[] resumeDcMotor(int channel)
+	public static byte[] resumeDcMotor(short channel)
 	{
 		// TODO Auto-generated method stub
 		
@@ -896,7 +896,7 @@ public class PMS5005
      *
      * All motor control channels are initially suspended at boot-up.
      */
-	public static byte[] suspendDcMotor(int channel)
+	public static byte[] suspendDcMotor(short channel)
 	{
 		// TODO Auto-generated method stub
 		
@@ -909,13 +909,13 @@ public class PMS5005
      * @param channel 0 for left, 1 for right (robot first person perspective)
      * @param Kp proportional gain (default is 50)
      * @param Kd derivative gain (default is 5)
-     * @param Ki_x100 the desired integral gain * 100.  when Ki_100 = 100, 
-     * the actual integral control term is Ki = 1.  Ki_x100 has a range of 
-     * 0 to 25599, where 0 means no integral control (default).
+     * @param Ki_x100 the desired shortegral gain * 100.  when Ki_100 = 100, 
+     * the actual shortegral control term is Ki = 1.  Ki_x100 has a range of 
+     * 0 to 25599, where 0 means no shortegral control (default).
      *
      * @see setDcMotorControlMode
      */
-	public static byte[] setDcMotorPositionControlPid(int channel, int Kp, int Kd, int Ki_x100)
+	public static byte[] setDcMotorPositionControlPid(short channel, short Kp, short Kd, short Ki_x100)
 	{
 		// TODO Auto-generated method stub
 		
@@ -925,7 +925,7 @@ public class PMS5005
      * This filtering feature is still under development. All data will be 
      * treated as raw data.
      */
-	public static byte[] setDcMotorSensorFilter(int channel, int filterMethod)
+	public static byte[] setDcMotorSensorFilter(short channel, short filterMethod)
 	{
 		// TODO Auto-generated method stub
 		
@@ -937,10 +937,10 @@ public class PMS5005
      * 
      * The available sensor types are 
      * single potentiometer, dual potentiometers, and quadrature encoder.  The 
-     * single potentiometer sensor is for the control of robot joint with 
+     * single potentiometer sensor is for the control of robot joshort with 
      * limited rotation range (0 degrees to 332 degrees).  The dual 
      * potentiometers and the quadrature sensor are for use with continuously 
-     * rotating joints (e.g. wheels).
+     * rotating joshorts (e.g. wheels).
      *
      * @param channel 0, 1, 2, 3, 4, or 5 for single potentiometer sensor
      * channel 0, 1, or 2 for dual potentiometer sensor
@@ -959,7 +959,7 @@ public class PMS5005
      *
      * @see getSensorPot
      */
-	public static byte[] setDcMotorSensorUsage(int channel, int sensorType)
+	public static byte[] setDcMotorSensorUsage(short channel, short sensorType)
 	{
 		// TODO Auto-generated method stub
 		
@@ -978,7 +978,7 @@ public class PMS5005
      * @see setDcMotorPositionControlPid
      * @see setDcMotorVelocityControlPid
      */
-	public static byte[] setDcMotorControlMode(int channel, int controlMode)
+	public static byte[] setDcMotorControlMode(short channel, short controlMode)
 	{
 		// TODO Auto-generated method stub
 		
@@ -995,7 +995,7 @@ public class PMS5005
      * @param cmdValue Target position value
      * @param timePeriod Executing time in milliseconds
      */
-	public static byte[] dcMotorPositionTimeCtrl(int channel, int cmdValue, int timePeriod)
+	public static byte[] dcMotorPositionTimeCtrl(short channel, short cmdValue, short timePeriod)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1022,7 +1022,7 @@ public class PMS5005
      * @see dcMotorVelocityTimeCtrl
      * @see getSensorPot
      */
-	public static byte[] dcMotorPositionNonTimeCtrl(int channel, int cmdValue)
+	public static byte[] dcMotorPositionNonTimeCtrl(short channel, short cmdValue)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1050,7 +1050,7 @@ public class PMS5005
      * 
      * @see dcMotorPwmNonTimeCtrl
      */
-	public static byte[] dcMotorPwmTimeCtrl(int channel, int cmdValue, int timePeriod)
+	public static byte[] dcMotorPwmTimeCtrl(short channel, short cmdValue, short timePeriod)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1078,7 +1078,7 @@ public class PMS5005
      * 
      * @see dcMotorPwmTimeCtrl
      */
-	public static byte[] dcMotorPwmNonTimeCtrl(int channel, int cmdValue)
+	public static byte[] dcMotorPwmNonTimeCtrl(short channel, short cmdValue)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1113,7 +1113,7 @@ public class PMS5005
      * @see getSensorPot
      * @see dcMotorPositionTimeCtrl
      */
-	public static byte[] dcMotorPositionTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	public static byte[] dcMotorPositionTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1147,7 +1147,7 @@ public class PMS5005
      * @see getSensorPot
      * @see dcMotorPositionNonTimeCtrl
      */
-	public static byte[] dcMotorPositionNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	public static byte[] dcMotorPositionNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1181,7 +1181,7 @@ public class PMS5005
      * 
      * @see dcMotorVelocityTimeCtrl
      */
-	public static byte[] dcMotorVelocityTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	public static byte[] dcMotorVelocityTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1215,7 +1215,7 @@ public class PMS5005
      * 
      * @see dcMotorVelocityNonTimeCtrl
      */
-	public static byte[] dcMotorVelocityNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	public static byte[] dcMotorVelocityNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1247,7 +1247,7 @@ public class PMS5005
      * 4) When omitting motors from control, the command value of -32768
      *    (0x8000), should be sent.  This implies NO_CONTROL.
      */
-	public static byte[] dcMotorPwmTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	public static byte[] dcMotorPwmTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1279,7 +1279,7 @@ public class PMS5005
      * 4) When omitting motors from control, the command value of -32768
      *    (0x8000), should be sent.  This implies NO_CONTROL.
      */
-	public static byte[] dcMotorPwmNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	public static byte[] dcMotorPwmNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1295,7 +1295,7 @@ public class PMS5005
      * 
      * @see disableServo
      */
-	public static byte[] enableServo(int channel)
+	public static byte[] enableServo(short channel)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1311,7 +1311,7 @@ public class PMS5005
      * 
      * @see enableServo
      */
-	public static byte[] disableServo(int channel)
+	public static byte[] disableServo(short channel)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1338,7 +1338,7 @@ public class PMS5005
      * 
      * @see servoNonTimeCtrl
      */
-	public static byte[] servoTimeCtrl(int channel, int cmdValue, int timePeriod)
+	public static byte[] servoTimeCtrl(short channel, short cmdValue, short timePeriod)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1356,7 +1356,7 @@ public class PMS5005
      * 
      * @see servoTimeCtrl
      */
-	public static byte[] servoNonTimeCtrl(int channel, int cmdValue)
+	public static byte[] servoNonTimeCtrl(short channel, short cmdValue)
 	{
 		// TODO Auto-generated method stub
 		
@@ -1384,7 +1384,7 @@ public class PMS5005
      * 
      * @see servoTimeCtrl
      */
-	public static byte[] servoTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	public static byte[] servoTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
 	{
 		byte[] cmd = new byte[23];
 		
@@ -1436,7 +1436,7 @@ public class PMS5005
      * 
      * @see servoNonTimeCtrl
      */
-	public static byte[] servoNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	public static byte[] servoNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
 		// TODO Auto-generated method stub
 		
