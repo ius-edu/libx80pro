@@ -20,48 +20,48 @@ public class PMS5005
 	 */
 	
 	/* Start transmission, End transmission */
-	public static final byte STX0 = 94;
-	public static final byte STX1 = 2;
-	public static final byte ETX0 = 94;
-	public static final byte ETX1 = 13;
+	public static final byte stx0 = 94;
+	public static final byte stx1 = 2;
+	public static final byte etx0 = 94;
+	public static final byte etx1 = 13;
 	
 	/* Data ID (DID) descriptor listing */
-	public static final byte DID_POSITIONCTRL = 3;
-	public static final byte DID_POSITIONCTRLALL = 4;
-	public static final byte DID_PWMCTRL = 5;
-	public static final byte DID_PWMCTRLALL = 6;
-	public static final byte DID_PARAMSET = 7;
-	public static final byte DID_POWERCTRL = 22;
-	public static final byte DID_LCDCTRL = 23;
-	public static final byte DID_VELOCITYCTRL = 26;
-	public static final byte DID_VELOCITYCTRLALL = 27;
-	public static final byte DID_SERVOCTRL = 28;
-	public static final byte DID_SERVOCTRLALL = 29;
-	public static final byte DID_MOTORCTRL = 30;
-	public static final byte DID_CONSTELLATIONCTRL = 80;
-	public static final byte DID_GETMOTORSIGNAL = 123;
-	public static final byte DID_GETCUSTOMSIGNAL = 124;
-	public static final byte DID_GETSENSORDATA = 125;
-	public static final byte DID_GETSENSORDATAALL = 127;
+	public static final byte didPositionCtrl = 3;
+	public static final byte didAllPositionCtrl = 4;
+	public static final byte didPwmCtrl = 5;
+	public static final byte didAllPwmCtrl = 6;
+	public static final byte didParamSet = 7;
+	public static final byte didPowerCtrl = 22;
+	public static final byte didLcdCtrl = 23;
+	public static final byte didVelocityCtrl = 26;
+	public static final byte didAllVelocityCtrl = 27;
+	public static final byte didServoCtrl = 28;
+	public static final byte didAllServoCtrl = 29;
+	public static final byte didMotorCtrl = 30;
+	public static final byte didConstellationCtrl = 80;
+	public static final byte didGetMotorSensorData = 123;
+	public static final byte didGetCustomSensorData = 124;
+	public static final byte didGetStandardSensorData = 125;
+	public static final byte didGetAllSensorData = 127;
 	// to use as ubyte: (byte)(DID_SETUPCOM & 0xff)
-	public static final short DID_SETUPCOM = 255;
+	public static final short didSetupCom = 255;
 	/* End Data ID (DID) descriptor listing */
 	
-	public static final byte DCMOTORCTRLMODE = 14;
+	public static final byte dcMotorCtrlMode = 14;
 	
-	public static final byte DCPOSITIONPID = 7; // positon PID Control
-	public static final byte DCVELOCITYPID = 8; // velocity PID Control
+	public static final byte dcPositionPid = 7; // positon PID Control
+	public static final byte dcVelocityPid = 8; // velocity PID Control
 	
-	public static final byte PWMCTRL = 0;
-	public static final byte POSITIONCTRL = 1;
-	public static final byte VELOCITYCTRL = 2;
+	public static final byte pwmCtrl = 0;
+	public static final byte positionCtrl = 1;
+	public static final byte velocityCtrl = 2;
 	
-	public static final byte KpID = 1; // progressive id
-	public static final byte KdID = 2; // derivative id
-	public static final byte KiID = 3; // shortegral id
+	public static final byte KpId = 1; // progressive id
+	public static final byte KdId = 2; // derivative id
+	public static final byte KiId = 3; // shortegral id
 	
-	public static final short NONCTRLCMD = (short) 0xffff; // no ctrl command
-	public static final short NO_CONTROL = (short) 0x8000;
+	public static final short NonCtrlCmd = (short) 0xffff; // no ctrl command
+	public static final short noCtrl = (short) 0x8000;
 	
     /**
      * Calculates a valid crc value to be used in order to check the shortegrity 
@@ -125,16 +125,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
+		cmd[0] = stx0;
+		cmd[1] = stx1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = DID_GETMOTORSIGNAL;
+		cmd[4] = didGetMotorSensorData;
 		cmd[5] = 2; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+		cmd[8] = etx0;
+		cmd[9] = etx1;
 		
 		return cmd;
 	}
@@ -161,16 +161,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
+		cmd[0] = stx0;
+		cmd[1] = stx1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = DID_GETMOTORSIGNAL;
+		cmd[4] = didGetMotorSensorData;
 		cmd[5] = 2; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+		cmd[8] = etx0;
+		cmd[9] = etx1;
 		
 		return cmd;
 	}
@@ -197,16 +197,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
+		cmd[0] = stx0;
+		cmd[1] = stx1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = DID_GETCUSTOMSIGNAL;
+		cmd[4] = didGetCustomSensorData;
 		cmd[5] = 2; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+		cmd[8] = etx0;
+		cmd[9] = etx1;
 		
 		return cmd;
 	}
@@ -233,16 +233,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
+		cmd[0] = stx0;
+		cmd[1] = stx1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = DID_GETSENSORDATAALL;
+		cmd[4] = didGetAllSensorData;
 		cmd[5] = 2; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+		cmd[8] = etx0;
+		cmd[9] = etx1;
 		
 		return cmd;
 	}
@@ -259,7 +259,19 @@ public class PMS5005
      */
 	public static byte[] enableMotorSensorSending()
 	{
+		byte[] cmd = new byte[9];
 		
+		cmd[0] = stx0;
+		cmd[1] = stx1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = didGetMotorSensorData;
+		cmd[5] = 1; // len
+		cmd[6] = crc(cmd);
+		cmd[7] = etx0;
+		cmd[8] = etx1;
+		
+		return cmd;
 	}
 	
     /**
@@ -274,8 +286,19 @@ public class PMS5005
      */
 	public static byte[] enableStandardSensorSending()
 	{
-		// TODO Auto-generated method stub
+		byte[] cmd = new byte[9];
 		
+		cmd[0] = stx0;
+		cmd[1] = stx1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = didGetStandardSensorData;
+		cmd[5] = 1; // len
+		cmd[6] = crc(cmd);
+		cmd[7] = etx0;
+		cmd[8] = etx1;
+		
+		return cmd;
 	}
 	
     /**
@@ -290,7 +313,6 @@ public class PMS5005
      */
 	public static byte[] enableCustomSensorSending()
 	{
-		// TODO Auto-generated method stub
 		
 	}
 	
@@ -1412,11 +1434,11 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[23];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
+		cmd[0] = stx0;
+		cmd[1] = stx1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = DID_SERVOCTRLALL;
+		cmd[4] = didAllServoCtrl;
 		cmd[5] = 14; // len
 		cmd[6] = (byte) (pos1 & 0xff);
 		cmd[7] = (byte) ((pos1 >>> 8) & 0xff);
@@ -1433,8 +1455,8 @@ public class PMS5005
 		cmd[18] = (byte) (timePeriod & 0xff);
 		cmd[19] = (byte) ((timePeriod >>> 8) & 0xff);
 		cmd[20] = crc(cmd);
-		cmd[21] = ETX0;
-		cmd[22] = ETX1;
+		cmd[21] = etx0;
+		cmd[22] = etx1;
 		
 		return cmd;
 	}
