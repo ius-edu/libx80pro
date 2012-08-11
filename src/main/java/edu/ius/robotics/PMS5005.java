@@ -195,7 +195,20 @@ public class PMS5005
      */
 	public static byte[] customSensorRequest(short packetNumber)
 	{
+		byte[] cmd = new byte[10];
 		
+		cmd[0] = STX0;
+		cmd[1] = STX1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = DID_GETCUSTOMSIGNAL;
+		cmd[5] = 2; // len
+		cmd[6] = (byte) (packetNumber & 0xff);
+		cmd[7] = crc(cmd);
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
+		
+		return cmd;
 	}
 	
     /**
@@ -218,8 +231,20 @@ public class PMS5005
      */
 	public static byte[] allSensorRequest(short packetNumber)
 	{
-		// TODO Auto-generated method stub
+		byte[] cmd = new byte[10];
 		
+		cmd[0] = STX0;
+		cmd[1] = STX1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = DID_GETSENSORDATAALL;
+		cmd[5] = 2; // len
+		cmd[6] = (byte) (packetNumber & 0xff);
+		cmd[7] = crc(cmd);
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
+		
+		return cmd;
 	}
 	
     /**
@@ -234,7 +259,6 @@ public class PMS5005
      */
 	public static byte[] enableMotorSensorSending()
 	{
-		// TODO Auto-generated method stub
 		
 	}
 	
