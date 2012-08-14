@@ -8,7 +8,7 @@ import java.net.*;
  * @author Bo Wei modifications by Jesse Riddle
  */
 public class X80 implements IX80, Runnable
-{
+{	
 	/** minimum time step in milliseconds */
 	public final int minTimeSlice = 50;
 	
@@ -583,7 +583,7 @@ public class X80 implements IX80, Runnable
 
 	public void suspendDcMotor(int channel)
 	{
-		sendCommand(PMS5005.suspendDcMotor((short)channel));
+		sendCommand(PMS5005.suspendDcMotor((byte)channel));
 	}
 
 	public void setDcMotorPositionControlPid(int channel, int Kp, int Kd, int Ki_x100)
