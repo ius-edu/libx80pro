@@ -63,6 +63,9 @@ public class PMS5005
 	public static final short NonCtrlCmd = (short) 0xffff; // no ctrl command
 	public static final short noCtrl = (short) 0x8000;
 	
+	public static final int offsetEncoderPulse = 24; 
+	public static final int offsetMotorSpeed = 26;
+	
     /**
      * Calculates a valid crc value to be used in order to check the shortegrity 
      * of the contents of a request packet.
@@ -313,7 +316,19 @@ public class PMS5005
      */
 	public static byte[] enableCustomSensorSending()
 	{
+		byte[] cmd = new byte[9];
 		
+		cmd[0] = stx0;
+		cmd[1] = stx1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = didGetCustomSensorData;
+		cmd[5] = 1; // len
+		cmd[6] = crc(cmd);
+		cmd[7] = etx0;
+		cmd[8] = etx1;
+		
+		return cmd;
 	}
 	
     /**
@@ -328,8 +343,19 @@ public class PMS5005
      */
 	public static byte[] enableAllSensorSending()
 	{
-		// TODO Auto-generated method stub
+		byte[] cmd = new byte[9];
 		
+		cmd[0] = stx0;
+		cmd[1] = stx1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = didGetAllSensorData;
+		cmd[5] = 1; // len
+		cmd[6] = crc(cmd);
+		cmd[7] = etx0;
+		cmd[8] = etx1;
+		
+		return cmd;
 	}
 	
     /**
@@ -339,8 +365,20 @@ public class PMS5005
      */
 	public static byte[] disableMotorSensorSending()
 	{
-		// TODO Auto-generated method stub
+		byte[] cmd = new byte[10];
 		
+		cmd[0] = stx0;
+		cmd[1] = stx1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = didGetMotorSensorData;
+		cmd[5] = 2; // len
+		cmd[6] = 0; //(byte) (0 & 0xff);
+		cmd[7] = crc(cmd);
+		cmd[8] = etx0;
+		cmd[9] = etx1;
+		
+		return cmd;
 	}
 	
     /**
@@ -350,8 +388,20 @@ public class PMS5005
      */
 	public static byte[] disableStandardSensorSending()
 	{
-		// TODO Auto-generated method stub
+		byte[] cmd = new byte[10];
 		
+		cmd[0] = stx0;
+		cmd[1] = stx1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = didGetStandardSensorData;
+		cmd[5] = 2; // len
+		cmd[6] = 0; //(byte) (0 & 0xff);
+		cmd[7] = crc(cmd);
+		cmd[8] = etx0;
+		cmd[9] = etx1;
+		
+		return cmd;
 	}
 	
     /**
@@ -361,8 +411,20 @@ public class PMS5005
      */
 	public static byte[] disableCustomSensorSending()
 	{
-		// TODO Auto-generated method stub
+		byte[] cmd = new byte[10];
 		
+		cmd[0] = stx0;
+		cmd[1] = stx1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = didGetCustomSensorData;
+		cmd[5] = 2; // len
+		cmd[6] = 0; //(byte) (0 & 0xff);
+		cmd[7] = crc(cmd);
+		cmd[8] = etx0;
+		cmd[9] = etx1;
+		
+		return cmd;
 	}
 	
     /**
@@ -372,8 +434,20 @@ public class PMS5005
      */
 	public static byte[] disableAllSensorSending()
 	{
-		// TODO Auto-generated method stub
+		byte[] cmd = new byte[10];
 		
+		cmd[0] = stx0;
+		cmd[1] = stx1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = didGetAllSensorData;
+		cmd[5] = 2; // len
+		cmd[6] = 0; //(byte) (0 & 0xff);
+		cmd[7] = crc(cmd);
+		cmd[8] = etx0;
+		cmd[9] = etx1;
+		
+		return cmd;
 	}
 	
     /**
@@ -389,8 +463,8 @@ public class PMS5005
      */
 	public static byte[] setMotorSensorPeriod(short timePeriod)
 	{
-		// TODO Auto-generated method stub
-		
+		// TODO stub
+		return null;
 	}
 	
     /**
@@ -406,8 +480,8 @@ public class PMS5005
      */
 	public static byte[] setStandardSensorPeriod(short timePeriod)
 	{
-		// TODO Auto-generated method stub
-		
+		// TODO stub
+		return null;
 	}
 	
     /**
@@ -423,8 +497,8 @@ public class PMS5005
      */
 	public static byte[] setCustomSensorPeriod(short timePeriod)
 	{
-		// TODO Auto-generated method stub
-		
+		// TODO stub
+		return null;
 	}
 	
     /**
@@ -440,8 +514,8 @@ public class PMS5005
      */
 	public static byte[] setAllSensorPeriod(short timePeriod)
 	{
-		// TODO Auto-generated method stub
-		
+		// TODO stub
+		return null;
 	}
 	
     /**
@@ -527,7 +601,7 @@ public class PMS5005
      * (to detect the change from "absence" to "presence"), and then compare 
      * the sample data of the two sensor modules.  For a single source of 
      * human motion, the different patterns of the two sensor modules manifest 
-     * the direction of motion.  The relationship can be obtained emperically.
+     * the direction of motion.  The relationship can be obtained empirically.
      */
 	public static short getSensorHumanMotion(short channel)
 	{
@@ -802,13 +876,13 @@ public class PMS5005
      * @param channel 0 for left encoder, 1 for right encoder (robot first 
      * person perspective).
      *
-     * @return Pulse counter, an shortegral value to rotation with range of 
+     * @return Pulse counter, an short integral value to rotation with range of 
      * 0 to 32767 in cycles.
      */
-	public static short getEncoderPulse(short channel)
+	public static short getEncoderPulse(short channel, int[] sensorDataAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		int offset = 4*channel + offsetEncoderPulse; // 24
+		return (short) (((sensorDataAry[offset + 1] & 0xff) << 8) | (sensorDataAry[offset] & 0xff));
 	}
 	
     /**
@@ -820,10 +894,10 @@ public class PMS5005
      *
      * @see setDcMotorSensorUsage
      */
-	public static short getEncoderSpeed(short channel)
+	public static short getEncoderSpeed(short channel, int[] motorDataAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		int offset = 4*channel + offsetMotorSpeed; // 26
+		return (short) (((motorDataAry[offset + 1] & 0xff) << 8) | (motorDataAry[offset] & 0xff));
 	}
 	
     /**
@@ -844,10 +918,10 @@ public class PMS5005
      *
      * @see getSensorBatteryAd
      */
-	public static short getCustomAd(short channel)
+	public static short getCustomAd(short channel, int[] customDataAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		int offset = 2*channel;
+		return (short) (((customDataAry[offset+1] & 0xff) << 8) | (customDataAry[offset] & 0xff));
 	}
 	
     /**
@@ -921,7 +995,21 @@ public class PMS5005
 	public static byte[] disableDcMotor(short channel)
 	{
 		// TODO Auto-generated method stub
+		byte[] cmd = new byte[10];
 		
+		cmd[0] = stx0;
+		cmd[1] = stx1;
+		cmd[2] = 1;
+		cmd[3] = 0;
+		cmd[4] = didMotorCtrl;
+		cmd[5] = 2; // len
+		cmd[6] = 0; //(byte) (0 & 0xff);
+		cmd[7] = (byte) channel;
+		cmd[7] = crc(cmd);
+		cmd[8] = etx0;
+		cmd[9] = etx1;
+		
+		return cmd;
 	}
 	
 	/**
