@@ -3,11 +3,11 @@ package edu.ius.robotics;
 public class PMS5005
 {
 	/* 
-	 * Java implmentation written by Jesse Riddle, with significant documentation 
-	 * taken from the DrRobot WiRobot SDK Application Programming Interface 
-	 * (API) Reference Manual - (For MS Windows) Version: 1.0.8 Feb. 2004 by 
-	 * DrRobot, Inc. and some parts from the DrRobot Java motion control demo 
-	 * program.
+	 * Java implmentation written by Jesse Riddle and Colton Jenkins, with 
+	 * significant documentation taken from the DrRobot WiRobot SDK Application 
+	 * Programming Interface (API) Reference Manual - (For MS Windows) 
+	 * Version: 1.0.8 Feb. 2004 by DrRobot, Inc. and some parts from the DrRobot 
+	 * Java motion control demo program.
 	 */
 	
 	/*
@@ -20,55 +20,63 @@ public class PMS5005
 	 */
 	
 	/* Start transmission, End transmission */
-	private static final byte STX0 = 94;
-    private static final byte STX1 = 2;
-    private static final byte ETX0 = 94;
-    private static final byte ETX1 = 13;
+	public static final byte STX0 = 94;
+    public static final byte STX1 = 2;
+    public static final byte ETX0 = 94;
+    public static final byte ETX1 = 13;
 	
 	/* Data ID (DID) descriptor listing */
-	public static final byte didPositionCtrl = 3;
-	public static final byte didAllPositionCtrl = 4;
-	public static final byte didPwmCtrl = 5;
-	public static final byte didAllPwmCtrl = 6;
-	public static final byte didParamSet = 7;
-	public static final byte didPowerCtrl = 22;
-	public static final byte didLcdCtrl = 23;
-	public static final byte didVelocityCtrl = 26;
-	public static final byte didAllVelocityCtrl = 27;
-	public static final byte didServoCtrl = 28;
-	public static final byte didAllServoCtrl = 29;
-	private static final int TOGGLE_DC_MOTORS = 30;
-	public static final byte didConstellationCtrl = 80;
-	public static final byte didGetMotorSensorData = 123;
-	public static final byte didGetCustomSensorData = 124;
-	public static final byte didGetStandardSensorData = 125;
-	public static final byte didGetAllSensorData = 127;
-	// to use as ubyte: (byte)(didSetupCom & 0xff)
-	public static final short didSetupCom = 255;
+	public static final byte POSITION_CTRL = 3;
+	public static final byte ALL_POSITION_CTRL = 4;
+	public static final byte PWM_CTRL = 5;
+	public static final byte ALL_PWM_CTRL = 6;
+	public static final byte PARAM_SET = 7;
+	public static final byte POWER_CTRL = 22;
+	public static final byte LCD_CTRL = 23;
+	public static final byte VELOCITY_CTRL = 26;
+	public static final byte ALL_VELOCITY_CTRL = 27;
+	public static final byte SERVO_CTRL = 28;
+	public static final byte ALL_SERVO_CTRL = 29;
+	public static final byte TOGGLE_DC_MOTORS = 30;
+	public static final byte CONSTELLATION_CTRL = 80;
+	public static final byte GET_MOTOR_SENSOR_DATA = 123;
+	public static final byte GET_CUSTOM_SENSOR_DATA = 124;
+	public static final byte GET_STANDARD_SENSOR_DATA = 125;
+	public static final byte GET_ALL_SENSOR_DATA = 127;
+	// to use as ubyte: (byte)(SETUP_COM & 0xff)
+	public static final short SETUP_COM = 255;
 	/* End Data ID (DID) descriptor listing */
 	
-	public static final byte dcMotorCtrlMode = 14;
+	public static final byte DC_MOTOR_CTRL_MODE = 14;
 	
-	public static final byte dcPositionPid = 7; // positon PID Control
-	public static final byte dcVelocityPid = 8; // velocity PID Control
+	public static final byte DC_POSITION_PID = 7; // positon PID Control
+	public static final byte DC_VELOCITY_PID = 8; // velocity PID Control
 	
-	public static final byte pwmCtrl = 0;
-	public static final byte positionCtrl = 1;
-	public static final byte velocityCtrl = 2;
+	public static final byte PWM_CTRL_MODE = 0;
+	public static final byte POSITION_CTRL_MODE = 1;
+	public static final byte VELOCITY_CTRL_MODE = 2;
 	
 	public static final byte KpId = 1; // progressive id
 	public static final byte KdId = 2; // derivative id
-	public static final byte KiId = 3; // shortegral id
+	public static final byte KiId = 3; // integral id
 	
-	public static final short NonCtrlCmd = (short) 0xffff; // no ctrl command
-	public static final short noCtrl = (short) 0x8000;
+	public static final short NON_CTRL_CMD = (short) 0xffff; // no ctrl command
+	public static final short NO_CTRL = (short) 0x8000;
 	
-	public static final int offsetMotorDirection = 22;
-	public static final int offsetEncoderPulse = 24; 
-	public static final int offsetEncoderSpeed = 32;
+	public static final int ULTRASONIC_OFFSET = 0;
+	public static final int ENCODER_PULSE_OFFSET = 24; 
+	public static final int ENCODER_SPEED_OFFSET = 32;
+	public static final int IR_RANGE_OFFSET = 24;
+	public static final int HUMAN_ALARM_OFFSET = 6;
+	public static final int HUMAN_MOTION_OFFSET = 8;
+	public static final int TILTING_X_OFFSET = 14;
+	public static final int TILTING_Y_OFFSET = 16;
+	public static final int ENCODER_DIRECTION_OFFSET = 32;
+	public static final int MOTOR_SPEED_OFFSET = 26;
+	public static final int CUSTOM_AD_OFFSET = 0;
 	
     /**
-     * Calculates a valid crc value to be used in order to check the shortegrity 
+     * Calculates a valid crc value to be used in order to check the integrity 
      * of the contents of a request packet.
      *
      * @param buf is the buffer from which the crc value will be calculated.
@@ -129,16 +137,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetMotorSensorData;
-		cmd[5] = 2; // len
+		cmd[4] = GET_MOTOR_SENSOR_DATA;
+		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = etx0;
-		cmd[9] = etx1;
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
 		
 		return cmd;
 	}
@@ -165,16 +173,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetMotorSensorData;
-		cmd[5] = 2; // len
+		cmd[4] = GET_MOTOR_SENSOR_DATA;
+		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = etx0;
-		cmd[9] = etx1;
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
 		
 		return cmd;
 	}
@@ -201,16 +209,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetCustomSensorData;
-		cmd[5] = 2; // len
+		cmd[4] = GET_CUSTOM_SENSOR_DATA;
+		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = etx0;
-		cmd[9] = etx1;
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
 		
 		return cmd;
 	}
@@ -237,16 +245,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetAllSensorData;
-		cmd[5] = 2; // len
+		cmd[4] = GET_ALL_SENSOR_DATA;
+		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = etx0;
-		cmd[9] = etx1;
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
 		
 		return cmd;
 	}
@@ -265,15 +273,15 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[9];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetMotorSensorData;
-		cmd[5] = 1; // len
+		cmd[4] = GET_MOTOR_SENSOR_DATA;
+		cmd[5] = 0; // len
 		cmd[6] = crc(cmd);
-		cmd[7] = etx0;
-		cmd[8] = etx1;
+		cmd[7] = ETX0;
+		cmd[8] = ETX1;
 		
 		return cmd;
 	}
@@ -292,15 +300,15 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[9];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetStandardSensorData;
-		cmd[5] = 1; // len
+		cmd[4] = GET_STANDARD_SENSOR_DATA;
+		cmd[5] = 0; // len
 		cmd[6] = crc(cmd);
-		cmd[7] = etx0;
-		cmd[8] = etx1;
+		cmd[7] = ETX0;
+		cmd[8] = ETX1;
 		
 		return cmd;
 	}
@@ -319,15 +327,15 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[9];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetCustomSensorData;
-		cmd[5] = 1; // len
+		cmd[4] = GET_CUSTOM_SENSOR_DATA;
+		cmd[5] = 0; // len
 		cmd[6] = crc(cmd);
-		cmd[7] = etx0;
-		cmd[8] = etx1;
+		cmd[7] = ETX0;
+		cmd[8] = ETX1;
 		
 		return cmd;
 	}
@@ -346,15 +354,15 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[9];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetAllSensorData;
-		cmd[5] = 1; // len
+		cmd[4] = GET_ALL_SENSOR_DATA;
+		cmd[5] = 0; // len
 		cmd[6] = crc(cmd);
-		cmd[7] = etx0;
-		cmd[8] = etx1;
+		cmd[7] = ETX0;
+		cmd[8] = ETX1;
 		
 		return cmd;
 	}
@@ -368,16 +376,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetMotorSensorData;
-		cmd[5] = 2; // len
+		cmd[4] = GET_MOTOR_SENSOR_DATA;
+		cmd[5] = 1; // len
 		cmd[6] = 0; //(byte) (0 & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = etx0;
-		cmd[9] = etx1;
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
 		
 		return cmd;
 	}
@@ -391,16 +399,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetStandardSensorData;
-		cmd[5] = 2; // len
+		cmd[4] = GET_STANDARD_SENSOR_DATA;
+		cmd[5] = 1; // len
 		cmd[6] = 0; //(byte) (0 & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = etx0;
-		cmd[9] = etx1;
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
 		
 		return cmd;
 	}
@@ -414,16 +422,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetCustomSensorData;
-		cmd[5] = 2; // len
+		cmd[4] = GET_CUSTOM_SENSOR_DATA;
+		cmd[5] = 1; // len
 		cmd[6] = 0; //(byte) (0 & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = etx0;
-		cmd[9] = etx1;
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
 		
 		return cmd;
 	}
@@ -437,16 +445,16 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didGetAllSensorData;
-		cmd[5] = 2; // len
+		cmd[4] = GET_ALL_SENSOR_DATA;
+		cmd[5] = 1; // len
 		cmd[6] = 0; //(byte) (0 & 0xff);
 		cmd[7] = crc(cmd);
-		cmd[8] = etx0;
-		cmd[9] = etx1;
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
 		
 		return cmd;
 	}
@@ -533,10 +541,9 @@ public class PMS5005
      * with the left-front sensor (robot first person perspective) at Sonar #1 
      * (channel 0).
      */
-	public static short getSensorSonar(short channel)
+	public static short getSensorSonar(short channel, int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return (byte) (standardSensorAry[channel + ULTRASONIC_OFFSET] & 0xff);
 	}
 	
     /**
@@ -555,10 +562,10 @@ public class PMS5005
      * digital converter.  The output voltage of the sensor can be calculated 
      * from the following equation: sensorOutputVoltage = (ival)*3.0/4095(v)
      */
-	public static short getSensorIrRange(short channel)
+	public static short getSensorIrRange(short channel, int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO channel
+		return (short) (((standardSensorAry[IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[IR_RANGE_OFFSET] & 0xff));
 	}
 	
     /**
@@ -580,10 +587,10 @@ public class PMS5005
      * threshold determines the sensitivity of the sensor.  The higher the 
      * threshold, the lower the sensitivity will be.
      */
-	public static short getSensorHumanAlarm(short channel)
+	public static short getSensorHumanAlarm(short channel, int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		int offset = 2*channel + HUMAN_ALARM_OFFSET;
+		return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
 	}
 	
     /**
@@ -604,18 +611,16 @@ public class PMS5005
      * human motion, the different patterns of the two sensor modules manifest 
      * the direction of motion.  The relationship can be obtained empirically.
      */
-	public static short getSensorHumanMotion(short channel)
+	public static short getSensorHumanMotion(short channel, int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		int offset = 2*channel + HUMAN_MOTION_OFFSET;
+		return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
 	}
 	
     /**
      * Returns the current tilt angle value in the horizontal direction from 
      * the DTA5102 Tilting and Acceleration Sensor Module.
      *
-     * @param channel 0 for left, 1 for right (robot first person perspective)
-     *
      * @return Tilting Angle = arcsin((ival - ZeroGValue)/abs(90DegreeGValue - 
      * ZeroGValue));
      * Where 90DegreeGValue and ZeroGValue are module-specific values that can 
@@ -630,18 +635,15 @@ public class PMS5005
      * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
      * ZeroGValue) is about 1250.
      */
-	public static short getSensorTiltingX(short channel)
+	public static short getSensorTiltingX(int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return (short) (((standardSensorAry[TILTING_X_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TILTING_X_OFFSET] & 0xff));
 	}
 	
     /**
      * Returns the current tilt angle value in the vertical direction from 
      * the DTA5102 Tilting and Acceleration Sensor Module.
      *
-     * @param channel 0 for left, 1 for right (robot first person perspective)
-     *
      * @return Tilting Angle = arcsin((ival - ZeroGValue)/abs(90DegreeGValue - 
      * ZeroGValue));
      * Where 90DegreeGValue and ZeroGValue are module-specific values that can 
@@ -656,10 +658,9 @@ public class PMS5005
      * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
      * ZeroGValue) is about 1250.
      */
-	public static short getSensorTiltingY(short channel)
+	public static short getSensorTiltingY(int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return (short) (((standardSensorAry[TILTING_X_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TILTING_X_OFFSET] & 0xff));
 	}
 	
     /**
@@ -731,7 +732,7 @@ public class PMS5005
      * @param highWord Second word
      *
      * Please note:
-     * 1) With infrared communication, the data format and shorterpretation can 
+     * 1) With infrared communication, the data format and interpretation can 
      *    be defined by the user at the application level.
      * 2) The control command should be compatible with the device to which 
      *    the command is sent.
@@ -740,7 +741,7 @@ public class PMS5005
 	public static byte[] setInfraredControlOutput(short lowWord, short highWord)
 	{
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 	
     /**
@@ -827,7 +828,7 @@ public class PMS5005
      *    and channel 1.  By connecting two potentiometers to potentiometer 
      *    channel 0 and channel 5, and by specifying the sensor type with 
      *    command setDcMotorSensorUsage set to "Dual potentiometer sensor" 
-     *    the channel 0 reading will combine these two sensor readings shorto 
+     *    the channel 0 reading will combine these two sensor readings into 
      *    0 degrees to 360 degree range.  For channel 1, channel 1 and channel 
      *    4 would be combined instead.
      *      Angle position (degrees) = (ival - 2214)/2214*180 + 180
@@ -865,10 +866,22 @@ public class PMS5005
      * @return 1 to indicate positive direction, 0 to indicate no movement, 
      * and -1 to indicate negative direction.
      */
-	public static short getEncoderDirection(short channel, int[] motorSensorDataAry)
+	public static short getEncoderDirection(short channel, int[] motorSensorAry)
 	{
-		int offset = channel + offsetEncoderDirection; // 32
-		return (short) (((motorSensorDataAry[offset + 1] & 0xff) << 8) | (motorSensorDataAry[offset] & 0xff));
+		int offset = channel + ENCODER_DIRECTION_OFFSET;
+		short result = -1;
+		
+		switch (channel)
+		{
+		case 0:
+			result = (short) (motorSensorAry[offset] & 0x01);
+			break;
+		case 1:
+			result = (short) (motorSensorAry[offset] & 0x03);
+			break;
+		}
+		
+		return result;
 	}
 	
     /**
@@ -880,10 +893,10 @@ public class PMS5005
      * @return Pulse counter, an short integral value to rotation with range of 
      * 0 to 32767 in cycles.
      */
-	public static short getEncoderPulse(short channel, int[] motorSensorDataAry)
+	public static short getEncoderPulse(short channel, int[] motorSensorAry)
 	{
-		int offset = 4*channel + offsetEncoderPulse; // 24
-		return (short) (((motorSensorDataAry[offset + 1] & 0xff) << 8) | (motorSensorDataAry[offset] & 0xff));
+		int offset = 4*channel + ENCODER_PULSE_OFFSET;
+		return (short) (((motorSensorAry[offset + 1] & 0xff) << 8) | (motorSensorAry[offset] & 0xff));
 	}
 	
     /**
@@ -895,10 +908,10 @@ public class PMS5005
      *
      * @see setDcMotorSensorUsage
      */
-	public static short getEncoderSpeed(short channel, int[] motorSensorDataAry)
+	public static short getEncoderSpeed(short channel, int[] motorSensorAry)
 	{
-		int offset = 4*channel + offsetMotorSpeed; // 26
-		return (short) (((motorSensorDataAry[offset + 1] & 0xff) << 8) | (motorSensorDataAry[offset] & 0xff));
+		int offset = 4*channel + MOTOR_SPEED_OFFSET;
+		return (short) (((motorSensorAry[offset + 1] & 0xff) << 8) | (motorSensorAry[offset] & 0xff));
 	}
 	
     /**
@@ -919,10 +932,10 @@ public class PMS5005
      *
      * @see getSensorBatteryAd
      */
-	public static short getCustomAd(short channel, int[] customSensorDataAry)
+	public static short getCustomAd(short channel, int[] customSensorAry)
 	{
-		int offset = 2*channel;
-		return (short) (((customSensorDataAry[offset+1] & 0xff) << 8) | (customSensorDataAry[offset] & 0xff));
+		int offset = 2*channel + CUSTOM_AD_OFFSET;
+		return (short) (((customSensorAry[offset+1] & 0xff) << 8) | (customSensorAry[offset] & 0xff));
 	}
 	
     /**
@@ -998,8 +1011,8 @@ public class PMS5005
 		// TODO Auto-generated method stub
 		byte[] cmd = new byte[10];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
 		cmd[4] = didMotorCtrl;
@@ -1007,8 +1020,8 @@ public class PMS5005
 		cmd[6] = 0; //(byte) (0 & 0xff);
 		cmd[7] = (byte) channel;
 		cmd[7] = crc(cmd);
-		cmd[8] = etx0;
-		cmd[9] = etx1;
+		cmd[8] = ETX0;
+		cmd[9] = ETX1;
 		
 		return cmd;
 	}
@@ -1055,9 +1068,9 @@ public class PMS5005
      * @param channel 0 for left, 1 for right (robot first person perspective)
      * @param Kp proportional gain (default is 50)
      * @param Kd derivative gain (default is 5)
-     * @param Ki_x100 the desired shortegral gain * 100.  when Ki_100 = 100, 
-     * the actual shortegral control term is Ki = 1.  Ki_x100 has a range of 
-     * 0 to 25599, where 0 means no shortegral control (default).
+     * @param Ki_x100 the desired integral gain * 100.  when Ki_100 = 100, 
+     * the actual integral control term is Ki = 1.  Ki_x100 has a range of 
+     * 0 to 25599, where 0 means no integral control (default).
      *
      * @see setDcMotorControlMode
      */
@@ -1254,7 +1267,7 @@ public class PMS5005
      * 4) When using the encoder as sensor input, the target position value is 
      *    the pulse count in the range of 0-32767.
      * 5) When omitting motor channels from control, the command value should 
-     *    be set to -32768 (0x8000), which implies NO_CONTROL.
+     *    be set to -32768 (0x8000), which implies NO_CTRL.
      * 
      * @see getSensorPot
      * @see dcMotorPositionTimeCtrl
@@ -1288,7 +1301,7 @@ public class PMS5005
      * 4) When using the encoder as sensor input, the target position value is 
      *    the pulse count in the range of 0-32767.
      * 5) When omitting motor channels from control, the command value should 
-     *    be set to -32768 (0x8000), which implies NO_CONTROL.
+     *    be set to -32768 (0x8000), which implies NO_CTRL.
      * 
      * @see getSensorPot
      * @see dcMotorPositionNonTimeCtrl
@@ -1323,7 +1336,7 @@ public class PMS5005
      * 4) Please refer to the description of getSensorPot for data conversion 
      *    between angular values and the A/D sampling data values.
      * 5) When omitting motors from control, send the command value -32768
-     *    (0x8000), which implies NO_CONTROL.
+     *    (0x8000), which implies NO_CTRL.
      * 
      * @see dcMotorVelocityTimeCtrl
      */
@@ -1357,7 +1370,7 @@ public class PMS5005
      * 4) Please refer to the description of getSensorPot for data conversion 
      *    between angular values and the A/D sampling data values.
      * 5) When omitting motors from control, send the command value -32768
-     *    (0x8000), which implies NO_CONTROL.
+     *    (0x8000), which implies NO_CTRL.
      * 
      * @see dcMotorVelocityNonTimeCtrl
      */
@@ -1391,7 +1404,7 @@ public class PMS5005
      *    motor) and any value in between 0 - 16362 will cause the motor to 
      *    turn counter-clockwise.
      * 4) When omitting motors from control, the command value of -32768
-     *    (0x8000), should be sent.  This implies NO_CONTROL.
+     *    (0x8000), should be sent.  This implies NO_CTRL.
      */
 	public static byte[] dcMotorPwmTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
 	{
@@ -1423,7 +1436,7 @@ public class PMS5005
      *    motor) and any value in between 0 - 16362 will cause the motor to 
      *    turn counter-clockwise.
      * 4) When omitting motors from control, the command value of -32768
-     *    (0x8000), should be sent.  This implies NO_CONTROL.
+     *    (0x8000), should be sent.  This implies NO_CTRL.
      */
 	public static byte[] dcMotorPwmNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
@@ -1519,14 +1532,14 @@ public class PMS5005
      *
      * @param pos1 Target position for channel #1 (Left Motor on X80Pro)
      * @param pos2 Target position for channel #2 (-Right Motor on X80Pro)
-     * @param pos3 Target position for channel #3 (NO_CONTROL on X80Pro)
-     * @param pos4 Target position for channel #4 (NO_CONTROL on X80Pro)
-     * @param pos5 Target position for channel #5 (NO_CONTROL on X80Pro)
-     * @param pos6 Target position for channel #6 (NO_CONTROL on X80Pro)
+     * @param pos3 Target position for channel #3 (NO_CTRL on X80Pro)
+     * @param pos4 Target position for channel #4 (NO_CTRL on X80Pro)
+     * @param pos5 Target position for channel #5 (NO_CTRL on X80Pro)
+     * @param pos6 Target position for channel #6 (NO_CTRL on X80Pro)
      * @param timePeriod Executing time in milliseconds
      * 
      * When omitting servo motors from control, please send the command value 
-     * -32768 (0x8000), which implies NO_CONTROL.
+     * -32768 (0x8000), which implies NO_CTRL.
      * 
      * @see servoTimeCtrl
      */
@@ -1534,11 +1547,11 @@ public class PMS5005
 	{
 		byte[] cmd = new byte[23];
 		
-		cmd[0] = stx0;
-		cmd[1] = stx1;
+		cmd[0] = STX0;
+		cmd[1] = STX1;
 		cmd[2] = 1;
 		cmd[3] = 0;
-		cmd[4] = didAllServoCtrl;
+		cmd[4] = ALL_SERVO_CTRL;
 		cmd[5] = 14; // len
 		cmd[6] = (byte) (pos1 & 0xff);
 		cmd[7] = (byte) ((pos1 >>> 8) & 0xff);
@@ -1555,8 +1568,8 @@ public class PMS5005
 		cmd[18] = (byte) (timePeriod & 0xff);
 		cmd[19] = (byte) ((timePeriod >>> 8) & 0xff);
 		cmd[20] = crc(cmd);
-		cmd[21] = etx0;
-		cmd[22] = etx1;
+		cmd[21] = ETX0;
+		cmd[22] = ETX1;
 		
 		return cmd;
 	}
@@ -1572,13 +1585,13 @@ public class PMS5005
      *
      * @param pos1 Target position for channel #1 (Left Motor on X80Pro)
      * @param pos2 Target position for channel #2 (-Right Motor on X80Pro)
-     * @param pos3 Target position for channel #3 (NO_CONTROL on X80Pro)
-     * @param pos4 Target position for channel #4 (NO_CONTROL on X80Pro)
-     * @param pos5 Target position for channel #5 (NO_CONTROL on X80Pro)
-     * @param pos6 Target position for channel #6 (NO_CONTROL on X80Pro)
+     * @param pos3 Target position for channel #3 (NO_CTRL on X80Pro)
+     * @param pos4 Target position for channel #4 (NO_CTRL on X80Pro)
+     * @param pos5 Target position for channel #5 (NO_CTRL on X80Pro)
+     * @param pos6 Target position for channel #6 (NO_CTRL on X80Pro)
      * 
      * When omitting servo motors from control, please send the command value 
-     * -32768 (0x8000), which implies NO_CONTROL.
+     * -32768 (0x8000), which implies NO_CTRL.
      * 
      * @see servoNonTimeCtrl
      */
