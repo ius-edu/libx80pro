@@ -43,7 +43,7 @@ public class PMS5005
 	public static final byte didGetCustomSensorData = 124;
 	public static final byte didGetStandardSensorData = 125;
 	public static final byte didGetAllSensorData = 127;
-	// to use as ubyte: (byte)(DID_SETUPCOM & 0xff)
+	// to use as ubyte: (byte)(didSetupCom & 0xff)
 	public static final short didSetupCom = 255;
 	/* End Data ID (DID) descriptor listing */
 	
@@ -63,8 +63,9 @@ public class PMS5005
 	public static final short NonCtrlCmd = (short) 0xffff; // no ctrl command
 	public static final short noCtrl = (short) 0x8000;
 	
+	public static final int offsetMotorDirection = 22;
 	public static final int offsetEncoderPulse = 24; 
-	public static final int offsetMotorSpeed = 26;
+	public static final int offsetEncoderSpeed = 32;
 	
     /**
      * Calculates a valid crc value to be used in order to check the shortegrity 
@@ -864,10 +865,10 @@ public class PMS5005
      * @return 1 to indicate positive direction, 0 to indicate no movement, 
      * and -1 to indicate negative direction.
      */
-	public static short getEncoderDirection(short channel)
+	public static short getEncoderDirection(short channel, int[] motorSensorDataAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		int offset = channel + offsetEncoderDirection; // 32
+		return (short) (((motorSensorDataAry[offset + 1] & 0xff) << 8) | (motorSensorDataAry[offset] & 0xff));
 	}
 	
     /**
@@ -879,10 +880,10 @@ public class PMS5005
      * @return Pulse counter, an short integral value to rotation with range of 
      * 0 to 32767 in cycles.
      */
-	public static short getEncoderPulse(short channel, int[] sensorDataAry)
+	public static short getEncoderPulse(short channel, int[] motorSensorDataAry)
 	{
 		int offset = 4*channel + offsetEncoderPulse; // 24
-		return (short) (((sensorDataAry[offset + 1] & 0xff) << 8) | (sensorDataAry[offset] & 0xff));
+		return (short) (((motorSensorDataAry[offset + 1] & 0xff) << 8) | (motorSensorDataAry[offset] & 0xff));
 	}
 	
     /**
@@ -894,10 +895,10 @@ public class PMS5005
      *
      * @see setDcMotorSensorUsage
      */
-	public static short getEncoderSpeed(short channel, int[] motorDataAry)
+	public static short getEncoderSpeed(short channel, int[] motorSensorDataAry)
 	{
 		int offset = 4*channel + offsetMotorSpeed; // 26
-		return (short) (((motorDataAry[offset + 1] & 0xff) << 8) | (motorDataAry[offset] & 0xff));
+		return (short) (((motorSensorDataAry[offset + 1] & 0xff) << 8) | (motorSensorDataAry[offset] & 0xff));
 	}
 	
     /**
@@ -918,10 +919,10 @@ public class PMS5005
      *
      * @see getSensorBatteryAd
      */
-	public static short getCustomAd(short channel, int[] customDataAry)
+	public static short getCustomAd(short channel, int[] customSensorDataAry)
 	{
 		int offset = 2*channel;
-		return (short) (((customDataAry[offset+1] & 0xff) << 8) | (customDataAry[offset] & 0xff));
+		return (short) (((customSensorDataAry[offset+1] & 0xff) << 8) | (customSensorDataAry[offset] & 0xff));
 	}
 	
     /**
