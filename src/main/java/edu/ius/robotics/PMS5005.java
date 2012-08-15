@@ -20,10 +20,10 @@ public class PMS5005
 	 */
 	
 	/* Start transmission, End transmission */
-	public static final byte stx0 = 94;
-	public static final byte stx1 = 2;
-	public static final byte etx0 = 94;
-	public static final byte etx1 = 13;
+	private static final byte STX0 = 94;
+    private static final byte STX1 = 2;
+    private static final byte ETX0 = 94;
+    private static final byte ETX1 = 13;
 	
 	/* Data ID (DID) descriptor listing */
 	public static final byte didPositionCtrl = 3;
@@ -37,7 +37,7 @@ public class PMS5005
 	public static final byte didAllVelocityCtrl = 27;
 	public static final byte didServoCtrl = 28;
 	public static final byte didAllServoCtrl = 29;
-	public static final byte didMotorCtrl = 30;
+	private static final int TOGGLE_DC_MOTORS = 30;
 	public static final byte didConstellationCtrl = 80;
 	public static final byte didGetMotorSensorData = 123;
 	public static final byte didGetCustomSensorData = 124;
@@ -1031,10 +1031,21 @@ public class PMS5005
      *
      * All motor control channels are initially suspended at boot-up.
      */
-	public static byte[] suspendDcMotor(short channel)
+	public static byte[] suspendDcMotor(byte channel)
 	{
-		// TODO Auto-generated method stub
-		
+		byte[] packet = new byte[11];
+		packet[0]  = STX0;
+		packet[1]  = STX1;
+		packet[2]  = 1;
+		packet[3]  = 0;
+		packet[4]  = TOGGLE_DC_MOTORS;
+		packet[5]  = 2;
+		packet[6]  = 0;
+		packet[7]  = channel;
+		packet[8]  = crc(packet);
+		packet[9]  = ETX0;
+		packet[10] = ETX1;
+		return packet;
 	}
 	
 	/**
