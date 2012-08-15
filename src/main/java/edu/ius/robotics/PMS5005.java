@@ -26,6 +26,7 @@ public class PMS5005
     public static final byte ETX1 = 13;
 	
 	/* Data ID (DID) descriptor listing */
+<<<<<<< HEAD
 	public static final byte POSITION_CTRL = 3;
 	public static final byte ALL_POSITION_CTRL = 4;
 	public static final byte PWM_CTRL = 5;
@@ -45,12 +46,37 @@ public class PMS5005
 	public static final byte GET_ALL_SENSOR_DATA = 127;
 	// to use as ubyte: (byte)(SETUP_COM & 0xff)
 	public static final short SETUP_COM = 255;
+=======
+	public static final byte didPositionCtrl = 3;
+	public static final byte didAllPositionCtrl = 4;
+	public static final byte didPwmCtrl = 5;
+	public static final byte didAllPwmCtrl = 6;
+	private static final byte SET_PARAMETERS_DC_MOTORS = 7;
+	public static final byte didPowerCtrl = 22;
+	public static final byte didLcdCtrl = 23;
+	public static final byte didVelocityCtrl = 26;
+	public static final byte didAllVelocityCtrl = 27;
+	public static final byte didServoCtrl = 28;
+	public static final byte didAllServoCtrl = 29;
+	private static final int TOGGLE_DC_MOTORS = 30;
+	public static final byte didConstellationCtrl = 80;
+	public static final byte didGetMotorSensorData = 123;
+	public static final byte didGetCustomSensorData = 124;
+	public static final byte didGetStandardSensorData = 125;
+	public static final byte didGetAllSensorData = 127;
+	// to use as ubyte: (byte)(didSetupCom & 0xff)
+	public static final short didSetupCom = 255;
+>>>>>>> 8254339fd9d2dcc4b9e6cd2215c46d54860766c7
 	/* End Data ID (DID) descriptor listing */
 	
 	public static final byte DC_MOTOR_CTRL_MODE = 14;
 	
 	public static final byte DC_POSITION_PID = 7; // positon PID Control
+<<<<<<< HEAD
 	public static final byte DC_VELOCITY_PID = 8; // velocity PID Control
+=======
+	public static final byte dcVelocityPid = 8; // velocity PID Control
+>>>>>>> 8254339fd9d2dcc4b9e6cd2215c46d54860766c7
 	
 	public static final byte PWM_CTRL_MODE = 0;
 	public static final byte POSITION_CTRL_MODE = 1;
@@ -1047,17 +1073,16 @@ public class PMS5005
 	public static byte[] suspendDcMotor(byte channel)
 	{
 		byte[] packet = new byte[11];
-		packet[0]  = STX0;
-		packet[1]  = STX1;
-		packet[2]  = 1;
-		packet[3]  = 0;
-		packet[4]  = TOGGLE_DC_MOTORS;
-		packet[5]  = 2;
-		packet[6]  = 0;
-		packet[7]  = channel;
-		packet[8]  = crc(packet);
-		packet[9]  = ETX0;
-		packet[10] = ETX1;
+		packet[0]  = STX0;	packet[1]  = STX1;
+		packet[2]  = 1;		packet[3]  = 0;
+		
+		packet[4]  = TOGGLE_DC_MOTORS; //DID
+		packet[5]  = 2;                //LEN
+		packet[6]  = 0;                //SUSPEND
+		packet[7]  = channel;          //0=L | 1=R
+		packet[8]  = crc(packet);      //CHECKSUM
+		
+		packet[9]  = ETX0;	packet[10] = ETX1;
 		return packet;
 	}
 	
@@ -1068,16 +1093,42 @@ public class PMS5005
      * @param channel 0 for left, 1 for right (robot first person perspective)
      * @param Kp proportional gain (default is 50)
      * @param Kd derivative gain (default is 5)
+<<<<<<< HEAD
      * @param Ki_x100 the desired integral gain * 100.  when Ki_100 = 100, 
      * the actual integral control term is Ki = 1.  Ki_x100 has a range of 
      * 0 to 25599, where 0 means no integral control (default).
+=======
+     * @param Ki the desired shortegral gain * 100.  when Ki = 100, 
+     * the actual shortegral control term is Ki = 1.  Ki has a range of 
+     * 0 to 25599, where 0 means no shortegral control (default).
+>>>>>>> 8254339fd9d2dcc4b9e6cd2215c46d54860766c7
      *
      * @see setDcMotorControlMode
      */
-	public static byte[] setDcMotorPositionControlPid(short channel, short Kp, short Kd, short Ki_x100)
+	public static byte[] setDcMotorPositionControlPid(byte channel, short Kp, short Kd, short Ki)
 	{
 		// TODO Auto-generated method stub
+		byte[] packet = new byte[20];
+		packet[0]  = STX0;	packet[1]  = STX1;
+		packet[2]  = 1;		packet[3]  = 0;
 		
+		packet[4]  = SET_PARAMETERS_DC_MOTORS;   //DID
+		packet[5]  = 11;                         //LEN 
+		packet[6]  = DC_POSITION_PID;            //Subcommand
+		packet[7]  = channel;                    //0=L | 1=R
+		packet[8]  = KpId;                       //Proportional gain
+		packet[9]  = (byte) (Kp & 0xff);         //lo
+	    packet[10] = (byte) ((Kp >>> 8) & 0xff);//hi
+        packet[11] = KdId;                       //Derivative gain
+        packet[12] = (byte) (Kd & 0xff);         //lo
+        packet[13] = (byte) ((Kd >>> 8) & 0xff);//hi
+        packet[14] = KiId;                       //Integral gain
+        packet[15] = (byte) (Ki & 0xff);         //lo
+        packet[16] = (byte) ((Ki >>> 8) & 0xff);//hi
+        packet[17] = crc(packet);                //checksum
+
+	    packet[18] = ETX0; packet[19] = ETX1;
+	    return packet;
 	}
 	
 	/**
@@ -1087,7 +1138,12 @@ public class PMS5005
 	public static byte[] setDcMotorSensorFilter(short channel, short filterMethod)
 	{
 		// TODO Auto-generated method stub
+		byte[] packet = new byte[6];
+		packet[0]  = STX0;	packet[1]  = STX1;
+		packet[2]  = 1;		packet[3]  = 0;
 		
+		packet[4]  = ETX0;  packet[5]  = ETX0;
+		return packet;
 	}
 	
 	/**
@@ -1121,7 +1177,12 @@ public class PMS5005
 	public static byte[] setDcMotorSensorUsage(short channel, short sensorType)
 	{
 		// TODO Auto-generated method stub
+		byte[] packet = new byte[6];
+		packet[0]  = STX0;	packet[1]  = STX1;
+		packet[2]  = 1;		packet[3]  = 0;
 		
+		packet[4]  = ETX0;  packet[5]  = ETX0;
+		return packet;
 	}
 	
 	/**
@@ -1139,8 +1200,16 @@ public class PMS5005
      */
 	public static byte[] setDcMotorControlMode(short channel, short controlMode)
 	{
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[6];
+		packet[0]  = STX0;	packet[1]  = STX1;
+		packet[2]  = 1;		packet[3]  = 0;
 		
+		packet[4]  = 7;
+		packet[5]  = 4;
+		packet[6]  = subcommand;
+		
+		packet[4]  = ETX0;  packet[5]  = ETX0;
+		return packet;
 	}
 	
 	/**
@@ -1156,8 +1225,8 @@ public class PMS5005
      */
 	public static byte[] dcMotorPositionTimeCtrl(short channel, short cmdValue, short timePeriod)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1183,8 +1252,8 @@ public class PMS5005
      */
 	public static byte[] dcMotorPositionNonTimeCtrl(short channel, short cmdValue)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1211,8 +1280,8 @@ public class PMS5005
      */
 	public static byte[] dcMotorPwmTimeCtrl(short channel, short cmdValue, short timePeriod)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1239,8 +1308,8 @@ public class PMS5005
      */
 	public static byte[] dcMotorPwmNonTimeCtrl(short channel, short cmdValue)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1274,8 +1343,8 @@ public class PMS5005
      */
 	public static byte[] dcMotorPositionTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1308,8 +1377,8 @@ public class PMS5005
      */
 	public static byte[] dcMotorPositionNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1342,8 +1411,8 @@ public class PMS5005
      */
 	public static byte[] dcMotorVelocityTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1376,6 +1445,7 @@ public class PMS5005
      */
 	public static byte[] dcMotorVelocityNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
+		return null;
 		// TODO Auto-generated method stub
 		
 	}
@@ -1408,6 +1478,7 @@ public class PMS5005
      */
 	public static byte[] dcMotorPwmTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
 	{
+		return null;
 		// TODO Auto-generated method stub
 		
 	}
@@ -1440,8 +1511,8 @@ public class PMS5005
      */
 	public static byte[] dcMotorPwmNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1456,8 +1527,8 @@ public class PMS5005
      */
 	public static byte[] enableServo(short channel)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1472,8 +1543,8 @@ public class PMS5005
      */
 	public static byte[] disableServo(short channel)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1499,8 +1570,8 @@ public class PMS5005
      */
 	public static byte[] servoTimeCtrl(short channel, short cmdValue, short timePeriod)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1517,8 +1588,8 @@ public class PMS5005
      */
 	public static byte[] servoNonTimeCtrl(short channel, short cmdValue)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1546,7 +1617,10 @@ public class PMS5005
 	public static byte[] servoTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
 	{
 		byte[] cmd = new byte[23];
+		cmd[0] = STX0;	cmd[1] = STX1;
+		cmd[2] = 1; 	cmd[3] = 0;
 		
+<<<<<<< HEAD
 		cmd[0] = STX0;
 		cmd[1] = STX1;
 		cmd[2] = 1;
@@ -1557,6 +1631,14 @@ public class PMS5005
 		cmd[7] = (byte) ((pos1 >>> 8) & 0xff);
 		cmd[8] = (byte) (pos2 & 0xff);
 		cmd[9] = (byte) ((pos2 >>> 8) & 0xff);
+=======
+		cmd[4]  = didAllServoCtrl;
+		cmd[5]  = 14; // len
+		cmd[6]  = (byte) (pos1 & 0xff);
+		cmd[7]  = (byte) ((pos1 >>> 8) & 0xff);
+		cmd[8]  = (byte) (pos2 & 0xff);
+		cmd[9]  = (byte) ((pos2 >>> 8) & 0xff);
+>>>>>>> 8254339fd9d2dcc4b9e6cd2215c46d54860766c7
 		cmd[10] = (byte) (pos3 & 0xff);
 		cmd[11] = (byte) ((pos3 >>> 8) & 0xff);
 		cmd[12] = (byte) (pos4 & 0xff);
@@ -1568,9 +1650,13 @@ public class PMS5005
 		cmd[18] = (byte) (timePeriod & 0xff);
 		cmd[19] = (byte) ((timePeriod >>> 8) & 0xff);
 		cmd[20] = crc(cmd);
+<<<<<<< HEAD
 		cmd[21] = ETX0;
 		cmd[22] = ETX1;
+=======
+>>>>>>> 8254339fd9d2dcc4b9e6cd2215c46d54860766c7
 		
+		cmd[21] = ETX0;	cmd[22] = ETX1;
 		return cmd;
 	}
 	
@@ -1597,8 +1683,8 @@ public class PMS5005
      */
 	public static byte[] servoNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -1612,7 +1698,7 @@ public class PMS5005
      */
 	public static byte[] lcdDisplayPMS(String bmpFileName)
 	{
+		return null;
 		// TODO Auto-generated method stub
-		
 	}
 }
