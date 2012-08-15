@@ -26,7 +26,6 @@ public class PMS5005
     public static final byte ETX1 = 13;
 	
 	/* Data ID (DID) descriptor listing */
-<<<<<<< HEAD
 	public static final byte POSITION_CTRL = 3;
 	public static final byte ALL_POSITION_CTRL = 4;
 	public static final byte PWM_CTRL = 5;
@@ -46,38 +45,14 @@ public class PMS5005
 	public static final byte GET_ALL_SENSOR_DATA = 127;
 	// to use as ubyte: (byte)(SETUP_COM & 0xff)
 	public static final short SETUP_COM = 255;
-=======
-	public static final byte didPositionCtrl = 3;
-	public static final byte didAllPositionCtrl = 4;
-	public static final byte didPwmCtrl = 5;
-	public static final byte didAllPwmCtrl = 6;
-	private static final byte SET_PARAMETERS_DC_MOTORS = 7;
-	public static final byte didPowerCtrl = 22;
-	public static final byte didLcdCtrl = 23;
-	public static final byte didVelocityCtrl = 26;
-	public static final byte didAllVelocityCtrl = 27;
-	public static final byte didServoCtrl = 28;
-	public static final byte didAllServoCtrl = 29;
-	private static final int TOGGLE_DC_MOTORS = 30;
-	public static final byte didConstellationCtrl = 80;
-	public static final byte didGetMotorSensorData = 123;
-	public static final byte didGetCustomSensorData = 124;
-	public static final byte didGetStandardSensorData = 125;
-	public static final byte didGetAllSensorData = 127;
-	// to use as ubyte: (byte)(didSetupCom & 0xff)
-	public static final short didSetupCom = 255;
->>>>>>> 8254339fd9d2dcc4b9e6cd2215c46d54860766c7
+
 	/* End Data ID (DID) descriptor listing */
 	
 	public static final byte DC_MOTOR_CTRL_MODE = 14;
 	
 	public static final byte DC_POSITION_PID = 7; // positon PID Control
-<<<<<<< HEAD
 	public static final byte DC_VELOCITY_PID = 8; // velocity PID Control
-=======
-	public static final byte dcVelocityPid = 8; // velocity PID Control
->>>>>>> 8254339fd9d2dcc4b9e6cd2215c46d54860766c7
-	
+
 	public static final byte PWM_CTRL_MODE = 0;
 	public static final byte POSITION_CTRL_MODE = 1;
 	public static final byte VELOCITY_CTRL_MODE = 2;
@@ -1093,15 +1068,9 @@ public class PMS5005
      * @param channel 0 for left, 1 for right (robot first person perspective)
      * @param Kp proportional gain (default is 50)
      * @param Kd derivative gain (default is 5)
-<<<<<<< HEAD
      * @param Ki_x100 the desired integral gain * 100.  when Ki_100 = 100, 
      * the actual integral control term is Ki = 1.  Ki_x100 has a range of 
      * 0 to 25599, where 0 means no integral control (default).
-=======
-     * @param Ki the desired shortegral gain * 100.  when Ki = 100, 
-     * the actual shortegral control term is Ki = 1.  Ki has a range of 
-     * 0 to 25599, where 0 means no shortegral control (default).
->>>>>>> 8254339fd9d2dcc4b9e6cd2215c46d54860766c7
      *
      * @see setDcMotorControlMode
      */
@@ -1617,28 +1586,17 @@ public class PMS5005
 	public static byte[] servoTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
 	{
 		byte[] cmd = new byte[23];
+		
 		cmd[0] = STX0;	cmd[1] = STX1;
 		cmd[2] = 1; 	cmd[3] = 0;
 		
-<<<<<<< HEAD
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
 		cmd[4] = ALL_SERVO_CTRL;
 		cmd[5] = 14; // len
 		cmd[6] = (byte) (pos1 & 0xff);
 		cmd[7] = (byte) ((pos1 >>> 8) & 0xff);
 		cmd[8] = (byte) (pos2 & 0xff);
 		cmd[9] = (byte) ((pos2 >>> 8) & 0xff);
-=======
-		cmd[4]  = didAllServoCtrl;
-		cmd[5]  = 14; // len
-		cmd[6]  = (byte) (pos1 & 0xff);
-		cmd[7]  = (byte) ((pos1 >>> 8) & 0xff);
-		cmd[8]  = (byte) (pos2 & 0xff);
-		cmd[9]  = (byte) ((pos2 >>> 8) & 0xff);
->>>>>>> 8254339fd9d2dcc4b9e6cd2215c46d54860766c7
+
 		cmd[10] = (byte) (pos3 & 0xff);
 		cmd[11] = (byte) ((pos3 >>> 8) & 0xff);
 		cmd[12] = (byte) (pos4 & 0xff);
@@ -1650,13 +1608,9 @@ public class PMS5005
 		cmd[18] = (byte) (timePeriod & 0xff);
 		cmd[19] = (byte) ((timePeriod >>> 8) & 0xff);
 		cmd[20] = crc(cmd);
-<<<<<<< HEAD
-		cmd[21] = ETX0;
-		cmd[22] = ETX1;
-=======
->>>>>>> 8254339fd9d2dcc4b9e6cd2215c46d54860766c7
 		
 		cmd[21] = ETX0;	cmd[22] = ETX1;
+		
 		return cmd;
 	}
 	
