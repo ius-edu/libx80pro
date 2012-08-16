@@ -31,6 +31,12 @@ public class PMS5005
 	public static final byte PWM_CTRL = 5;
 	public static final byte ALL_PWM_CTRL = 6;
 	public static final byte PARAM_SET = 7;
+		//Subcommands under PARAM_SET
+		public static final byte DC_POSITION_PID = 7;     // positon PID Control
+		public static final byte DC_VELOCITY_PID = 8;     // velocity PID Control
+		public static final byte DC_SENSOR_USAGE = 13;
+		public static final byte DC_CTRL_MODE = 14;
+		
 	public static final byte POWER_CTRL = 22;
 	public static final byte LCD_CTRL = 23;
 	public static final byte VELOCITY_CTRL = 26;
@@ -45,13 +51,9 @@ public class PMS5005
 	public static final byte GET_ALL_SENSOR_DATA = 127;
 	// to use as ubyte: (byte)(SETUP_COM & 0xff)
 	public static final short SETUP_COM = 255;
-
 	/* End Data ID (DID) descriptor listing */
 	
-	public static final byte DC_MOTOR_CTRL_MODE = 14;
 	
-	public static final byte DC_POSITION_PID = 7; // positon PID Control
-	public static final byte DC_VELOCITY_PID = 8; // velocity PID Control
 
 	public static final byte PWM_CTRL_MODE = 0;
 	public static final byte POSITION_CTRL_MODE = 1;
@@ -92,10 +94,10 @@ public class PMS5005
 		byte fb_bit;
 		short z;
 		shift_reg = 0; // initialize the shift register
-		z = (short) (buf.length - 5);
-		for (short i = 0; i < z; ++i)
+		z = (short) (buf.length - 3);// Don't include crc and ETX (z=length-3)
+		for (short i = 2; i < z; ++i)// Don't include STX (i=2)
 		{
-			v = (byte) (buf[2 + i]); // start from RID
+			v = (byte) (buf[i]); 
 			// for each bit
 			
 			for (short j = 0; j < 8; ++j)
@@ -961,6 +963,7 @@ public class PMS5005
      */
 	public static byte[] setCustomDOut(short ival)
 	{
+		return null;
 		// TODO Auto-generated method stub
 		
 	}
@@ -978,10 +981,21 @@ public class PMS5005
      * 
      * @param polarity 1 or -1
      */
-	public static byte[] setMotorPolarity(short channel, short polarity)
+	public static byte[] setMotorPolarity(byte channel, byte polarity)
 	{
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[6];
+		packet[0]  = STX0;	packet[1]  = STX1;
+		packet[2]  = 1;		packet[3]  = 0;
 		
+		packet[4] = PARAM_SET;                   //DID
+		packet[5] = 5;                           //LEN
+		packet[6] = DC_SENSOR_USAGE;             //Subcommand
+		packet[7] = channel;                     //0-L | 1=R
+		packet[8] = polarity;                    //polarity 1 | -1
+		packet[9] = crc(packet);                 //Checksum
+		
+		packet[4]  = ETX0;  packet[5]  = ETX0;
+		return packet;
 	}
 	
     /**
@@ -993,10 +1007,20 @@ public class PMS5005
      *
      * @see resumeDcMotor
      */
-	public static byte[] enableDcMotor(short channel)
+	public static byte[] enableDcMotor(byte channel)
 	{
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[11];
+		packet[0]  = STX0;	packet[1]  = STX1;
+		packet[2]  = 1;		packet[3]  = 0;
 		
+		packet[4]  = TOGGLE_DC_MOTORS; //DID
+		packet[5]  = 2;                //LEN
+		packet[6]  = 1;                //1 = Enable/Resume
+		packet[7]  = channel;          //0=L | 1=R
+		packet[8]  = crc(packet);      //Checksum
+		
+		packet[9]  = ETX0;	packet[10] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1008,24 +1032,20 @@ public class PMS5005
      *
      * @see suspendDcMotor
      */
-	public static byte[] disableDcMotor(short channel)
+	public static byte[] disableDcMotor(byte channel)
 	{
-		// TODO Auto-generated method stub
-		byte[] cmd = new byte[10];
+		byte[] packet = new byte[10];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1; 		packet[3] = 0;
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = didMotorCtrl;
-		cmd[5] = 2; // len
-		cmd[6] = 0; //(byte) (0 & 0xff);
-		cmd[7] = (byte) channel;
-		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+		packet[4] = TOGGLE_DC_MOTORS;         //DID
+		packet[5] = 2;                        //LEN
+		packet[6] = 0;                        // 0 = Disable/Suspend
+		packet[7] = channel;                  //0=L | 1=R
+		packet[7] = crc(packet);              //Checksum
 		
-		return cmd;
+		packet[8] = ETX0;	packet[9] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1033,10 +1053,20 @@ public class PMS5005
      *
      * @param channel 0 for left, 1 for right (robot first person perspective)
      */
-	public static byte[] resumeDcMotor(short channel)
+	public static byte[] resumeDcMotor(byte channel)
 	{
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[11];
+		packet[0]  = STX0;	packet[1]  = STX1;
+		packet[2]  = 1;		packet[3]  = 0;
 		
+		packet[4]  = TOGGLE_DC_MOTORS; //DID
+		packet[5]  = 2;                //LEN
+		packet[6]  = 1;                //resume
+		packet[7]  = channel;          //0=L | 1=R
+		packet[8]  = crc(packet);      //Checksum
+		
+		packet[9]  = ETX0;	packet[10] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1056,7 +1086,7 @@ public class PMS5005
 		packet[5]  = 2;                //LEN
 		packet[6]  = 0;                //SUSPEND
 		packet[7]  = channel;          //0=L | 1=R
-		packet[8]  = crc(packet);      //CHECKSUM
+		packet[8]  = crc(packet);      //Checksum
 		
 		packet[9]  = ETX0;	packet[10] = ETX1;
 		return packet;
@@ -1077,29 +1107,53 @@ public class PMS5005
      */
 	public static byte[] setDcMotorPositionControlPid(byte channel, short Kp, short Kd, short Ki)
 	{
-		// TODO Auto-generated method stub
 		byte[] packet = new byte[20];
 		packet[0]  = STX0;	packet[1]  = STX1;
 		packet[2]  = 1;		packet[3]  = 0;
 		
-		packet[4]  = SET_PARAMETERS_DC_MOTORS;   //DID
+		packet[4]  = PARAM_SET;   				 //DID
 		packet[5]  = 11;                         //LEN 
 		packet[6]  = DC_POSITION_PID;            //Subcommand
 		packet[7]  = channel;                    //0=L | 1=R
 		packet[8]  = KpId;                       //Proportional gain
-		packet[9]  = (byte) (Kp & 0xff);         //lo
-	    packet[10] = (byte) ((Kp >>> 8) & 0xff);//hi
+		packet[9]  = (byte) (Kp & 0xff);        
+	    packet[10] = (byte) ((Kp >>> 8) & 0xff);
         packet[11] = KdId;                       //Derivative gain
-        packet[12] = (byte) (Kd & 0xff);         //lo
-        packet[13] = (byte) ((Kd >>> 8) & 0xff);//hi
+        packet[12] = (byte) (Kd & 0xff);        
+        packet[13] = (byte) ((Kd >>> 8) & 0xff);
         packet[14] = KiId;                       //Integral gain
-        packet[15] = (byte) (Ki & 0xff);         //lo
-        packet[16] = (byte) ((Ki >>> 8) & 0xff);//hi
-        packet[17] = crc(packet);                //checksum
+        packet[15] = (byte) (Ki & 0xff);         
+        packet[16] = (byte) ((Ki >>> 8) & 0xff);
+        packet[17] = crc(packet);                //Checksum
 
 	    packet[18] = ETX0; packet[19] = ETX1;
 	    return packet;
 	}
+	
+    public static byte[] setDcMotorVelocityControlPID(byte channel, int Kp, int Kd, int Ki) 
+    {
+    	byte[] packet = new byte[20];
+		packet[0]  = STX0;	packet[1]  = STX1;
+		packet[2]  = 1;		packet[3]  = 0;
+		
+		packet[4]  = PARAM_SET;                  //DID
+		packet[5]  = 11;                         //LEN 
+		packet[6]  = DC_VELOCITY_PID;            //Subcommand
+		packet[7]  = channel;                    //0=L | 1=R
+		packet[8]  = KpId;                       //Proportional gain
+		packet[9]  = (byte) (Kp & 0xff);         
+	    packet[10] = (byte) ((Kp >>> 8) & 0xff);
+        packet[11] = KdId;                       //Derivative gain
+        packet[12] = (byte) (Kd & 0xff);         
+        packet[13] = (byte) ((Kd >>> 8) & 0xff);
+        packet[14] = KiId;                       //Integral gain
+        packet[15] = (byte) (Ki & 0xff);         
+        packet[16] = (byte) ((Ki >>> 8) & 0xff);
+        packet[17] = crc(packet);                //Checksum
+
+	    packet[18] = ETX0; packet[19] = ETX1;
+	    return packet;
+    }
 	
 	/**
      * This filtering feature is still under development. All data will be 
@@ -1122,10 +1176,10 @@ public class PMS5005
      * 
      * The available sensor types are 
      * single potentiometer, dual potentiometers, and quadrature encoder.  The 
-     * single potentiometer sensor is for the control of robot joshort with 
+     * single potentiometer sensor is for the control of robot joint with 
      * limited rotation range (0 degrees to 332 degrees).  The dual 
      * potentiometers and the quadrature sensor are for use with continuously 
-     * rotating joshorts (e.g. wheels).
+     * rotating joints (e.g. wheels).
      *
      * @param channel 0, 1, 2, 3, 4, or 5 for single potentiometer sensor
      * channel 0, 1, or 2 for dual potentiometer sensor
@@ -1144,12 +1198,18 @@ public class PMS5005
      *
      * @see getSensorPot
      */
-	public static byte[] setDcMotorSensorUsage(short channel, short sensorType)
+	public static byte[] setDcMotorSensorUsage(byte channel, byte sensorType)
 	{
-		// TODO Auto-generated method stub
 		byte[] packet = new byte[6];
 		packet[0]  = STX0;	packet[1]  = STX1;
 		packet[2]  = 1;		packet[3]  = 0;
+		
+		packet[4] = PARAM_SET;                   //DID
+		packet[5] = 5;                           //LEN
+		packet[6] = DC_SENSOR_USAGE;             //Subcommand
+		packet[7] = channel;                     //0-5  = Single Potentiometer, 0-2  = Dual Potentiometer, 0-1  = Encoder
+		packet[8] = sensorType;                  //0x00 = Single Potentiometer, 0x01 = Dual Potentiometer, 0x02 = Encoder
+		packet[9] = crc(packet);                 //Checksum
 		
 		packet[4]  = ETX0;  packet[5]  = ETX0;
 		return packet;
@@ -1168,15 +1228,18 @@ public class PMS5005
      * @see setDcMotorPositionControlPid
      * @see setDcMotorVelocityControlPid
      */
-	public static byte[] setDcMotorControlMode(short channel, short controlMode)
+	public static byte[] setDcMotorControlMode(byte channel, byte controlMode)
 	{
 		byte[] packet = new byte[6];
 		packet[0]  = STX0;	packet[1]  = STX1;
 		packet[2]  = 1;		packet[3]  = 0;
 		
-		packet[4]  = 7;
-		packet[5]  = 4;
-		packet[6]  = subcommand;
+		packet[4]  = PARAM_SET;				//DID
+		packet[5]  = 3;						//LEN
+		packet[6]  = DC_CTRL_MODE;			//Subcommand
+		packet[7]  = channel;				//channel 0-5
+		packet[8]  = controlMode;			//0 = open, 1 = closed position, 2 = closed velocity
+		packet[9]  = crc(packet);			//Checksum
 		
 		packet[4]  = ETX0;  packet[5]  = ETX0;
 		return packet;
@@ -1193,10 +1256,23 @@ public class PMS5005
      * @param cmdValue Target position value
      * @param timePeriod Executing time in milliseconds
      */
-	public static byte[] dcMotorPositionTimeCtrl(short channel, short cmdValue, short timePeriod)
+	public static byte[] dcMotorPositionTimeCtrl(byte channel, short cmdValue, short time)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[14];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1;		packet[3] = 0;
+		
+		packet[4]  = POSITION_CTRL;					//DID
+		packet[5]  = 5;								//LEN
+		packet[6]  = channel;						//Channel 0-5
+		packet[7]  = (byte)(cmdValue & 0xFF);		//cmdValue
+		packet[8]  = (byte)((cmdValue >>> 8) & 0xFF);
+		packet[9]  = (byte)(time & 0xFF);			//time
+		packet[10] = (byte)((time >>> 8) & 0xFF);
+		packet[11] = crc(packet);					//Checksum
+		
+		packet[12] = ETX0;	packet[13] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1220,10 +1296,21 @@ public class PMS5005
      * @see dcMotorVelocityTimeCtrl
      * @see getSensorPot
      */
-	public static byte[] dcMotorPositionNonTimeCtrl(short channel, short cmdValue)
+	public static byte[] dcMotorPositionNonTimeCtrl(byte channel, short cmdValue)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[12];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1;		packet[3] = 0;
+		
+		packet[4] = POSITION_CTRL;					//DID
+		packet[5] = 3;								//LEN
+		packet[6] = channel;						//channel 0-5
+		packet[7] = (byte)(cmdValue & 0xFF);		//cmdValue
+		packet[8] = (byte)((cmdValue >>> 8) & 0xFF);
+		packet[9] = crc(packet);					//Checksum
+		
+		packet[10] = ETX0;	packet[11] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1248,10 +1335,23 @@ public class PMS5005
      * 
      * @see dcMotorPwmNonTimeCtrl
      */
-	public static byte[] dcMotorPwmTimeCtrl(short channel, short cmdValue, short timePeriod)
+	public static byte[] dcMotorPwmTimeCtrl(byte channel, short cmdValue, short time)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[14];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1;		packet[3] = 0;
+		
+		packet[4]  = PWM_CTRL;						//DID
+		packet[5]  = 5;								//LEN
+		packet[6]  = channel;						//Channel 0-5
+		packet[7]  = (byte)(cmdValue & 0xFF);		//cmdValue
+		packet[8]  = (byte)((cmdValue >>> 8) & 0xFF);
+		packet[9]  = (byte)(time & 0xFF);			//time
+		packet[10] = (byte)((time >>> 8) & 0xFF);
+		packet[11] = crc(packet);					//Checksum
+		
+		packet[12] = ETX0;	packet[13] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1276,10 +1376,21 @@ public class PMS5005
      * 
      * @see dcMotorPwmTimeCtrl
      */
-	public static byte[] dcMotorPwmNonTimeCtrl(short channel, short cmdValue)
+	public static byte[] dcMotorPwmNonTimeCtrl(byte channel, short cmdValue)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[12];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1;		packet[3] = 0;
+		
+		packet[4] = PWM_CTRL;						//DID
+		packet[5] = 3;								//LEN
+		packet[6] = channel;						//Channel 0-5
+		packet[7] = (byte)(cmdValue & 0xFF);		//cmdValue
+		packet[8] = (byte)((cmdValue >>> 8) & 0xFF);
+		packet[9] = crc(packet);					//Checksum
+		
+		packet[10] = ETX0;	packet[11] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1311,10 +1422,32 @@ public class PMS5005
      * @see getSensorPot
      * @see dcMotorPositionTimeCtrl
      */
-	public static byte[] dcMotorPositionTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
+	public static byte[] dcMotorPositionTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[23];
+		packet[0] = STX0;  packet[1] = STX1;
+		packet[2] = 1;   packet[3] = 0;
+		
+		packet[4]  = ALL_POSITION_CTRL;                 //DID
+		packet[5]  = 14;                                //LEN
+		packet[6]  = (byte)(pos1 & 0xff);               //channel 1
+		packet[7]  = (byte)((pos1 >>> 8) & 0xff);
+		packet[8]  = (byte)(pos2 & 0xff);               //channel 2
+		packet[9]  = (byte)((pos2 >>> 8) & 0xff);
+		packet[10] = (byte)(pos3 & 0xff);               //channel 3
+		packet[11] = (byte)((pos3 >>> 8) & 0xff);
+		packet[12] = (byte)(pos4 & 0xff);               //channel 4
+		packet[13] = (byte)((pos4 >>> 8) & 0xff);
+		packet[14] = (byte)(pos5 & 0xff);               //channel 5
+		packet[15] = (byte)((pos5 >>> 8) & 0xff);
+		packet[16] = (byte)(pos6 & 0xff);               //channel 6
+		packet[17] = (byte)((pos6 >>> 8) & 0xff);
+		packet[18] = (byte)(time & 0xff);				//time
+		packet[19] = (byte)((time >>> 8) & 0x0ff);
+		packet[20] = crc(packet);                       //Checksum
+
+		packet[21] = ETX0; packet[22] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1347,8 +1480,28 @@ public class PMS5005
      */
 	public static byte[] dcMotorPositionNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[21];
+		packet[0] = STX0;  packet[1] = STX1;
+		packet[2] = 1;   packet[3] = 0;
+		
+		packet[4]  = ALL_POSITION_CTRL;                 //DID
+		packet[5]  = 12;                                //LEN
+		packet[6]  = (byte)(pos1 & 0xff);               //channel 1
+		packet[7]  = (byte)((pos1 >>> 8) & 0xff);
+		packet[8]  = (byte)(pos2 & 0xff);               //channel 2
+		packet[9]  = (byte)((pos2 >>> 8) & 0xff);
+		packet[10] = (byte)(pos3 & 0xff);               //channel 3
+		packet[11] = (byte)((pos3 >>> 8) & 0xff);
+		packet[12] = (byte)(pos4 & 0xff);               //channel 4
+		packet[13] = (byte)((pos4 >>> 8) & 0xff);
+		packet[14] = (byte)(pos5 & 0xff);               //channel 5
+		packet[15] = (byte)((pos5 >>> 8) & 0xff);
+		packet[16] = (byte)(pos6 & 0xff);               //channel 6
+		packet[17] = (byte)((pos6 >>> 8) & 0xff);
+		packet[18] = crc(packet);                       //Checksum
+
+		packet[19] = ETX0; packet[20] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1379,10 +1532,32 @@ public class PMS5005
      * 
      * @see dcMotorVelocityTimeCtrl
      */
-	public static byte[] dcMotorVelocityTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
+	public static byte[] dcMotorVelocityTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[23];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1;		packet[3] = 0;
+		
+		packet[4]  = ALL_VELOCITY_CTRL;			//DID
+		packet[5]  = 14;						//LEN
+		packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
+		packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
+		packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
+		packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
+		packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
+		packet[11] = (byte)((pos3 >>> 8) & 0xFF);
+		packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
+		packet[13] = (byte)((pos4 >>> 8) & 0xFF);
+		packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
+		packet[15] = (byte)((pos5 >>> 8) & 0xFF);
+		packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
+		packet[17] = (byte)((pos6 >>> 8) & 0xFF);
+		packet[18] = (byte)(time & 0xFF);		//time
+		packet[19] = (byte)((time >>> 8) & 0xFF);
+		packet[20] = crc(packet);				//Checksum
+		
+		packet[21] = ETX0;  packet[22] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1415,9 +1590,28 @@ public class PMS5005
      */
 	public static byte[] dcMotorVelocityNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[21];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1;		packet[3] = 0;
 		
+		packet[4]  = ALL_VELOCITY_CTRL;			//DID
+		packet[5]  = 12;						//LEN
+		packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
+		packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
+		packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
+		packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
+		packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
+		packet[11] = (byte)((pos3 >>> 8) & 0xFF);
+		packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
+		packet[13] = (byte)((pos4 >>> 8) & 0xFF);
+		packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
+		packet[15] = (byte)((pos5 >>> 8) & 0xFF);
+		packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
+		packet[17] = (byte)((pos6 >>> 8) & 0xFF);
+		packet[18] = crc(packet);				//Checksum
+		
+		packet[19] = ETX0;  packet[20] = ETX1;
+		return packet;	
 	}
 	
 	/**
@@ -1446,11 +1640,32 @@ public class PMS5005
      * 4) When omitting motors from control, the command value of -32768
      *    (0x8000), should be sent.  This implies NO_CTRL.
      */
-	public static byte[] dcMotorPwmTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
+	public static byte[] dcMotorPwmTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[23];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1;		packet[3] = 0;
 		
+		packet[4]  = ALL_PWM_CTRL;				//DID
+		packet[5]  = 14;						//LEN
+		packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
+		packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
+		packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
+		packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
+		packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
+		packet[11] = (byte)((pos3 >>> 8) & 0xFF);
+		packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
+		packet[13] = (byte)((pos4 >>> 8) & 0xFF);
+		packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
+		packet[15] = (byte)((pos5 >>> 8) & 0xFF);
+		packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
+		packet[17] = (byte)((pos6 >>> 8) & 0xFF);
+		packet[18] = (byte)(time & 0xFF);		//time
+		packet[19] = (byte)((time >>> 8) & 0xFF);
+		packet[20] = crc(packet);				//Checksum
+		
+		packet[21] = ETX0;  packet[22] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1481,8 +1696,28 @@ public class PMS5005
      */
 	public static byte[] dcMotorPwmNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[21];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1;		packet[3] = 0;
+		
+		packet[4]  = ALL_PWM_CTRL;				//DID
+		packet[5]  = 12;						//LEN
+		packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
+		packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
+		packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
+		packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
+		packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
+		packet[11] = (byte)((pos3 >>> 8) & 0xFF);
+		packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
+		packet[13] = (byte)((pos4 >>> 8) & 0xFF);
+		packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
+		packet[15] = (byte)((pos5 >>> 8) & 0xFF);
+		packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
+		packet[17] = (byte)((pos6 >>> 8) & 0xFF);
+		packet[18] = crc(packet);				//Checksum
+		
+		packet[19] = ETX0;  packet[20] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1495,10 +1730,20 @@ public class PMS5005
      * 
      * @see disableServo
      */
-	public static byte[] enableServo(short channel)
+	public static byte[] enableServo(byte channel)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[10];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1; 		packet[3] = 0;
+		
+		packet[4] = TOGGLE_DC_MOTORS;         //DID
+		packet[5] = 2;                        //LEN
+		packet[6] = 0;                        //0 = Enable
+		packet[7] = channel;                  //6-11 SERVO
+		packet[7] = crc(packet);              //Checksum
+		
+		packet[8] = ETX0;	packet[9] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1511,10 +1756,20 @@ public class PMS5005
      * 
      * @see enableServo
      */
-	public static byte[] disableServo(short channel)
+	public static byte[] disableServo(byte channel)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[10];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1; 		packet[3] = 0;
+		
+		packet[4] = TOGGLE_DC_MOTORS;         //DID
+		packet[5] = 2;                        //LEN
+		packet[6] = 0;                        //0 = Disable
+		packet[7] = channel;                  //6-11 = SERVO
+		packet[7] = crc(packet);              //Checksum
+		
+		packet[8] = ETX0;	packet[9] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1538,10 +1793,24 @@ public class PMS5005
      * 
      * @see servoNonTimeCtrl
      */
-	public static byte[] servoTimeCtrl(short channel, short cmdValue, short timePeriod)
+	public static byte[] servoTimeCtrl(byte channel, short cmdValue, short time)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[15];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1;		packet[3] = 0;
+		
+		packet[4]  = SERVO_CTRL;                        //DID
+		packet[5]  = 6;                                 //LEN
+		packet[6]  = channel;                           //channel
+		packet[7]  = (byte)(cmdValue & 0xff);           //command value low 8 bit
+        packet[8]  = (byte)((cmdValue >>> 8) & 0xff);   //high 8 bit
+        packet[9]  = 6;                                 //flag
+        packet[10] = (byte)(time & 0xff);               //time low 8 bit
+        packet[11] = (byte)((time >>> 8) & 0xff);       //high 8 bit    
+        packet[12] = crc(packet);                       //Checksum
+        
+        packet[13] = ETX0;	packet[14] = ETX1;
+        return packet;
 	}
 	
 	/**
@@ -1556,10 +1825,22 @@ public class PMS5005
      * 
      * @see servoTimeCtrl
      */
-	public static byte[] servoNonTimeCtrl(short channel, short cmdValue)
+	public static byte[] servoNonTimeCtrl(byte channel, short cmdValue)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[13];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1;		packet[3] = 0;
+		
+		packet[4]  = SERVO_CTRL;                        //DID
+		packet[5]  = 4;                                 //LEN
+		packet[6]  = channel;                           //channel
+		packet[7]  = (byte)(cmdValue & 0xff);           //command value low 8 bit
+        packet[8]  = (byte)((cmdValue >>> 8) & 0xff);   //high 8 bit
+        packet[9]  = 6;                                 //flag
+        packet[10] = crc(packet);                       //Checksum
+        
+        packet[11] = ETX0;	packet[12] = ETX1;
+        return packet;
 	}
 	
 	/**
@@ -1584,35 +1865,32 @@ public class PMS5005
      * 
      * @see servoTimeCtrl
      */
-	public static byte[] servoTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
+	public static byte[] servoTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 	{
-		byte[] cmd = new byte[23];
+		byte[] packet = new byte[23];
+		packet[0] = STX0;	packet[1] = STX1;
+		packet[2] = 1; 	packet[3] = 0;
 		
-		cmd[0] = STX0;	cmd[1] = STX1;
-		cmd[2] = 1; 	cmd[3] = 0;
+		packet[4]  = ALL_SERVO_CTRL;                        //DID
+		packet[5]  = 14;                                    //LEN
+		packet[6]  = (byte) (pos1 & 0xff);				    //channel 1
+		packet[7]  = (byte) ((pos1 >>> 8) & 0xff);			
+		packet[8]  = (byte) (pos2 & 0xff);					//channel 2
+		packet[9]  = (byte) ((pos2 >>> 8) & 0xff);		
+		packet[10] = (byte) (pos3 & 0xff);					//channel 3
+		packet[11] = (byte) ((pos3 >>> 8) & 0xff);
+		packet[12] = (byte) (pos4 & 0xff);					//channel 4
+		packet[13] = (byte) ((pos4 >>> 8) & 0xff);
+		packet[14] = (byte) (pos5 & 0xff);					//channel 5
+		packet[15] = (byte) ((pos5 >>> 8) & 0xff);
+		packet[16] = (byte) (pos6 & 0xff);					//channel 6
+		packet[17] = (byte) ((pos6 >>> 8) & 0xff);
+		packet[18] = (byte) (time & 0xff);					//time
+		packet[19] = (byte) ((time >>> 8) & 0xff);
+		packet[20] = crc(packet);							//Checksum
 		
-		cmd[4] = ALL_SERVO_CTRL;
-		cmd[5] = 14; // len
-		cmd[6] = (byte) (pos1 & 0xff);
-		cmd[7] = (byte) ((pos1 >>> 8) & 0xff);
-		cmd[8] = (byte) (pos2 & 0xff);
-		cmd[9] = (byte) ((pos2 >>> 8) & 0xff);
-
-		cmd[10] = (byte) (pos3 & 0xff);
-		cmd[11] = (byte) ((pos3 >>> 8) & 0xff);
-		cmd[12] = (byte) (pos4 & 0xff);
-		cmd[13] = (byte) ((pos4 >>> 8) & 0xff);
-		cmd[14] = (byte) (pos5 & 0xff);
-		cmd[15] = (byte) ((pos5 >>> 8) & 0xff);
-		cmd[16] = (byte) (pos6 & 0xff);
-		cmd[17] = (byte) ((pos6 >>> 8) & 0xff);
-		cmd[18] = (byte) (timePeriod & 0xff);
-		cmd[19] = (byte) ((timePeriod >>> 8) & 0xff);
-		cmd[20] = crc(cmd);
-		
-		cmd[21] = ETX0;	cmd[22] = ETX1;
-		
-		return cmd;
+		packet[21] = ETX0;	packet[22] = ETX1;
+		return packet;
 	}
 	
 	/**
@@ -1638,8 +1916,28 @@ public class PMS5005
      */
 	public static byte[] servoNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
-		return null;
-		// TODO Auto-generated method stub
+		  byte[] packet = new byte[21];
+		  packet[0] = STX0;	  packet[1] = STX1;
+		  packet[2] = 1;	  packet[3] = 0;
+		  
+		  packet[4]  = ALL_SERVO_CTRL;                //DID
+		  packet[5]  = 12;                            //LEN
+		  packet[6]  = (byte)(pos1 & 0xff);           //motor 1
+		  packet[7]  = (byte)((pos1 >>> 8) & 0xff);             
+		  packet[8]  = (byte)(pos2 & 0xff);           //motor 2
+		  packet[9]  = (byte)((pos2 >>> 8) & 0xff);
+		  packet[10] = (byte)(pos3 & 0xff);           //motor 3
+		  packet[11] = (byte)((pos3 >>> 8) & 0xff);
+		  packet[12] = (byte)(pos4 & 0xff);           //motor 4
+		  packet[13] = (byte)((pos4 >>> 8) & 0xff);
+		  packet[14] = (byte)(pos5 & 0xff);           //motor 5
+		  packet[15] = (byte)((pos5 >>> 8) & 0xff);           
+		  packet[16] = (byte)(pos6 & 0xff);           //motor 6
+		  packet[17] = (byte)((pos6 >>> 8) & 0xff);            
+		  packet[18] = crc(packet);                   //Checksum
+		  
+		  packet[19] = ETX0;  packet[20] = ETX1;
+		  return packet;
 	}
 	
 	/**
