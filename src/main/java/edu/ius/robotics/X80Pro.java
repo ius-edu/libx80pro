@@ -3,8 +3,8 @@ package edu.ius.robotics;
 
 import com.drrobot.*;
 
-public class X80Pro implements IX80{
-
+public class X80Pro implements IX80
+{
     /* The structure for a packet to the PMS5005 is the following:
      * STX0 = 94 (always)
      * STX1 = 2 (always)
@@ -60,7 +60,7 @@ public class X80Pro implements IX80{
     public static final byte KiID = 3; // integral id
     
     public static final int NONCTRLCMD = 0xffff;      // no ctrl command
-    public static final int NO_CONTROL = 0x8000;
+    public static final int NO_CTRL = 0x8000;
 
     RobotSocket socket;
 

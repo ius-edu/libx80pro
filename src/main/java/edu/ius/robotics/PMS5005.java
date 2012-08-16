@@ -75,6 +75,8 @@ public class PMS5005
 	public static final int ENCODER_DIRECTION_OFFSET = 32;
 	public static final int MOTOR_SPEED_OFFSET = 26;
 	public static final int CUSTOM_AD_OFFSET = 0;
+	public static final int TEMPERATURE_AD_OFFSET = 22;
+	public static final int OVERHEAT_SENSOR_OFFSET = 18;
 	
     /**
      * Calculates a valid crc value to be used in order to check the integrity 
@@ -684,10 +686,10 @@ public class PMS5005
      * from the following equation: Temperature = 100 - (ival - 980)/11.6 
      * where Temperature is in degrees Celsius.
      */
-	public static short getSensorOverheat(short channel)
+	public static short getSensorOverheat(short channel, int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		int offset = 2*channel + OVERHEAT_SENSOR_OFFSET;
+		return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
 	}
 	
     /**
@@ -697,10 +699,9 @@ public class PMS5005
      * @return Temperature = (ival - 1256) / 34.8, where Temperature is in 
      * degrees Celsius.
      */
-	public static short getSensorTemperature()
+	public static short getSensorTemperature(int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return (short) (((standardSensorAry[TEMPERATURE_AD_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TEMPERATURE_AD_OFFSET] & 0xff));
 	}
 	
     /**
