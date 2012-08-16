@@ -634,6 +634,8 @@ interface IX80
      */
     void setDcMotorPositionControlPid(int channel, int Kp, int Kd, int Ki_x100);
 
+    void setDcMotorVelocityControlPID(byte channel, int Kp, int Kd, int Ki);
+    
     /**
      * This filtering feature is still under development. All data will be 
      * treated as raw data.
