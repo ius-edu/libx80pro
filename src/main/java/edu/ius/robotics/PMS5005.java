@@ -68,8 +68,8 @@ public class PMS5005
 	public static final int ULTRASONIC_OFFSET = 0;
 	public static final int ENCODER_PULSE_OFFSET = 24; 
 	public static final int ENCODER_SPEED_OFFSET = 32;
-	public static final int STANARD_IR_RANGE_OFFSET = 24;
-	public static final int CUSTOM_IR_RANGE_OFFSET = ;
+	public static final int STANDARD_IR_RANGE_OFFSET = 24;
+	public static final int CUSTOM_IR_RANGE_OFFSET = 4; // CustomAD3
 	public static final int HUMAN_ALARM_OFFSET = 6;
 	public static final int HUMAN_MOTION_OFFSET = 8;
 	public static final int TILTING_X_OFFSET = 14;
@@ -80,6 +80,11 @@ public class PMS5005
 	public static final int TEMPERATURE_AD_OFFSET = 22;
 	public static final int OVERHEAT_SENSOR_OFFSET = 18;
 	public static final int INFRARED_COMMAND_OFFSET = 26;
+	public static final int BATTERY_SENSOR_OFFSET = 30;
+	public static final int REFERENCE_VOLTAGE_OFFSET = 36;
+	public static final int POTENTIOMETER_POWER_OFFSET = 38;
+	public static final int POTENTIOMETER_SENSOR_OFFSET = 0;
+	public static final int MOTOR_CURRENT_SENSOR_OFFSET = 12;
 	
     /**
      * Calculates a valid crc value to be used in order to check the integrity 
@@ -574,11 +579,11 @@ public class PMS5005
 		
 		if (0 <= channel && channel < 1)
 		{
-			result = (short) (((standardSensorAry[STANARD_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[IR_RANGE_OFFSET] & 0xff));
+			result = (short) (((standardSensorAry[STANDARD_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[STANDARD_IR_RANGE_OFFSET] & 0xff));
 		}
 		else
 		{
-			result = (short) (((customSensorAry[CUSTOM_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[IR_RANGE_OFFSET] & 0xff));
+			result = (short) (((customSensorAry[2*(channel-1) + CUSTOM_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[2*(channel-1) + CUSTOM_IR_RANGE_OFFSET] & 0xff));
 		}
 		
 		return result;
@@ -783,10 +788,9 @@ public class PMS5005
      * 2) Power supply voltage of DC motors = 24v*(ival/4095)
      * 3) Power supply voltage of servo motors = 9v*(ival/4095)
      */
-	public static short getSensorBatteryAd(short channel)
+	public static short getSensorBatteryAd(short channel, int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return (short) (((standardSensorAry[2*channel + BATTERY_SENSOR_OFFSET + 1] & 0xff) << 8 | standardSensorAry[2*channel + BATTERY_SENSOR_OFFSET] & 0xff));
 	}
 	
     /**
@@ -798,10 +802,9 @@ public class PMS5005
      * The following equation can be used to calculate the actual voltage 
      * values: Voltage = 6v*(ival/4095)
      */
-	public static short getSensorRefVoltage()
+	public static short getSensorRefVoltage(int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return (short) (((standardSensorAry[REFERENCE_VOLTAGE_OFFSET + 1] & 0xff) << 8 | standardSensorAry[REFERENCE_VOLTAGE_OFFSET] & 0xff));
 	}
 	
     /**
@@ -813,10 +816,9 @@ public class PMS5005
      * The following equation can be used to calculate the actual voltage 
      * values: Voltage = 6v*(ival/4095)
      */
-	public static short getSensorPotVoltage()
+	public static short getSensorPotVoltage(int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return (short) (((standardSensorAry[POTENTIOMETER_POWER_OFFSET + 1] & 0xff) << 8 | standardSensorAry[POTENTIOMETER_POWER_OFFSET] & 0xff));
 	}
 	
     /**
@@ -849,10 +851,9 @@ public class PMS5005
      *
      * @see setDcMotorSensorUsage
      */
-	public static short getSensorPot(short channel)
+	public static short getSensorPot(short channel, int[] motorSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return (short) (((motorSensorAry[2*channel + POTENTIOMETER_SENSOR_OFFSET] + 1) << 8 | motorSensorAry[2*channel + POTENTIOMETER_SENSOR_OFFSET]));
 	}
 	
     /**
@@ -865,10 +866,9 @@ public class PMS5005
      * current value can be calculated with the following formula: 
      * Motor Current (amperes) = ival/728 ( = ival*3*375/200/4095)
      */
-	public static short getMotorCurrent(short channel)
+	public static short getMotorCurrent(short channel, int[] motorSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return (short) (((motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET + 1]) << 8 | motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET]));
 	}
 	
     /**
@@ -1171,7 +1171,6 @@ public class PMS5005
      */
 	public static byte[] setDcMotorSensorFilter(short channel, short filterMethod)
 	{
-		// TODO Auto-generated method stub
 		byte[] packet = new byte[6];
 		packet[0]  = STX0;	packet[1]  = STX1;
 		packet[2]  = 1;		packet[3]  = 0;
