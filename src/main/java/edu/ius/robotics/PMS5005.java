@@ -19,6 +19,10 @@ public class PMS5005
 	 * 94 (always) ETX1 = 13 (always)
 	 */
 	
+	public static final int HEADER_LENGTH = 7;
+	public static final int PAYLOAD_OFFSET = 6;
+	public static final int DID_OFFSET = 4;
+	
 	/* Start transmission, End transmission */
 	public static final byte STX0 = 94;
     public static final byte STX1 = 2;
@@ -32,12 +36,12 @@ public class PMS5005
 	public static final byte ALL_PWM_CTRL = 6;
 	public static final byte PARAM_SET = 7;
 	
-	//Subcommands under PARAM_SET
+	/* SubCommands under PARAM_SET */
 	public static final byte DC_POSITION_PID = 7;     // positon PID Control
 	public static final byte DC_VELOCITY_PID = 8;     // velocity PID Control
 	public static final byte DC_SENSOR_USAGE = 13;
 	public static final byte DC_CTRL_MODE = 14;
-		
+	
 	public static final byte POWER_CTRL = 22;
 	public static final byte LCD_CTRL = 23;
 	public static final byte VELOCITY_CTRL = 26;
@@ -65,26 +69,27 @@ public class PMS5005
 	public static final short NON_CTRL_CMD = (short) 0xffff; // no ctrl command
 	public static final short NO_CTRL = (short) 0x8000;
 	
-	public static final int ULTRASONIC_OFFSET = 0;
-	public static final int ENCODER_PULSE_OFFSET = 24; 
-	public static final int ENCODER_SPEED_OFFSET = 32;
-	public static final int STANDARD_IR_RANGE_OFFSET = 24;
-	public static final int CUSTOM_IR_RANGE_OFFSET = 4; // CustomAD3
-	public static final int HUMAN_ALARM_OFFSET = 6;
-	public static final int HUMAN_MOTION_OFFSET = 8;
-	public static final int TILTING_X_OFFSET = 14;
-	public static final int TILTING_Y_OFFSET = 16;
-	public static final int ENCODER_DIRECTION_OFFSET = 32;
-	public static final int MOTOR_SPEED_OFFSET = 26;
-	public static final int CUSTOM_AD_OFFSET = 0;
-	public static final int TEMPERATURE_AD_OFFSET = 22;
-	public static final int OVERHEAT_SENSOR_OFFSET = 18;
-	public static final int INFRARED_COMMAND_OFFSET = 26;
-	public static final int BATTERY_SENSOR_OFFSET = 30;
-	public static final int REFERENCE_VOLTAGE_OFFSET = 36;
-	public static final int POTENTIOMETER_POWER_OFFSET = 38;
-	public static final int POTENTIOMETER_SENSOR_OFFSET = 0;
-	public static final int MOTOR_CURRENT_SENSOR_OFFSET = 12;
+	/* Sensor Data Offsets */
+	public static final int ULTRASONIC_OFFSET = 0 + HEADER_LENGTH;
+	public static final int ENCODER_PULSE_OFFSET = 24 + HEADER_LENGTH; 
+	public static final int ENCODER_SPEED_OFFSET = 32 + HEADER_LENGTH;
+	public static final int STANDARD_IR_RANGE_OFFSET = 24 + HEADER_LENGTH;
+	public static final int CUSTOM_IR_RANGE_OFFSET = 4 + HEADER_LENGTH; // CustomAD3
+	public static final int HUMAN_ALARM_OFFSET = 6 + HEADER_LENGTH;
+	public static final int HUMAN_MOTION_OFFSET = 8 + HEADER_LENGTH;
+	public static final int TILTING_X_OFFSET = 14 + HEADER_LENGTH;
+	public static final int TILTING_Y_OFFSET = 16 + HEADER_LENGTH;
+	public static final int ENCODER_DIRECTION_OFFSET = 32 + HEADER_LENGTH;
+	public static final int MOTOR_SPEED_OFFSET = 26 + HEADER_LENGTH;
+	public static final int CUSTOM_AD_OFFSET = 0 + HEADER_LENGTH;
+	public static final int TEMPERATURE_AD_OFFSET = 22 + HEADER_LENGTH;
+	public static final int OVERHEAT_SENSOR_OFFSET = 18 + HEADER_LENGTH;
+	public static final int INFRARED_COMMAND_OFFSET = 26 + HEADER_LENGTH;
+	public static final int BATTERY_SENSOR_OFFSET = 30 + HEADER_LENGTH;
+	public static final int REFERENCE_VOLTAGE_OFFSET = 36 + HEADER_LENGTH;
+	public static final int POTENTIOMETER_POWER_OFFSET = 38 + HEADER_LENGTH;
+	public static final int POTENTIOMETER_SENSOR_OFFSET = 0 + HEADER_LENGTH;
+	public static final int MOTOR_CURRENT_SENSOR_OFFSET = 12 + HEADER_LENGTH;
 	
     /**
      * Calculates a valid crc value to be used in order to check the integrity 
@@ -868,7 +873,7 @@ public class PMS5005
      */
 	public static short getMotorCurrent(short channel, int[] motorSensorAry)
 	{
-		return (short) (((motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET + 1]) << 8 | motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET]));
+		return (short) ((((motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET + 1]) << 8 | motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET])) / 728.0);
 	}
 	
     /**

@@ -53,6 +53,9 @@ public class X80 implements IX80, Runnable
 	private int[] standardSensorAry;
 	private int[] customSensorAry;
 	
+	public final int HEADER_SIZE = 7;
+	public final int PAYLOAD_OFFSET = 6;
+	public final int DID_OFFSET = 4;
 	
 	/** wheel distance */
     final double WheelDis = 0.265;
@@ -216,7 +219,7 @@ public class X80 implements IX80, Runnable
 		}
 	}
 	
-	private double Ad2Dis(int AdValue)
+	public static double Ad2Dis(int AdValue)
 	{
 		double distance = 0;
 		
@@ -307,57 +310,61 @@ public class X80 implements IX80, Runnable
 	{
 		int z = sensorDataAry.length;
 		
-		if (sensorDataAry[0] == 94 && sensorDataAry[1] == 2 && sensorDataAry[z - 2] == 94 && sensorDataAry[z - 1] == 13)
+		if (sensorDataAry[0] == PMS5005.STX0 && sensorDataAry[1] == PMS5005.STX1 && 
+			sensorDataAry[z - 2] == PMS5005.ETX0 && sensorDataAry[z - 1] == PMS5005.ETX1)
 		{
 			// here is a whole package (all sensor data)
 			// for first motor sensor data, please refer to the protocol
 			// documentation
-			if (sensorDataAry[4] == 123)
+			if (sensorDataAry[DID_OFFSET] == PMS5005.GET_MOTOR_SENSOR_DATA)
 			{
-				encoderPos[0] = sensorDataAry[5 + 25] + (sensorDataAry[5 + 26]) * 256;
-				encoderSpeed[0] = sensorDataAry[5 + 27] + (sensorDataAry[5 + 28]) * 256;
-				encoderPos[1] = sensorDataAry[5 + 29] + (sensorDataAry[5 + 30]) * 256;
-				encoderSpeed[1] = sensorDataAry[5 + 31] + (sensorDataAry[5 + 32]) * 256;
+				motorSensorAry = sensorDataAry;
+				//encoderPos[0] = sensorDataAry[5 + 25] + (sensorDataAry[5 + 26]) * 256;
+				//encoderSpeed[0] = sensorDataAry[5 + 27] + (sensorDataAry[5 + 28]) * 256;
+				//encoderPos[1] = sensorDataAry[5 + 29] + (sensorDataAry[5 + 30]) * 256;
+				//encoderSpeed[1] = sensorDataAry[5 + 31] + (sensorDataAry[5 + 32]) * 256;
 				
-				motorCurrent[0] = (double) (sensorDataAry[5 + 13] + (sensorDataAry[5 + 14]) * 256) / 728.0;
-				motorCurrent[1] = (double) (sensorDataAry[5 + 15] + (sensorDataAry[5 + 16]) * 256) / 728.0;
+				//motorCurrent[0] = (double) (sensorDataAry[5 + 13] + (sensorDataAry[5 + 14]) * 256) / 728.0;
+				//motorCurrent[1] = (double) (sensorDataAry[5 + 15] + (sensorDataAry[5 + 16]) * 256) / 728.0;
 			}
-			else if (sensorDataAry[4] == 124)
+			else if (sensorDataAry[DID_OFFSET] == PMS5005.GET_CUSTOM_SENSOR_DATA)
 			{
 				// custom sensor data
-				for (int i = 0; i < 8; i++)
-				{
-					customAd[i] = sensorDataAry[6 + 2 * i] + sensorDataAry[6 + 2 * i + 1] * 256;
-				}
+				customSensorAry = sensorDataAry;
+				//for (int i = 0; i < 8; i++)
+				//{
+				//	customAd[i] = sensorDataAry[6 + 2 * i] + sensorDataAry[6 + 2 * i + 1] * 256;
+				//}
 				
-				customIo = sensorDataAry[5 + 17];
+				//customIo = sensorDataAry[5 + 17];
 			}
-			else if (sensorDataAry[4] == 125)
+			else if (sensorDataAry[DID_OFFSET] == PMS5005.GET_STANDARD_SENSOR_DATA)
 			{
 				// standard sensors
-				for (int i = 0; i < nStdSensors; ++i)
-				{
-					usDis[i] = (double) (sensorDataAry[nStdSensors + i]) / 100.0;
-				}
+				standardSensorAry = sensorDataAry;
+				//for (int i = 0; i < nStdSensors; ++i)
+				//{
+				//	usDis[i] = (double) (sensorDataAry[nStdSensors + i]) / 100.0;
+				//}
 				
-				humanAlarm[0] = sensorDataAry[5 + 7] + sensorDataAry[5 + 8] * 256;
-				humanMotion[0] = sensorDataAry[5 + 9] + sensorDataAry[5 + 10] * 256;
-				humanAlarm[1] = sensorDataAry[5 + 11] + sensorDataAry[5 + 12] * 256;
-				humanMotion[1] = sensorDataAry[5 + 13] + sensorDataAry[5 + 14] * 256;
-				irRange = (sensorDataAry[5 + 25] + sensorDataAry[5 + 26] * 256);
-				boardVol = (double) (sensorDataAry[5 + 31] + sensorDataAry[5 + 32] * 256) / 4095.0 * 9.0;
-				dcMotorVol = (double) (sensorDataAry[5 + 33] + sensorDataAry[5 + 34] * 256) / 4095.0 * 24.0;
+				//humanAlarm[0] = sensorDataAry[5 + 7] + sensorDataAry[5 + 8] * 256;
+				//humanMotion[0] = sensorDataAry[5 + 9] + sensorDataAry[5 + 10] * 256;
+				//humanAlarm[1] = sensorDataAry[5 + 11] + sensorDataAry[5 + 12] * 256;
+				//humanMotion[1] = sensorDataAry[5 + 13] + sensorDataAry[5 + 14] * 256;
+				//irRange = (sensorDataAry[5 + 25] + sensorDataAry[5 + 26] * 256);
+				//boardVol = (double) (sensorDataAry[5 + 31] + sensorDataAry[5 + 32] * 256) / 4095.0 * 9.0;
+				//dcMotorVol = (double) (sensorDataAry[5 + 33] + sensorDataAry[5 + 34] * 256) / 4095.0 * 24.0;
 			}
 		}
 		
 		// the first ir sensor
-		irDis[0] = Ad2Dis(irRange);
+		//irDis[0] = Ad2Dis(irRange);
 		
 		// the rest of the ir sensors
-		for (int i = 0; i < nIrSensors; i++)
-		{
-			irDis[i + 1] = Ad2Dis(customAd[i + 1]);
-		}
+		//for (int i = 0; i < nIrSensors; i++)
+		//{
+		//	irDis[i + 1] = Ad2Dis(customAd[i + 1]);
+		//}
 	}
 	
 	public void motorSensorRequest(int packetNumber)
