@@ -958,7 +958,7 @@ public class PMS5005
      *
      * @param channel 0, 1, 2, 3, 4, 5, 6, or 7 for channel #1 through #8.
      */
-	public static short getCustomDIn(short channel)
+	public static short getCustomDIn(byte channel, int[] customSensorAry)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -971,7 +971,7 @@ public class PMS5005
      * corresponding outputs of the 8 channels.  The MSB of the lower byte 
      * represents channel #8 and LSB of the lower byte represents channel #1.
      */
-	public static byte[] setCustomDOut(short ival)
+	public static byte[] setCustomDOut(byte ival)
 	{
 		return null;
 		// TODO Auto-generated method stub

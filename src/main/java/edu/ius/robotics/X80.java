@@ -49,6 +49,11 @@ public class X80 implements IX80, Runnable
 	public double boardVol;
 	public double dcMotorVol;
 	
+	private int[] motorSensorAry;
+	private int[] standardSensorAry;
+	private int[] customSensorAry;
+	
+	
 	/** wheel distance */
     final double WheelDis = 0.265;
     
@@ -455,33 +460,28 @@ public class X80 implements IX80, Runnable
 		return PMS5005.getSensorHumanMotion((byte)channel, standardSensorAry);
 	}
 
-	public int getSensorTiltingX(int channel, standardSensorAry)
+	public int getSensorTiltingX(int channel)
 	{
-		// TODO examine this farther
-		return PMS5005.getSensorTiltingX((byte)channel);
+		return PMS5005.getSensorTiltingX(standardSensorAry);
 	}
 
-	public int getSensorTiltingY(int channel, standardSensorAry)
+	public int getSensorTiltingY(int channel)
 	{
-		// TODO examine this farther
-		return PMS5005.getSensorTiltingY((byte)channel);
+		return PMS5005.getSensorTiltingY(standardSensorAry);
 	}
 
-	public int getSensorOverheat(int channel, standardSensorAry)
+	public int getSensorOverheat(int channel)
 	{
-		// TODO examine this farther
-		return PMS5005.getSensorOverheat((byte)channel);
+		return PMS5005.getSensorOverheat((byte)channel, standardSensorAry);
 	}
 
 	public int getSensorTemperature()
 	{
-		// TODO examine this farther
 		return PMS5005.getSensorTemperature(standardSensorAry);
 	}
 
 	public int getSensorIrCode(int index)
 	{
-		// TODO examine this farther
 		return PMS5005.getSensorIrCode((byte)index, standardSensorAry);
 	}
 
@@ -492,67 +492,57 @@ public class X80 implements IX80, Runnable
 
 	public int getSensorBatteryAd(int channel)
 	{
-		// TODO examine this farther
 		return PMS5005.getSensorBatteryAd((short)channel, standardSensorAry);
 	}
 
 	public int getSensorRefVoltage()
 	{
-		// TODO examine this farther
-		return PMS5005.getSensorRefVoltage(stanardSensorAry);
+		return PMS5005.getSensorRefVoltage(standardSensorAry);
 	}
 
 	public int getSensorPotVoltage()
 	{
-		// TODO examine this farther
-		return PMS5005.getSensorPotVoltage(stanardSensorAry);
+		return PMS5005.getSensorPotVoltage(standardSensorAry);
 	}
 
 	public int getSensorPot(int channel)
 	{
-		// TODO examine this farther
 		return PMS5005.getSensorPot((byte)channel, motorSensorAry);
 	}
 
 	public int getMotorCurrent(int channel)
 	{
-		// TODO examine this farther
 		return PMS5005.getMotorCurrent((byte)channel, motorSensorAry);
 	}
 
 	public int getEncoderDirection(int channel)
 	{
-		// TODO examine this farther
 		return PMS5005.getEncoderDirection((byte)channel, motorSensorAry);
 	}
 
 	public int getEncoderPulse(int channel)
 	{
-		// TODO examine this farther
 		return PMS5005.getEncoderPulse((byte)channel, motorSensorAry);
 	}
 
 	public int getEncoderSpeed(int channel)
 	{
-		// TODO examine this farther
 		return PMS5005.getEncoderSpeed((byte)channel, motorSensorAry);
 	}
 
 	public int getCustomAd(int channel)
 	{
-		// TODO examine this farther
 		return PMS5005.getCustomAd((byte)channel, customSensorAry);
 	}
 
 	public int getCustomDIn(int channel)
 	{
-		// TODO examine this farther
-		return PMS5005.getCustomDIn((short)channel, customSensorAry);
+		return PMS5005.getCustomDIn((byte)channel, customSensorAry);
 	}
 
 	public void setCustomDOut(int ival)
 	{
-		sendCommand(PMS5005.setCustomDOut((short)ival), customSensorAry);
+		sendCommand(PMS5005.setCustomDOut((byte)ival));
 	}
 
 	public void setMotorPolarity(int channel, int polarity)
