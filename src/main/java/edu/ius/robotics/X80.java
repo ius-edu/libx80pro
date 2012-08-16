@@ -437,56 +437,52 @@ public class X80 implements IX80, Runnable
 
 	public int getSensorSonar(int channel)
 	{
-		// TODO examine this farther
-		return PMS5005.getSensorSonar((short)channel);
+		return PMS5005.getSensorSonar((byte)channel, standardSensorAry);
 	}
 
 	public int getSensorIrRange(int channel)
 	{
-		// TODO examine this farther
-		return PMS5005.getSensorIrRange((short)channel);
+		return PMS5005.getSensorIrRange((byte)channel, standardSensorAry, customSensorAry);
 	}
 
 	public int getSensorHumanAlarm(int channel)
 	{
-		// TODO examine this farther
-		return PMS5005.getSensorHumanAlarm((short)channel);
+		return PMS5005.getSensorHumanAlarm((byte)channel, standardSensorAry);
 	}
 
 	public int getSensorHumanMotion(int channel)
 	{
-		// TODO examine this farther
-		return PMS5005.getSensorHumanMotion((short)channel);
+		return PMS5005.getSensorHumanMotion((byte)channel, standardSensorAry);
 	}
 
-	public int getSensorTiltingX(int channel)
+	public int getSensorTiltingX(int channel, standardSensorAry)
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorTiltingX((short)channel);
+		return PMS5005.getSensorTiltingX((byte)channel);
 	}
 
-	public int getSensorTiltingY(int channel)
+	public int getSensorTiltingY(int channel, standardSensorAry)
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorTiltingY((short)channel);
+		return PMS5005.getSensorTiltingY((byte)channel);
 	}
 
-	public int getSensorOverheat(int channel)
+	public int getSensorOverheat(int channel, standardSensorAry)
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorOverheat((short)channel);
+		return PMS5005.getSensorOverheat((byte)channel);
 	}
 
 	public int getSensorTemperature()
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorTemperature();
+		return PMS5005.getSensorTemperature(standardSensorAry);
 	}
 
 	public int getSensorIrCode(int index)
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorIrCode((short)index);
+		return PMS5005.getSensorIrCode((byte)index, standardSensorAry);
 	}
 
 	public void setInfraredControlOutput(int lowWord, int highWord)
@@ -497,88 +493,88 @@ public class X80 implements IX80, Runnable
 	public int getSensorBatteryAd(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorBatteryAd((short)channel);
+		return PMS5005.getSensorBatteryAd((short)channel, standardSensorAry);
 	}
 
 	public int getSensorRefVoltage()
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorRefVoltage();
+		return PMS5005.getSensorRefVoltage(stanardSensorAry);
 	}
 
 	public int getSensorPotVoltage()
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorPotVoltage();
+		return PMS5005.getSensorPotVoltage(stanardSensorAry);
 	}
 
 	public int getSensorPot(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getSensorPot((short)channel);
+		return PMS5005.getSensorPot((byte)channel, motorSensorAry);
 	}
 
 	public int getMotorCurrent(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getMotorCurrent((short)channel);
+		return PMS5005.getMotorCurrent((byte)channel, motorSensorAry);
 	}
 
 	public int getEncoderDirection(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getEncoderDirection((short)channel);
+		return PMS5005.getEncoderDirection((byte)channel, motorSensorAry);
 	}
 
 	public int getEncoderPulse(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getEncoderPulse((short)channel);
+		return PMS5005.getEncoderPulse((byte)channel, motorSensorAry);
 	}
 
 	public int getEncoderSpeed(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getEncoderSpeed((short)channel);
+		return PMS5005.getEncoderSpeed((byte)channel, motorSensorAry);
 	}
 
 	public int getCustomAd(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getCustomAd((short)channel);
+		return PMS5005.getCustomAd((byte)channel, customSensorAry);
 	}
 
 	public int getCustomDIn(int channel)
 	{
 		// TODO examine this farther
-		return PMS5005.getCustomDIn((short)channel);
+		return PMS5005.getCustomDIn((short)channel, customSensorAry);
 	}
 
 	public void setCustomDOut(int ival)
 	{
-		sendCommand(PMS5005.setCustomDOut((short)ival));
+		sendCommand(PMS5005.setCustomDOut((short)ival), customSensorAry);
 	}
 
 	public void setMotorPolarity(int channel, int polarity)
 	{
-		sendCommand(PMS5005.setMotorPolarity((short)channel, (short)polarity));
+		sendCommand(PMS5005.setMotorPolarity((byte)channel, (byte)polarity));
 	}
 
 	@SuppressWarnings("deprecation")
 	public void enableDcMotor(int channel)
 	{
-		sendCommand(PMS5005.enableDcMotor((short)channel));
+		sendCommand(PMS5005.enableDcMotor((byte)channel));
 	}
 
 	@SuppressWarnings("deprecation")
 	public void disableDcMotor(int channel)
 	{
-		sendCommand(PMS5005.disableDcMotor((short)channel));
+		sendCommand(PMS5005.disableDcMotor((byte)channel));
 	}
 
 	public void resumeDcMotor(int channel)
 	{
-		sendCommand(PMS5005.resumeDcMotor((short)channel));
+		sendCommand(PMS5005.resumeDcMotor((byte)channel));
 	}
 
 	public void suspendDcMotor(int channel)
@@ -588,7 +584,7 @@ public class X80 implements IX80, Runnable
 
 	public void setDcMotorPositionControlPid(int channel, int Kp, int Kd, int Ki_x100)
 	{
-		sendCommand(PMS5005.setDcMotorPositionControlPid((short)channel, (short)Kp, (short)Kd, (short)Ki_x100));
+		sendCommand(PMS5005.setDcMotorPositionControlPid((byte)channel, (short)Kp, (short)Kd, (short)Ki_x100));
 	}
 
 	public void setDcMotorSensorFilter(int channel, int filterMethod)
@@ -598,32 +594,32 @@ public class X80 implements IX80, Runnable
 
 	public void setDcMotorSensorUsage(int channel, int sensorType)
 	{
-		sendCommand(PMS5005.setDcMotorSensorUsage((short)channel, (short)sensorType));
+		sendCommand(PMS5005.setDcMotorSensorUsage((byte)channel, (byte)sensorType));
 	}
 
 	public void setDcMotorControlMode(int channel, int controlMode)
 	{
-		sendCommand(PMS5005.setDcMotorControlMode((short)channel, (short)controlMode));
+		sendCommand(PMS5005.setDcMotorControlMode((byte)channel, (byte)controlMode));
 	}
 
 	public void dcMotorPositionTimeCtrl(int channel, int cmdValue, int timePeriod)
 	{
-		sendCommand(PMS5005.dcMotorPositionTimeCtrl((short)channel, (short)cmdValue, (short)timePeriod));
+		sendCommand(PMS5005.dcMotorPositionTimeCtrl((byte)channel, (short)cmdValue, (short)timePeriod));
 	}
 
 	public void dcMotorPositionNonTimeCtrl(int channel, int cmdValue)
 	{
-		sendCommand(PMS5005.dcMotorPositionNonTimeCtrl((short)channel, (short)cmdValue));
+		sendCommand(PMS5005.dcMotorPositionNonTimeCtrl((byte)channel, (short)cmdValue));
 	}
 
 	public void dcMotorPwmTimeCtrl(int channel, int cmdValue, int timePeriod)
 	{
-		sendCommand(PMS5005.dcMotorPwmTimeCtrl((short)channel, (short)cmdValue, (short)timePeriod));
+		sendCommand(PMS5005.dcMotorPwmTimeCtrl((byte)channel, (short)cmdValue, (short)timePeriod));
 	}
 
 	public void dcMotorPwmNonTimeCtrl(int channel, int cmdValue)
 	{
-		sendCommand(PMS5005.dcMotorPwmNonTimeCtrl((short)channel, (short)cmdValue));
+		sendCommand(PMS5005.dcMotorPwmNonTimeCtrl((byte)channel, (short)cmdValue));
 	}
 
 	public void dcMotorPositionTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
@@ -658,22 +654,22 @@ public class X80 implements IX80, Runnable
 
 	public void enableServo(int channel)
 	{
-		sendCommand(PMS5005.enableServo((short)channel));
+		sendCommand(PMS5005.enableServo((byte)channel));
 	}
 
 	public void disableServo(int channel)
 	{
-		sendCommand(PMS5005.disableServo((short)channel));
+		sendCommand(PMS5005.disableServo((byte)channel));
 	}
 
 	public void servoTimeCtrl(int channel, int cmdValue, int timePeriod)
 	{
-		sendCommand(PMS5005.servoTimeCtrl((short)channel, (short)cmdValue, (short)timePeriod));
+		sendCommand(PMS5005.servoTimeCtrl((byte)channel, (short)cmdValue, (short)timePeriod));
 	}
 
 	public void servoNonTimeCtrl(int channel, int cmdValue)
 	{
-		sendCommand(PMS5005.servoNonTimeCtrl((short)channel, (short)cmdValue));
+		sendCommand(PMS5005.servoNonTimeCtrl((byte)channel, (short)cmdValue));
 	}
 
 	public void servoTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
@@ -689,5 +685,10 @@ public class X80 implements IX80, Runnable
 	public void lcdDisplayPMS(String bmpFileName)
 	{
 		sendCommand(PMS5005.lcdDisplayPMS(bmpFileName));
+	}
+
+	public void setDcMotorVelocityControlPID(byte channel, int Kp, int Kd, int Ki)
+	{
+		sendCommand(PMS5005.setDcMotorVelocityControlPID(channel, Kp, Kd, Ki));
 	}
 }

@@ -31,11 +31,12 @@ public class PMS5005
 	public static final byte PWM_CTRL = 5;
 	public static final byte ALL_PWM_CTRL = 6;
 	public static final byte PARAM_SET = 7;
-		//Subcommands under PARAM_SET
-		public static final byte DC_POSITION_PID = 7;     // positon PID Control
-		public static final byte DC_VELOCITY_PID = 8;     // velocity PID Control
-		public static final byte DC_SENSOR_USAGE = 13;
-		public static final byte DC_CTRL_MODE = 14;
+	
+	//Subcommands under PARAM_SET
+	public static final byte DC_POSITION_PID = 7;     // positon PID Control
+	public static final byte DC_VELOCITY_PID = 8;     // velocity PID Control
+	public static final byte DC_SENSOR_USAGE = 13;
+	public static final byte DC_CTRL_MODE = 14;
 		
 	public static final byte POWER_CTRL = 22;
 	public static final byte LCD_CTRL = 23;
@@ -53,8 +54,6 @@ public class PMS5005
 	public static final short SETUP_COM = 255;
 	/* End Data ID (DID) descriptor listing */
 	
-	
-
 	public static final byte PWM_CTRL_MODE = 0;
 	public static final byte POSITION_CTRL_MODE = 1;
 	public static final byte VELOCITY_CTRL_MODE = 2;
@@ -69,7 +68,8 @@ public class PMS5005
 	public static final int ULTRASONIC_OFFSET = 0;
 	public static final int ENCODER_PULSE_OFFSET = 24; 
 	public static final int ENCODER_SPEED_OFFSET = 32;
-	public static final int IR_RANGE_OFFSET = 24;
+	public static final int STANARD_IR_RANGE_OFFSET = 24;
+	public static final int CUSTOM_IR_RANGE_OFFSET = ;
 	public static final int HUMAN_ALARM_OFFSET = 6;
 	public static final int HUMAN_MOTION_OFFSET = 8;
 	public static final int TILTING_X_OFFSET = 14;
@@ -79,6 +79,7 @@ public class PMS5005
 	public static final int CUSTOM_AD_OFFSET = 0;
 	public static final int TEMPERATURE_AD_OFFSET = 22;
 	public static final int OVERHEAT_SENSOR_OFFSET = 18;
+	public static final int INFRARED_COMMAND_OFFSET = 26;
 	
     /**
      * Calculates a valid crc value to be used in order to check the integrity 
@@ -567,10 +568,20 @@ public class PMS5005
      * digital converter.  The output voltage of the sensor can be calculated 
      * from the following equation: sensorOutputVoltage = (ival)*3.0/4095(v)
      */
-	public static short getSensorIrRange(short channel, int[] standardSensorAry)
+	public static short getSensorIrRange(short channel, int[] standardSensorAry, int[] customSensorAry)
 	{
-		// TODO channel
-		return (short) (((standardSensorAry[IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[IR_RANGE_OFFSET] & 0xff));
+		short result = -1;
+		
+		if (0 <= channel && channel < 1)
+		{
+			result = (short) (((standardSensorAry[STANARD_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[IR_RANGE_OFFSET] & 0xff));
+		}
+		else
+		{
+			result = (short) (((customSensorAry[CUSTOM_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[IR_RANGE_OFFSET] & 0xff));
+		}
+		
+		return result;
 	}
 	
     /**
@@ -665,7 +676,7 @@ public class PMS5005
      */
 	public static short getSensorTiltingY(int[] standardSensorAry)
 	{
-		return (short) (((standardSensorAry[TILTING_X_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TILTING_X_OFFSET] & 0xff));
+		return (short) (((standardSensorAry[TILTING_Y_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TILTING_Y_OFFSET] & 0xff));
 	}
 	
     /**
@@ -718,10 +729,9 @@ public class PMS5005
      * Repeat Code: byte[3]
      * Where the repeat byte would be 255 if the button is pressed continuously
      */
-	public static short getSensorIrCode(short index)
+	public static short getSensorIrCode(short index, int[] standardSensorAry)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return (short) standardSensorAry[INFRARED_COMMAND_OFFSET + index];
 	}
 	
     /**
