@@ -1,6 +1,6 @@
 package edu.ius.robotics;
 
-public class PMB5010 implements IPMB5010
+public class PMB5010
 {
     /*
      * calcCRC method comes directly from PMB5010 Protocol documentation.
