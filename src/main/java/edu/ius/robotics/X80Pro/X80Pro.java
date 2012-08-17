@@ -1,16 +1,18 @@
-package edu.ius.robotics;
+package edu.ius.robotics.X80Pro;
 
 import java.io.*;
-import java.net.*;
+
+import edu.ius.robotics.RobotSocket;
+import edu.ius.robotics.boards.PMS5005;
 
 /**
  * 
  * @author Bo Wei modifications by Jesse Riddle
  */
-public class X80 implements IX80, Runnable
+public class X80Pro implements IX80Pro, Runnable
 {	
 	/** minimum time step in milliseconds */
-	public final int minTimeSlice = 50;
+	public final int MIN_TIME_MILLI = 50;
 	
 	public final int nStdSensors = 6;
 	public final int nMotors = 2;
@@ -19,14 +21,6 @@ public class X80 implements IX80, Runnable
 	public final int nUltrasonicSensors = 6;
 	public final int nHumanSensors = 2;
 	
-	private DatagramSocket socket;
-	private String robotIp;
-	private int robotPort;
-	private DatagramPacket rxPkt;
-	private DatagramPacket txPkt;
-	private InetAddress server;
-	private byte[] rxBuf;
-	private byte[] txBuf;
 	// private ByteArrayInputStream byteArrIn;
 	// private DataInputStream dataIn;
 	// private DataOutputStream dataOut;
@@ -66,46 +60,16 @@ public class X80 implements IX80, Runnable
     /** encoder one circle count */
     final int CircleCnt = 1200;
 	
-	/** Creates a new instance of X80 */
-	public X80(String robotIp, int robotPort)
+    private RobotSocket socket;
+    
+	/** Creates a new instance of X80Pro */
+	public X80Pro(String robotIp, int robotPort)
 	{
 		this.makeSensorData();
 		this.clearSensorData();
 		
-		if (this.connectRobot(robotIp, robotPort))
-		{
-			try
-			{
-				// socket connect
-				socket = new DatagramSocket();
-				socket.setSoTimeout(minTimeSlice);
-			}
-			catch (IOException ex)
-			{
-				ex.printStackTrace();
-				System.exit(3);
-				return;
-			}
-			
-			rxBuf = new byte[1024];
-			rxPkt = new DatagramPacket(rxBuf, rxBuf.length);
-			
-			txBuf = new byte[256];
-			txPkt = new DatagramPacket(txBuf, txBuf.length, server, robotPort);
-			
-			try
-			{
-				socket.send(txPkt);
-			}
-			catch (IOException ex)
-			{
-				ex.printStackTrace();
-			}
-		}
-		else
-		{
+		if (!socket.connectRobot(robotIp, robotPort, MIN_TIME_MILLI))
 			System.exit(3);
-		}
 	}
 	
 	private void makeSensorData()
@@ -176,47 +140,12 @@ public class X80 implements IX80, Runnable
 	
 	public void run()
 	{
-		try
-		{
-			socket.setSoTimeout(10);
-			socket.receive(rxPkt);
-		}
-		catch (IOException ex)
-		{
-			ex.printStackTrace();
-		}
-		
-		int z = rxPkt.getLength();
-		
-		if (0 < z)
-		{
-			// decode here
-			int[] sensorDataAry = new int[z];
-			
-			for (int i = 0; i < z; ++i)
-			{
-				sensorDataAry[i] = (int) (rxBuf[i] & 0xff);
-			}
-			
-			decodeSensorData(sensorDataAry);
-			rxPkt.setLength(rxBuf.length);
-		}
-		
+		socket.run();
 	}
 	
 	public void sendCommand(byte[] command)
 	{
-		System.arraycopy(command, 0, txBuf, 0, command.length);
-		txPkt = new DatagramPacket(txBuf, txBuf.length, server, robotPort);
-		
-		try
-		{
-			socket.send(txPkt);
-		}
-		catch (IOException ex)
-		{
-			ex.printStackTrace();
-		}
+		socket.send(command);
 	}
 	
 	public static double Ad2Dis(int AdValue)
@@ -246,64 +175,6 @@ public class X80 implements IX80, Runnable
 		}
 		
 		return distance;
-	}
-	
-	public String getRobotIp()
-	{
-		return robotIp;
-	}
-	
-	public int getRobotPort()
-	{
-		return robotPort;
-	}
-	
-	public void setRobotIp(String robotIp)
-	{
-		this.robotIp = robotIp;
-	}
-	
-	public void setRobotPort(int robotPort)
-	{
-		this.robotPort = robotPort;
-	}
-	
-	public boolean connectRobot()
-	{
-		boolean result;
-		
-		try
-		{
-			this.server = InetAddress.getByName(robotIp);
-			result = true;
-		}
-		catch (IOException ex)
-		{
-			ex.printStackTrace();
-			result = false;
-		}
-		
-		return result;
-	}
-	
-	public boolean connectRobot(String robotIp, int robotPort)
-	{
-		boolean result;
-		
-		try
-		{
-			this.server = InetAddress.getByName(robotIp);
-			this.setRobotIp(robotIp);
-			this.setRobotPort(robotPort);
-			result = true;
-		}
-		catch (IOException ex)
-		{
-			ex.printStackTrace();
-			result = false;
-		}
-		
-		return result;
 	}
 	
 	private void decodeSensorData(int[] sensorDataAry)
@@ -369,82 +240,82 @@ public class X80 implements IX80, Runnable
 	
 	public void motorSensorRequest(int packetNumber)
 	{
-		sendCommand(PMS5005.motorSensorRequest((short)packetNumber));
+		socket.send(PMS5005.motorSensorRequest((short)packetNumber));
 	}
 
 	public void standardSensorRequest(int packetNumber)
 	{
-		sendCommand(PMS5005.standardSensorRequest((short)packetNumber));
+		socket.send(PMS5005.standardSensorRequest((short)packetNumber));
 	}
 
 	public void customSensorRequest(int packetNumber)
 	{
-		sendCommand(PMS5005.customSensorRequest((short)packetNumber));
+		socket.send(PMS5005.customSensorRequest((short)packetNumber));
 	}
 
 	public void allSensorRequest(int packetNumber)
 	{
-		sendCommand(PMS5005.allSensorRequest((short)packetNumber));
+		socket.send(PMS5005.allSensorRequest((short)packetNumber));
 	}
 
 	public void enableMotorSensorSending()
 	{
-		sendCommand(PMS5005.enableAllSensorSending());
+		socket.send(PMS5005.enableAllSensorSending());
 	}
 
 	public void enableStandardSensorSending()
 	{
-		sendCommand(PMS5005.enableStandardSensorSending());
+		socket.send(PMS5005.enableStandardSensorSending());
 	}
 
 	public void enableCustomSensorSending()
 	{
-		sendCommand(PMS5005.enableCustomSensorSending());
+		socket.send(PMS5005.enableCustomSensorSending());
 	}
 
 	public void enableAllSensorSending()
 	{
-		sendCommand(PMS5005.enableAllSensorSending());
+		socket.send(PMS5005.enableAllSensorSending());
 	}
 
 	public void disableMotorSensorSending()
 	{
-		sendCommand(PMS5005.disableMotorSensorSending());
+		socket.send(PMS5005.disableMotorSensorSending());
 	}
 
 	public void disableStandardSensorSending()
 	{
-		sendCommand(PMS5005.disableStandardSensorSending());
+		socket.send(PMS5005.disableStandardSensorSending());
 	}
 
 	public void disableCustomSensorSending()
 	{
-		sendCommand(PMS5005.disableCustomSensorSending());
+		socket.send(PMS5005.disableCustomSensorSending());
 	}
 
 	public void disableAllSensorSending()
 	{
-		sendCommand(PMS5005.disableAllSensorSending());
+		socket.send(PMS5005.disableAllSensorSending());
 	}
 
 	public void setMotorSensorPeriod(int timePeriod)
 	{
-		sendCommand(PMS5005.setMotorSensorPeriod((short)timePeriod));
+		socket.send(PMS5005.setMotorSensorPeriod((short)timePeriod));
 	}
 
 	public void setStandardSensorPeriod(int timePeriod)
 	{
-		sendCommand(PMS5005.setStandardSensorPeriod((short)timePeriod));
+		socket.send(PMS5005.setStandardSensorPeriod((short)timePeriod));
 	}
 
 	public void setCustomSensorPeriod(int timePeriod)
 	{
-		sendCommand(PMS5005.setCustomSensorPeriod((short)timePeriod));
+		socket.send(PMS5005.setCustomSensorPeriod((short)timePeriod));
 	}
 
 	public void setAllSensorPeriod(int timePeriod)
 	{
-		sendCommand(PMS5005.setAllSensorPeriod((short)timePeriod));
+		socket.send(PMS5005.setAllSensorPeriod((short)timePeriod));
 	}
 
 	public int getSensorSonar(int channel)
@@ -549,143 +420,143 @@ public class X80 implements IX80, Runnable
 
 	public void setCustomDOut(int ival)
 	{
-		sendCommand(PMS5005.setCustomDOut((byte)ival));
+		socket.send(PMS5005.setCustomDOut((byte)ival));
 	}
 
 	public void setMotorPolarity(int channel, int polarity)
 	{
-		sendCommand(PMS5005.setMotorPolarity((byte)channel, (byte)polarity));
+		socket.send(PMS5005.setMotorPolarity((byte)channel, (byte)polarity));
 	}
 
 	@SuppressWarnings("deprecation")
 	public void enableDcMotor(int channel)
 	{
-		sendCommand(PMS5005.enableDcMotor((byte)channel));
+		socket.send(PMS5005.enableDcMotor((byte)channel));
 	}
 
 	@SuppressWarnings("deprecation")
 	public void disableDcMotor(int channel)
 	{
-		sendCommand(PMS5005.disableDcMotor((byte)channel));
+		socket.send(PMS5005.disableDcMotor((byte)channel));
 	}
 
 	public void resumeDcMotor(int channel)
 	{
-		sendCommand(PMS5005.resumeDcMotor((byte)channel));
+		socket.send(PMS5005.resumeDcMotor((byte)channel));
 	}
 
 	public void suspendDcMotor(int channel)
 	{
-		sendCommand(PMS5005.suspendDcMotor((byte)channel));
+		socket.send(PMS5005.suspendDcMotor((byte)channel));
 	}
 
 	public void setDcMotorPositionControlPid(int channel, int Kp, int Kd, int Ki_x100)
 	{
-		sendCommand(PMS5005.setDcMotorPositionControlPid((byte)channel, (short)Kp, (short)Kd, (short)Ki_x100));
+		socket.send(PMS5005.setDcMotorPositionControlPid((byte)channel, (short)Kp, (short)Kd, (short)Ki_x100));
 	}
 
 	public void setDcMotorSensorFilter(int channel, int filterMethod)
 	{
-		sendCommand(PMS5005.setDcMotorSensorFilter((byte)channel, (short)filterMethod));
+		socket.send(PMS5005.setDcMotorSensorFilter((byte)channel, (short)filterMethod));
 	}
 
 	public void setDcMotorSensorUsage(int channel, int sensorType)
 	{
-		sendCommand(PMS5005.setDcMotorSensorUsage((byte)channel, (byte)sensorType));
+		socket.send(PMS5005.setDcMotorSensorUsage((byte)channel, (byte)sensorType));
 	}
 
 	public void setDcMotorControlMode(int channel, int controlMode)
 	{
-		sendCommand(PMS5005.setDcMotorControlMode((byte)channel, (byte)controlMode));
+		socket.send(PMS5005.setDcMotorControlMode((byte)channel, (byte)controlMode));
 	}
 
 	public void dcMotorPositionTimeCtrl(int channel, int cmdValue, int timePeriod)
 	{
-		sendCommand(PMS5005.dcMotorPositionTimeCtrl((byte)channel, (short)cmdValue, (short)timePeriod));
+		socket.send(PMS5005.dcMotorPositionTimeCtrl((byte)channel, (short)cmdValue, (short)timePeriod));
 	}
 
 	public void dcMotorPositionNonTimeCtrl(int channel, int cmdValue)
 	{
-		sendCommand(PMS5005.dcMotorPositionNonTimeCtrl((byte)channel, (short)cmdValue));
+		socket.send(PMS5005.dcMotorPositionNonTimeCtrl((byte)channel, (short)cmdValue));
 	}
 
 	public void dcMotorPwmTimeCtrl(int channel, int cmdValue, int timePeriod)
 	{
-		sendCommand(PMS5005.dcMotorPwmTimeCtrl((byte)channel, (short)cmdValue, (short)timePeriod));
+		socket.send(PMS5005.dcMotorPwmTimeCtrl((byte)channel, (short)cmdValue, (short)timePeriod));
 	}
 
 	public void dcMotorPwmNonTimeCtrl(int channel, int cmdValue)
 	{
-		sendCommand(PMS5005.dcMotorPwmNonTimeCtrl((byte)channel, (short)cmdValue));
+		socket.send(PMS5005.dcMotorPwmNonTimeCtrl((byte)channel, (short)cmdValue));
 	}
 
 	public void dcMotorPositionTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
 	{
-		sendCommand(PMS5005.dcMotorPositionTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
+		socket.send(PMS5005.dcMotorPositionTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
 	}
 
 	public void dcMotorPositionNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
 	{
-		sendCommand(PMS5005.dcMotorPositionNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
+		socket.send(PMS5005.dcMotorPositionNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
 	}
 
 	public void dcMotorVelocityTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
 	{
-		sendCommand(PMS5005.dcMotorVelocityTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
+		socket.send(PMS5005.dcMotorVelocityTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
 	}
 
 	public void dcMotorVelocityNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
 	{
-		sendCommand(PMS5005.dcMotorVelocityNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
+		socket.send(PMS5005.dcMotorVelocityNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
 	}
 
 	public void dcMotorPwmTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
 	{
-		sendCommand(PMS5005.dcMotorPwmTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
+		socket.send(PMS5005.dcMotorPwmTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
 	}
 
 	public void dcMotorPwmNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
 	{
-		sendCommand(PMS5005.dcMotorPwmNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
+		socket.send(PMS5005.dcMotorPwmNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
 	}
 
 	public void enableServo(int channel)
 	{
-		sendCommand(PMS5005.enableServo((byte)channel));
+		socket.send(PMS5005.enableServo((byte)channel));
 	}
 
 	public void disableServo(int channel)
 	{
-		sendCommand(PMS5005.disableServo((byte)channel));
+		socket.send(PMS5005.disableServo((byte)channel));
 	}
 
 	public void servoTimeCtrl(int channel, int cmdValue, int timePeriod)
 	{
-		sendCommand(PMS5005.servoTimeCtrl((byte)channel, (short)cmdValue, (short)timePeriod));
+		socket.send(PMS5005.servoTimeCtrl((byte)channel, (short)cmdValue, (short)timePeriod));
 	}
 
 	public void servoNonTimeCtrl(int channel, int cmdValue)
 	{
-		sendCommand(PMS5005.servoNonTimeCtrl((byte)channel, (short)cmdValue));
+		socket.send(PMS5005.servoNonTimeCtrl((byte)channel, (short)cmdValue));
 	}
 
 	public void servoTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
 	{
-		sendCommand(PMS5005.servoTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
+		socket.send(PMS5005.servoTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6, (short)timePeriod));
 	}
 
 	public void servoNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
 	{
-		sendCommand(PMS5005.servoNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
+		socket.send(PMS5005.servoNonTimeCtrlAll((short)pos1, (short)pos2, (short)pos3, (short)pos4, (short)pos5, (short)pos6));
 	}
 
 	public void lcdDisplayPMS(String bmpFileName)
 	{
-		sendCommand(PMS5005.lcdDisplayPMS(bmpFileName));
+		socket.send(PMS5005.lcdDisplayPMS(bmpFileName));
 	}
 
 	public void setDcMotorVelocityControlPID(byte channel, int Kp, int Kd, int Ki)
 	{
-		sendCommand(PMS5005.setDcMotorVelocityControlPID(channel, Kp, Kd, Ki));
+		socket.send(PMS5005.setDcMotorVelocityControlPID(channel, Kp, Kd, Ki));
 	}
 }
