@@ -67,6 +67,11 @@ public class X80 implements IX80, Runnable
     final int CircleCnt = 1200;
 	
 	/** Creates a new instance of X80 */
+    /**
+     * 
+     * @param robotIp
+     * @param robotPort
+     */
 	public X80(String robotIp, int robotPort)
 	{
 		this.makeSensorData();
@@ -108,6 +113,9 @@ public class X80 implements IX80, Runnable
 		}
 	}
 	
+	/**
+	 * makeSensorData
+	 */
 	private void makeSensorData()
 	{
 		this.encoderPos = new int[nMotors];
@@ -120,6 +128,9 @@ public class X80 implements IX80, Runnable
 		this.humanMotion = new int[nHumanSensors];
 	}
 	
+	/**
+	 * clearSensorData
+	 */
 	public void clearSensorData()
 	{
 		int c, z;
@@ -174,6 +185,9 @@ public class X80 implements IX80, Runnable
 		this.dcMotorVol = 0;
 	}
 	
+	/**
+	 * receive packet thread
+	 */
 	public void run()
 	{
 		try
@@ -204,6 +218,10 @@ public class X80 implements IX80, Runnable
 		
 	}
 	
+	/**
+	 * sends a command to the robot
+	 * @param command
+	 */
 	public void sendCommand(byte[] command)
 	{
 		System.arraycopy(command, 0, txBuf, 0, command.length);
@@ -219,6 +237,12 @@ public class X80 implements IX80, Runnable
 		}
 	}
 	
+	/**
+	 * analog to digital conversion
+	 * 
+	 * @param AdValue
+	 * @return
+	 */
 	public static double Ad2Dis(int AdValue)
 	{
 		double distance = 0;
@@ -248,26 +272,48 @@ public class X80 implements IX80, Runnable
 		return distance;
 	}
 	
+	/**
+	 * @return robot IP address
+	 */
 	public String getRobotIp()
 	{
 		return robotIp;
 	}
 	
+	/**
+	 * 
+	 * @return robot Port
+	 */
 	public int getRobotPort()
 	{
 		return robotPort;
 	}
 	
+	/**
+	 * sets the robot IP
+	 * 
+	 * @param robotIp
+	 */
 	public void setRobotIp(String robotIp)
 	{
 		this.robotIp = robotIp;
 	}
 	
+	/**
+	 * sets the robot Port
+	 * 
+	 * @param robotPort
+	 */
 	public void setRobotPort(int robotPort)
 	{
 		this.robotPort = robotPort;
 	}
 	
+	/**
+	 * Connects to robot
+	 * 
+	 * @return
+	 */
 	public boolean connectRobot()
 	{
 		boolean result;
@@ -286,6 +332,13 @@ public class X80 implements IX80, Runnable
 		return result;
 	}
 	
+	/**
+	 * Connects to robot
+	 * 
+	 * @param robotIp
+	 * @param robotPort
+	 * @return true if connection successful, false if connection unsuccessful
+	 */
 	public boolean connectRobot(String robotIp, int robotPort)
 	{
 		boolean result;
@@ -306,6 +359,11 @@ public class X80 implements IX80, Runnable
 		return result;
 	}
 	
+	/**
+	 * assigns sensor data based on DID
+	 * 
+	 * @param sensorDataAry
+	 */
 	private void decodeSensorData(int[] sensorDataAry)
 	{
 		int z = sensorDataAry.length;
