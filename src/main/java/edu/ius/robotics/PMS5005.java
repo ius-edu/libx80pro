@@ -104,7 +104,7 @@ public class PMS5005
 		byte shift_reg, sr_lsb, data_bit, v;
 		byte fb_bit;
 		short z;
-		shift_reg = 0; // initialize the shift register
+		shift_reg = 0;               // initialize the shift register
 		z = (short) (buf.length - 3);// Don't include crc and ETX (z=length-3)
 		for (short i = 2; i < z; ++i)// Don't include STX (i=2)
 		{
@@ -1055,7 +1055,7 @@ public class PMS5005
 		
 		packet[4] = TOGGLE_DC_MOTORS;         //DID
 		packet[5] = 2;                        //LEN
-		packet[6] = 0;                        // 0 = Disable/Suspend
+		packet[6] = 0;                        //0 = Disable/Suspend
 		packet[7] = channel;                  //0=L | 1=R
 		packet[7] = crc(packet);              //Checksum
 		
@@ -1174,14 +1174,9 @@ public class PMS5005
      * This filtering feature is still under development. All data will be 
      * treated as raw data.
      */
-	public static byte[] setDcMotorSensorFilter(short channel, short filterMethod)
+	public static byte[] setDcMotorSensorFilter(byte channel, short filterMethod)
 	{
-		byte[] packet = new byte[6];
-		packet[0]  = STX0;	packet[1]  = STX1;
-		packet[2]  = 1;		packet[3]  = 0;
-		
-		packet[4]  = ETX0;  packet[5]  = ETX0;
-		return packet;
+		return null;
 	}
 	
 	/**

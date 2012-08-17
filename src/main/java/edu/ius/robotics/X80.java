@@ -644,7 +644,7 @@ public class X80 implements IX80, Runnable
 
 	public void setDcMotorSensorFilter(int channel, int filterMethod)
 	{
-		sendCommand(PMS5005.setDcMotorSensorFilter((short)channel, (short)filterMethod));
+		sendCommand(PMS5005.setDcMotorSensorFilter((byte)channel, (short)filterMethod));
 	}
 
 	public void setDcMotorSensorUsage(int channel, int sensorType)
