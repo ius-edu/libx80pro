@@ -1,4 +1,4 @@
-package edu.ius.robotics;
+package edu.ius.robotics.sockets;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
