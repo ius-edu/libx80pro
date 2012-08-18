@@ -1,4 +1,4 @@
-package edu.ius.robotics.X80Pro;
+package edu.ius.robotics;
 
 import edu.ius.robotics.sockets.X80ProUdpSocket;
 import edu.ius.robotics.boards.PMS5005;
@@ -15,36 +15,17 @@ public class X80Pro implements IX80Pro, Runnable
 	public final int nUltrasonicSensors = 6;
 	public final int nHumanSensors = 2;
 	
+	public static final int DEFAULT_ROBOT_PORT = 10001;
+	public static final int NO_CTRL = -32768;
+	public static final int SERVO0_INI = 3650;
+	public static final int SERVO1_INI = 3300;
+	
 	// private ByteArrayInputStream byteArrIn;
 	// private DataInputStream dataIn;
 	// private DataOutputStream dataOut;
 	// private InputStream inputStream;
 	// private BufferedReader reader;
 	// private String command;
-	public int[] encoderPos;
-	public double[] irDis;
-	// motor sensor
-	public int[] encoderSpeed;
-	public double[] motorCurrent;
-	// custom sensor data
-	public int[] customAd;
-	public int customIo;
-	// standard sensor data
-	public double[] usDis;
-	public int[] humanAlarm;
-	public int[] humanMotion;
-	public int irRange;
-	public double boardVol;
-	public double dcMotorVol;
-	
-	private int[] motorSensorAry;
-	private int[] standardSensorAry;
-	private int[] customSensorAry;
-	
-	public final int HEADER_SIZE = 7;
-	public final int PAYLOAD_OFFSET = 6;
-	public final int DID_OFFSET = 4;
-	
 	/** wheel distance */
 	final double WheelDis = 0.265;
 	
@@ -62,84 +43,22 @@ public class X80Pro implements IX80Pro, Runnable
 	 * @param robotIp
 	 * @param robotPort
 	 */
-	public X80Pro(String robotIp, int robotPort)
+	public X80Pro(String ipAddress)
 	{
-		this.makeSensorData();
-		this.clearSensorData();
-		
-		if (!socket.connectRobot(robotIp, robotPort, MIN_TIME_MILLI)) System.exit(3);
+		this.socket = new X80ProUdpSocket(ipAddress, DEFAULT_ROBOT_PORT);
+		//if (!socket.connectRobot(ipAddress, DEFAULT_ROBOT_PORT, MIN_TIME_MILLI)) System.exit(3);
 	}
 	
 	/**
-	 * makeSensorData
+	 * Creates a new instance of X80Pro
+	 * 
+	 * @param robotIp
+	 * @param robotPort
 	 */
-	private void makeSensorData()
+	public X80Pro(String ipAddress, int port)
 	{
-		this.encoderPos = new int[nMotors];
-		this.irDis = new double[nIrSensors];
-		this.encoderSpeed = new int[nMotors];
-		this.motorCurrent = new double[nMotors];
-		this.customAd = new int[nCustomSensors];
-		this.usDis = new double[nUltrasonicSensors];
-		this.humanAlarm = new int[nHumanSensors];
-		this.humanMotion = new int[nHumanSensors];
-	}
-	
-	/**
-	 * clearSensorData
-	 */
-	public void clearSensorData()
-	{
-		int c, z;
-		
-		for (c = 0, z = this.encoderPos.length; c < z; ++c)
-		{
-			this.encoderPos[c] = 0;
-		}
-		
-		for (c = 0, z = this.irDis.length; c < z; ++c)
-		{
-			this.irDis[c] = (double) (c + 1);
-		}
-		
-		// motor sensor
-		for (c = 0, z = this.encoderSpeed.length; c < z; ++c)
-		{
-			this.encoderSpeed[c] = 0;
-		}
-		
-		for (c = 0, z = this.motorCurrent.length; c < z; ++c)
-		{
-			this.motorCurrent[c] = 0.0;
-		}
-		
-		// custom sensor data
-		for (c = 0, z = this.customAd.length; c < z; ++c)
-		{
-			this.customAd[c] = 0;
-		}
-		
-		this.customIo = 0;
-		
-		// standard sensor data
-		for (c = 0, z = this.usDis.length; c < z; ++c)
-		{
-			this.usDis[c] = 0;
-		}
-		
-		for (c = 0, z = this.humanAlarm.length; c < z; ++c)
-		{
-			this.humanAlarm[c] = 0;
-		}
-		
-		for (c = 0, z = this.humanMotion.length; c < z; ++c)
-		{
-			this.humanMotion[c] = 0;
-		}
-		
-		this.irRange = 0;
-		this.boardVol = 0;
-		this.dcMotorVol = 0;
+		this.socket = new X80ProUdpSocket(ipAddress, port);
+		//if (!socket.connectRobot(ipAddress, robotPort, MIN_TIME_MILLI)) System.exit(3);
 	}
 	
 	/**
@@ -195,79 +114,9 @@ public class X80Pro implements IX80Pro, Runnable
 		return distance;
 	}
 	
-	private void decodeSensorData(int[] sensorDataAry)
+	public void resetHead()
 	{
-		int z = sensorDataAry.length;
-		
-		if (sensorDataAry[0] == PMS5005.STX0 && sensorDataAry[1] == PMS5005.STX1 && sensorDataAry[z - 2] == PMS5005.ETX0
-				&& sensorDataAry[z - 1] == PMS5005.ETX1)
-		{
-			// here is a whole package (all sensor data)
-			// for first motor sensor data, please refer to the protocol
-			// documentation
-			if (sensorDataAry[DID_OFFSET] == PMS5005.GET_MOTOR_SENSOR_DATA)
-			{
-				motorSensorAry = sensorDataAry;
-				// encoderPos[0] = sensorDataAry[5 + 25] + (sensorDataAry[5 +
-				// 26]) * 256;
-				// encoderSpeed[0] = sensorDataAry[5 + 27] + (sensorDataAry[5 +
-				// 28]) * 256;
-				// encoderPos[1] = sensorDataAry[5 + 29] + (sensorDataAry[5 +
-				// 30]) * 256;
-				// encoderSpeed[1] = sensorDataAry[5 + 31] + (sensorDataAry[5 +
-				// 32]) * 256;
-				
-				// motorCurrent[0] = (double) (sensorDataAry[5 + 13] +
-				// (sensorDataAry[5 + 14]) * 256) / 728.0;
-				// motorCurrent[1] = (double) (sensorDataAry[5 + 15] +
-				// (sensorDataAry[5 + 16]) * 256) / 728.0;
-			}
-			else if (sensorDataAry[DID_OFFSET] == PMS5005.GET_CUSTOM_SENSOR_DATA)
-			{
-				// custom sensor data
-				customSensorAry = sensorDataAry;
-				// for (int i = 0; i < 8; i++)
-				// {
-				// customAd[i] = sensorDataAry[6 + 2 * i] + sensorDataAry[6 + 2
-				// * i + 1] * 256;
-				// }
-				
-				// customIo = sensorDataAry[5 + 17];
-			}
-			else if (sensorDataAry[DID_OFFSET] == PMS5005.GET_STANDARD_SENSOR_DATA)
-			{
-				// standard sensors
-				standardSensorAry = sensorDataAry;
-				// for (int i = 0; i < nStdSensors; ++i)
-				// {
-				// usDis[i] = (double) (sensorDataAry[nStdSensors + i]) / 100.0;
-				// }
-				
-				// humanAlarm[0] = sensorDataAry[5 + 7] + sensorDataAry[5 + 8] *
-				// 256;
-				// humanMotion[0] = sensorDataAry[5 + 9] + sensorDataAry[5 + 10]
-				// * 256;
-				// humanAlarm[1] = sensorDataAry[5 + 11] + sensorDataAry[5 + 12]
-				// * 256;
-				// humanMotion[1] = sensorDataAry[5 + 13] + sensorDataAry[5 +
-				// 14] * 256;
-				// irRange = (sensorDataAry[5 + 25] + sensorDataAry[5 + 26] *
-				// 256);
-				// boardVol = (double) (sensorDataAry[5 + 31] + sensorDataAry[5
-				// + 32] * 256) / 4095.0 * 9.0;
-				// dcMotorVol = (double) (sensorDataAry[5 + 33] +
-				// sensorDataAry[5 + 34] * 256) / 4095.0 * 24.0;
-			}
-		}
-		
-		// the first ir sensor
-		// irDis[0] = Ad2Dis(irRange);
-		
-		// the rest of the ir sensors
-		// for (int i = 0; i < nIrSensors; i++)
-		// {
-		// irDis[i + 1] = Ad2Dis(customAd[i + 1]);
-		// }
+		servoNonTimeCtrlAll(SERVO0_INI, SERVO1_INI, NO_CTRL, NO_CTRL, NO_CTRL, NO_CTRL);
 	}
 	
 	public void motorSensorRequest(int packetNumber)
@@ -352,47 +201,47 @@ public class X80Pro implements IX80Pro, Runnable
 	
 	public int getSensorSonar(int channel)
 	{
-		return PMS5005.getSensorSonar((byte) channel, standardSensorAry);
+		return PMS5005.getSensorSonar((byte) channel, socket.getStandardSensorAry());
 	}
 	
 	public int getSensorIrRange(int channel)
 	{
-		return PMS5005.getSensorIrRange((byte) channel, standardSensorAry, customSensorAry);
+		return PMS5005.getSensorIrRange((byte) channel, socket.getStandardSensorAry(), socket.getCustomSensorAry());
 	}
 	
 	public int getSensorHumanAlarm(int channel)
 	{
-		return PMS5005.getSensorHumanAlarm((byte) channel, standardSensorAry);
+		return PMS5005.getSensorHumanAlarm((byte) channel, socket.getStandardSensorAry());
 	}
 	
 	public int getSensorHumanMotion(int channel)
 	{
-		return PMS5005.getSensorHumanMotion((byte) channel, standardSensorAry);
+		return PMS5005.getSensorHumanMotion((byte) channel, socket.getStandardSensorAry());
 	}
 	
 	public int getSensorTiltingX(int channel)
 	{
-		return PMS5005.getSensorTiltingX(standardSensorAry);
+		return PMS5005.getSensorTiltingX(socket.getStandardSensorAry());
 	}
 	
 	public int getSensorTiltingY(int channel)
 	{
-		return PMS5005.getSensorTiltingY(standardSensorAry);
+		return PMS5005.getSensorTiltingY(socket.getStandardSensorAry());
 	}
 	
 	public int getSensorOverheat(int channel)
 	{
-		return PMS5005.getSensorOverheat((byte) channel, standardSensorAry);
+		return PMS5005.getSensorOverheat((byte) channel, socket.getStandardSensorAry());
 	}
 	
 	public int getSensorTemperature()
 	{
-		return PMS5005.getSensorTemperature(standardSensorAry);
+		return PMS5005.getSensorTemperature(socket.getStandardSensorAry());
 	}
 	
 	public int getSensorIrCode(int index)
 	{
-		return PMS5005.getSensorIrCode((byte) index, standardSensorAry);
+		return PMS5005.getSensorIrCode((byte) index, socket.getStandardSensorAry());
 	}
 	
 	public void setInfraredControlOutput(int lowWord, int highWord)
@@ -402,52 +251,52 @@ public class X80Pro implements IX80Pro, Runnable
 	
 	public int getSensorBatteryAd(int channel)
 	{
-		return PMS5005.getSensorBatteryAd((short) channel, standardSensorAry);
+		return PMS5005.getSensorBatteryAd((short) channel, socket.getStandardSensorAry());
 	}
 	
 	public int getSensorRefVoltage()
 	{
-		return PMS5005.getSensorRefVoltage(standardSensorAry);
+		return PMS5005.getSensorRefVoltage(socket.getStandardSensorAry());
 	}
 	
 	public int getSensorPotVoltage()
 	{
-		return PMS5005.getSensorPotVoltage(standardSensorAry);
+		return PMS5005.getSensorPotVoltage(socket.getStandardSensorAry());
 	}
 	
 	public int getSensorPot(int channel)
 	{
-		return PMS5005.getSensorPot((byte) channel, motorSensorAry);
+		return PMS5005.getSensorPot((byte) channel, socket.getMotorSensorAry());
 	}
 	
 	public int getMotorCurrent(int channel)
 	{
-		return PMS5005.getMotorCurrent((byte) channel, motorSensorAry);
+		return PMS5005.getMotorCurrent((byte) channel, socket.getMotorSensorAry());
 	}
 	
 	public int getEncoderDirection(int channel)
 	{
-		return PMS5005.getEncoderDirection((byte) channel, motorSensorAry);
+		return PMS5005.getEncoderDirection((byte) channel, socket.getMotorSensorAry());
 	}
 	
 	public int getEncoderPulse(int channel)
 	{
-		return PMS5005.getEncoderPulse((byte) channel, motorSensorAry);
+		return PMS5005.getEncoderPulse((byte) channel, socket.getMotorSensorAry());
 	}
 	
 	public int getEncoderSpeed(int channel)
 	{
-		return PMS5005.getEncoderSpeed((byte) channel, motorSensorAry);
+		return PMS5005.getEncoderSpeed((byte) channel, socket.getMotorSensorAry());
 	}
 	
 	public int getCustomAd(int channel)
 	{
-		return PMS5005.getCustomAd((byte) channel, customSensorAry);
+		return PMS5005.getCustomAd((byte) channel, socket.getCustomSensorAry());
 	}
 	
 	public int getCustomDIn(int channel)
 	{
-		return PMS5005.getCustomDIn((byte) channel, customSensorAry);
+		return PMS5005.getCustomDIn((byte) channel, socket.getCustomSensorAry());
 	}
 	
 	public void setCustomDOut(int ival)
