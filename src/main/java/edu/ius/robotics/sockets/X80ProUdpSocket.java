@@ -7,7 +7,7 @@ import java.net.InetAddress;
 
 import edu.ius.robotics.boards.PMS5005;
 
-public class X80ProUdpSocket
+public class X80ProUdpSocket implements Runnable
 {
 	private DatagramSocket socket;
 	private String robotIp;
@@ -45,7 +45,6 @@ public class X80ProUdpSocket
 	public static final int DEFAULT_ROBOT_PORT = 10001;
 	
 	private int minTimeInMillis;
-	
 	
 	public X80ProUdpSocket(String ipAddress)
 	{
@@ -164,6 +163,9 @@ public class X80ProUdpSocket
 		}
 	}
 	
+	/**
+	 * receive packet thread
+	 */
 	public void run()
 	{
 		try

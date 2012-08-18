@@ -3,7 +3,7 @@ package edu.ius.robotics;
 import edu.ius.robotics.sockets.X80ProUdpSocket;
 import edu.ius.robotics.boards.PMS5005;
 
-public class X80Pro implements IX80Pro, Runnable
+public class X80Pro implements IX80Pro
 {
 	/** minimum time step in milliseconds */
 	public final int MIN_TIME_MILLI = 50;
@@ -59,14 +59,6 @@ public class X80Pro implements IX80Pro, Runnable
 	{
 		this.socket = new X80ProUdpSocket(ipAddress, port);
 		//if (!socket.connectRobot(ipAddress, robotPort, MIN_TIME_MILLI)) System.exit(3);
-	}
-	
-	/**
-	 * receive packet thread
-	 */
-	public void run()
-	{
-		socket.run();
 	}
 	
 	/**

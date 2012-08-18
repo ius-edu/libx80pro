@@ -1,4 +1,4 @@
-package edu.ius.robotics.X80Pro;
+package edu.ius.robotics;
 
 /* 
  * Java implmentation written by Jesse Riddle, with significant documentation 
