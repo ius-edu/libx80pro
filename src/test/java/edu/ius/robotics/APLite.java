@@ -1,6 +1,6 @@
 package edu.ius.robotics;
 
-import edu.ius.robotics.X80;
+import edu.ius.robotics.X80Pro.X80Pro;
 import java.lang.Math;
 
 public class APLite implements Runnable
@@ -67,12 +67,12 @@ public class APLite implements Runnable
 	
 	private class sensors 
 	{
-		public static double[] thetaIr; 
+		public static Double[] thetaIr = new Double[4]; 
 	}
 	
-	X80 robot;
+	X80Pro robot;
 	
-	APLite(X80 robot)
+	APLite(X80Pro robot)
 	{
 		this.robot = robot;
 		//resetHead();
