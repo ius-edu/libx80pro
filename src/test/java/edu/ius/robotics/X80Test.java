@@ -13,55 +13,15 @@ public class X80Test
 		X80Pro robot = new X80Pro("192.168.0.203");
 
 		robot.resetHead();
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		System.err.println("resuming motor 0");
 		robot.enableDcMotor(0);
-		
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+				
 		System.err.println("resuming motor 1");
-		
 		robot.enableDcMotor(1);
-		
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		System.err.println("Move robot forward");
 		robot.dcMotorVelocityNonTimeCtrlAll(3000, 3000, NO_CTRL, NO_CTRL, NO_CTRL, NO_CTRL);
-		
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		System.err.println("Move for 3 seconds");
 		try
@@ -76,16 +36,6 @@ public class X80Test
 		
 		System.err.println("Suspend motor 0");
 		robot.suspendDcMotor(0);
-		
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		System.err.println("Suspend motor 1");
 		robot.suspendDcMotor(1);
