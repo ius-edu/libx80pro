@@ -1,4 +1,4 @@
-package edu.ius.robotics;
+package edu.ius.robotics.boards;
 
 public class PMB5010
 {

@@ -1,95 +1,95 @@
-package edu.ius.robotics;
+package edu.ius.robotics.boards;
 
 public class PMS5005
 {
-	/* 
-	 * Java implmentation written by Jesse Riddle and Colton Jenkins, with 
-	 * significant documentation taken from the DrRobot WiRobot SDK Application 
-	 * Programming Interface (API) Reference Manual - (For MS Windows) 
-	 * Version: 1.0.8 Feb. 2004 by DrRobot, Inc. and some parts from the DrRobot 
-	 * Java motion control demo program.
-	 */
+    /* 
+     * Java implmentation written by Jesse Riddle and Colton Jenkins, with 
+     * significant documentation taken from the DrRobot WiRobot SDK Application 
+     * Programming Interface (API) Reference Manual - (For MS Windows) 
+     * Version: 1.0.8 Feb. 2004 by DrRobot, Inc. and some parts from the DrRobot 
+     * Java motion control demo program.
+     */
 	
-	/*
-	 * The structure for a packet to the PMS5005 is the following: STX0 = 94
-	 * (always) STX1 = 2 (always) RID = 1 (generally) Reserved = 0 (generally)
-	 * DID (Data ID) = <DID> (your choice of DID) LENGTH = <len> (Length from
-	 * next element to crc byte) DATA = <data> (may be more than 1 byte in
-	 * length) CHECKSUM = <cksum> (use crc() method to calculate on cmd) ETX0 =
-	 * 94 (always) ETX1 = 13 (always)
-	 */
+    /*
+     * The structure for a packet to the PMS5005 is the following: STX0 = 94
+     * (always) STX1 = 2 (always) RID = 1 (generally) Reserved = 0 (generally)
+     * DID (Data ID) = <DID> (your choice of DID) LENGTH = <len> (Length from
+     * next element to crc byte) DATA = <data> (may be more than 1 byte in
+     * length) CHECKSUM = <cksum> (use crc() method to calculate on cmd) ETX0 =
+     * 94 (always) ETX1 = 13 (always)
+     */
 	
-	public static final int HEADER_LENGTH = 7;
-	public static final int PAYLOAD_OFFSET = 6;
-	public static final int DID_OFFSET = 4;
+    public static final int HEADER_LENGTH = 7;
+    public static final int PAYLOAD_OFFSET = 6;
+    public static final int DID_OFFSET = 4;
 	
-	/* Start transmission, End transmission */
-	public static final byte STX0 = 94;
+    /* Start transmission, End transmission */
+    public static final byte STX0 = 94;
     public static final byte STX1 = 2;
     public static final byte ETX0 = 94;
     public static final byte ETX1 = 13;
 	
-	/* Data ID (DID) descriptor listing */
-	public static final byte POSITION_CTRL = 3;
-	public static final byte ALL_POSITION_CTRL = 4;
-	public static final byte PWM_CTRL = 5;
-	public static final byte ALL_PWM_CTRL = 6;
-	public static final byte PARAM_SET = 7;
+    /* Data ID (DID) descriptor listing */
+    public static final byte POSITION_CTRL = 3;
+    public static final byte ALL_POSITION_CTRL = 4;
+    public static final byte PWM_CTRL = 5;
+    public static final byte ALL_PWM_CTRL = 6;
+    public static final byte PARAM_SET = 7;
 	
-	/* SubCommands under PARAM_SET */
-	public static final byte DC_POSITION_PID = 7;     // positon PID Control
-	public static final byte DC_VELOCITY_PID = 8;     // velocity PID Control
-	public static final byte DC_SENSOR_USAGE = 13;
-	public static final byte DC_CTRL_MODE = 14;
+    /* SubCommands under PARAM_SET */
+    public static final byte DC_POSITION_PID = 7;     // positon PID Control
+    public static final byte DC_VELOCITY_PID = 8;     // velocity PID Control
+    public static final byte DC_SENSOR_USAGE = 13;
+    public static final byte DC_CTRL_MODE = 14;
 	
-	public static final byte POWER_CTRL = 22;
-	public static final byte LCD_CTRL = 23;
-	public static final byte VELOCITY_CTRL = 26;
-	public static final byte ALL_VELOCITY_CTRL = 27;
-	public static final byte SERVO_CTRL = 28;
-	public static final byte ALL_SERVO_CTRL = 29;
-	public static final byte TOGGLE_DC_MOTORS = 30;
-	public static final byte CONSTELLATION_CTRL = 80;
-	public static final byte GET_MOTOR_SENSOR_DATA = 123;
-	public static final byte GET_CUSTOM_SENSOR_DATA = 124;
-	public static final byte GET_STANDARD_SENSOR_DATA = 125;
-	public static final byte GET_ALL_SENSOR_DATA = 127;
-	// to use as ubyte: (byte)(SETUP_COM & 0xff)
-	public static final short SETUP_COM = 255;
-	/* End Data ID (DID) descriptor listing */
+    public static final byte POWER_CTRL = 22;
+    public static final byte LCD_CTRL = 23;
+    public static final byte VELOCITY_CTRL = 26;
+    public static final byte ALL_VELOCITY_CTRL = 27;
+    public static final byte SERVO_CTRL = 28;
+    public static final byte ALL_SERVO_CTRL = 29;
+    public static final byte TOGGLE_DC_MOTORS = 30;
+    public static final byte CONSTELLATION_CTRL = 80;
+    public static final byte GET_MOTOR_SENSOR_DATA = 123;
+    public static final byte GET_CUSTOM_SENSOR_DATA = 124;
+    public static final byte GET_STANDARD_SENSOR_DATA = 125;
+    public static final byte GET_ALL_SENSOR_DATA = 127;
+    // to use as ubyte: (byte)(SETUP_COM & 0xff)
+    public static final short SETUP_COM = 255;
+    /* End Data ID (DID) descriptor listing */
 	
-	public static final byte PWM_CTRL_MODE = 0;
-	public static final byte POSITION_CTRL_MODE = 1;
-	public static final byte VELOCITY_CTRL_MODE = 2;
+    public static final byte PWM_CTRL_MODE = 0;
+    public static final byte POSITION_CTRL_MODE = 1;
+    public static final byte VELOCITY_CTRL_MODE = 2;
 	
-	public static final byte KpId = 1; // progressive id
-	public static final byte KdId = 2; // derivative id
-	public static final byte KiId = 3; // integral id
+    public static final byte KpId = 1; // progressive id
+    public static final byte KdId = 2; // derivative id
+    public static final byte KiId = 3; // integral id
 	
-	public static final short NON_CTRL_CMD = (short) 0xffff; // no ctrl command
-	public static final short NO_CTRL = (short) 0x8000;
+    public static final short NON_CTRL_CMD = (short) 0xffff; // no ctrl command
+    public static final short NO_CTRL = (short) 0x8000;
 	
-	/* Sensor Data Offsets */
-	public static final int ULTRASONIC_OFFSET = 0 + HEADER_LENGTH;
-	public static final int ENCODER_PULSE_OFFSET = 24 + HEADER_LENGTH; 
-	public static final int ENCODER_SPEED_OFFSET = 32 + HEADER_LENGTH;
-	public static final int STANDARD_IR_RANGE_OFFSET = 24 + HEADER_LENGTH;
-	public static final int CUSTOM_IR_RANGE_OFFSET = 4 + HEADER_LENGTH; // CustomAD3
-	public static final int HUMAN_ALARM_OFFSET = 6 + HEADER_LENGTH;
-	public static final int HUMAN_MOTION_OFFSET = 8 + HEADER_LENGTH;
-	public static final int TILTING_X_OFFSET = 14 + HEADER_LENGTH;
-	public static final int TILTING_Y_OFFSET = 16 + HEADER_LENGTH;
-	public static final int ENCODER_DIRECTION_OFFSET = 32 + HEADER_LENGTH;
-	public static final int MOTOR_SPEED_OFFSET = 26 + HEADER_LENGTH;
-	public static final int CUSTOM_AD_OFFSET = 0 + HEADER_LENGTH;
-	public static final int TEMPERATURE_AD_OFFSET = 22 + HEADER_LENGTH;
-	public static final int OVERHEAT_SENSOR_OFFSET = 18 + HEADER_LENGTH;
-	public static final int INFRARED_COMMAND_OFFSET = 26 + HEADER_LENGTH;
-	public static final int BATTERY_SENSOR_OFFSET = 30 + HEADER_LENGTH;
-	public static final int REFERENCE_VOLTAGE_OFFSET = 36 + HEADER_LENGTH;
-	public static final int POTENTIOMETER_POWER_OFFSET = 38 + HEADER_LENGTH;
-	public static final int POTENTIOMETER_SENSOR_OFFSET = 0 + HEADER_LENGTH;
-	public static final int MOTOR_CURRENT_SENSOR_OFFSET = 12 + HEADER_LENGTH;
+    /* Sensor Data Offsets */
+    public static final int ULTRASONIC_OFFSET = 0 + HEADER_LENGTH;
+    public static final int ENCODER_PULSE_OFFSET = 24 + HEADER_LENGTH; 
+    public static final int ENCODER_SPEED_OFFSET = 32 + HEADER_LENGTH;
+    public static final int STANDARD_IR_RANGE_OFFSET = 24 + HEADER_LENGTH;
+    public static final int CUSTOM_IR_RANGE_OFFSET = 4 + HEADER_LENGTH; // CustomAD3
+    public static final int HUMAN_ALARM_OFFSET = 6 + HEADER_LENGTH;
+    public static final int HUMAN_MOTION_OFFSET = 8 + HEADER_LENGTH;
+    public static final int TILTING_X_OFFSET = 14 + HEADER_LENGTH;
+    public static final int TILTING_Y_OFFSET = 16 + HEADER_LENGTH;
+    public static final int ENCODER_DIRECTION_OFFSET = 32 + HEADER_LENGTH;
+    public static final int MOTOR_SPEED_OFFSET = 26 + HEADER_LENGTH;
+    public static final int CUSTOM_AD_OFFSET = 0 + HEADER_LENGTH;
+    public static final int TEMPERATURE_AD_OFFSET = 22 + HEADER_LENGTH;
+    public static final int OVERHEAT_SENSOR_OFFSET = 18 + HEADER_LENGTH;
+    public static final int INFRARED_COMMAND_OFFSET = 26 + HEADER_LENGTH;
+    public static final int BATTERY_SENSOR_OFFSET = 30 + HEADER_LENGTH;
+    public static final int REFERENCE_VOLTAGE_OFFSET = 36 + HEADER_LENGTH;
+    public static final int POTENTIOMETER_POWER_OFFSET = 38 + HEADER_LENGTH;
+    public static final int POTENTIOMETER_SENSOR_OFFSET = 0 + HEADER_LENGTH;
+    public static final int MOTOR_CURRENT_SENSOR_OFFSET = 12 + HEADER_LENGTH;
 	
     /**
      * Calculates a valid crc value to be used in order to check the integrity 
@@ -99,38 +99,38 @@ public class PMS5005
      *
      * @return The crc value calculated from the given buffer.
      */
-	public static byte crc(byte[] buf)
+    public static byte crc(byte[] buf)
+    {
+	byte shift_reg, sr_lsb, data_bit, v;
+	byte fb_bit;
+	short z;
+	shift_reg = 0;               // initialize the shift register
+	z = (short) (buf.length - 3);// Don't include crc and ETX (z=length-3)
+	for (short i = 2; i < z; ++i)// Don't include STX (i=2)
 	{
-		byte shift_reg, sr_lsb, data_bit, v;
-		byte fb_bit;
-		short z;
-		shift_reg = 0;               // initialize the shift register
-		z = (short) (buf.length - 3);// Don't include crc and ETX (z=length-3)
-		for (short i = 2; i < z; ++i)// Don't include STX (i=2)
-		{
-			v = (byte) (buf[i]); 
-			// for each bit
+	    v = (byte) (buf[i]); 
+	    // for each bit
 			
-			for (short j = 0; j < 8; ++j)
-			{
-				// isolate least sign bit
-				data_bit = (byte) ((v & 0x01) & 0xff);
-				sr_lsb = (byte) ((shift_reg & 0x01) & 0xff);
-				// calculate the feed back bit
-				fb_bit = (byte) (((data_bit ^ sr_lsb) & 0x01) & 0xff);
-				shift_reg = (byte) ((shift_reg & 0xff) >>> 1);
+	    for (short j = 0; j < 8; ++j)
+	    {
+		// isolate least sign bit
+		data_bit = (byte) ((v & 0x01) & 0xff);
+		sr_lsb = (byte) ((shift_reg & 0x01) & 0xff);
+		// calculate the feed back bit
+		fb_bit = (byte) (((data_bit ^ sr_lsb) & 0x01) & 0xff);
+		shift_reg = (byte) ((shift_reg & 0xff) >>> 1);
 				
-				if (fb_bit == 1)
-				{
-					shift_reg = (byte) ((shift_reg ^ 0x8C) & 0xff);
-				}
-				
-				v = (byte) ((v & 0xff) >>> 1);
-			}
+		if (fb_bit == 1)
+		{
+		    shift_reg = (byte) ((shift_reg ^ 0x8C) & 0xff);
 		}
-		
-		return shift_reg;
+				
+		v = (byte) ((v & 0xff) >>> 1);
+	    }
 	}
+		
+	return shift_reg;
+    }
 	
     /**
      * Sends a request command to the Sensing and Motion Controller (PMS5005) 
@@ -149,23 +149,23 @@ public class PMS5005
      *
      * See Also: setMotorSensorPeriod
      */
-	public static byte[] motorSensorRequest(short packetNumber)
-	{
-		byte[] cmd = new byte[10];
+    public static byte[] motorSensorRequest(short packetNumber)
+    {
+	byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_MOTOR_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_MOTOR_SENSOR_DATA;
+	cmd[5] = 1; // len
+	cmd[6] = (byte) (packetNumber & 0xff);
+	cmd[7] = crc(cmd);
+	cmd[8] = ETX0;
+	cmd[9] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Sends a request command to the Sensing and Motion Controller (PMS5005) 
@@ -185,23 +185,23 @@ public class PMS5005
      *
      * See Also: setStandardSensorPeriod
      */
-	public static byte[] standardSensorRequest(short packetNumber)
-	{
-		byte[] cmd = new byte[10];
+    public static byte[] standardSensorRequest(short packetNumber)
+    {
+	byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_MOTOR_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_MOTOR_SENSOR_DATA;
+	cmd[5] = 1; // len
+	cmd[6] = (byte) (packetNumber & 0xff);
+	cmd[7] = crc(cmd);
+	cmd[8] = ETX0;
+	cmd[9] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Sends a request command to the Sensing and Motion Controller (PMS5005) 
@@ -221,23 +221,23 @@ public class PMS5005
      *
      * See Also: setCustomSensorPeriod
      */
-	public static byte[] customSensorRequest(short packetNumber)
-	{
-		byte[] cmd = new byte[10];
+    public static byte[] customSensorRequest(short packetNumber)
+    {
+	byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_CUSTOM_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_CUSTOM_SENSOR_DATA;
+	cmd[5] = 1; // len
+	cmd[6] = (byte) (packetNumber & 0xff);
+	cmd[7] = crc(cmd);
+	cmd[8] = ETX0;
+	cmd[9] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Sends a request command to the Sensing and Motion Controller (PMS5005) 
@@ -257,23 +257,23 @@ public class PMS5005
      *
      * See Also: setAllSensorPeriod
      */
-	public static byte[] allSensorRequest(short packetNumber)
-	{
-		byte[] cmd = new byte[10];
+    public static byte[] allSensorRequest(short packetNumber)
+    {
+	byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_ALL_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_ALL_SENSOR_DATA;
+	cmd[5] = 1; // len
+	cmd[6] = (byte) (packetNumber & 0xff);
+	cmd[7] = crc(cmd);
+	cmd[8] = ETX0;
+	cmd[9] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Enables batch updating of motor-related sensor packets.
@@ -285,22 +285,22 @@ public class PMS5005
      *
      * @see motorSensorRequest
      */
-	public static byte[] enableMotorSensorSending()
-	{
-		byte[] cmd = new byte[9];
+    public static byte[] enableMotorSensorSending()
+    {
+	byte[] cmd = new byte[9];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_MOTOR_SENSOR_DATA;
-		cmd[5] = 0; // len
-		cmd[6] = crc(cmd);
-		cmd[7] = ETX0;
-		cmd[8] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_MOTOR_SENSOR_DATA;
+	cmd[5] = 0; // len
+	cmd[6] = crc(cmd);
+	cmd[7] = ETX0;
+	cmd[8] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Enables batch updating of standard sensor packets.
@@ -312,22 +312,22 @@ public class PMS5005
      *
      * @see disableMotorSensorSending
      */
-	public static byte[] enableStandardSensorSending()
-	{
-		byte[] cmd = new byte[9];
+    public static byte[] enableStandardSensorSending()
+    {
+	byte[] cmd = new byte[9];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_STANDARD_SENSOR_DATA;
-		cmd[5] = 0; // len
-		cmd[6] = crc(cmd);
-		cmd[7] = ETX0;
-		cmd[8] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_STANDARD_SENSOR_DATA;
+	cmd[5] = 0; // len
+	cmd[6] = crc(cmd);
+	cmd[7] = ETX0;
+	cmd[8] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Enables batch updating of custom sensor packets.
@@ -339,22 +339,22 @@ public class PMS5005
      *
      * @see disableStandardSensorSending
      */
-	public static byte[] enableCustomSensorSending()
-	{
-		byte[] cmd = new byte[9];
+    public static byte[] enableCustomSensorSending()
+    {
+	byte[] cmd = new byte[9];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_CUSTOM_SENSOR_DATA;
-		cmd[5] = 0; // len
-		cmd[6] = crc(cmd);
-		cmd[7] = ETX0;
-		cmd[8] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_CUSTOM_SENSOR_DATA;
+	cmd[5] = 0; // len
+	cmd[6] = crc(cmd);
+	cmd[7] = ETX0;
+	cmd[8] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Enables batch updating of all sensor packets.
@@ -366,114 +366,114 @@ public class PMS5005
      *
      * @see disableCustomSensorSending
      */
-	public static byte[] enableAllSensorSending()
-	{
-		byte[] cmd = new byte[9];
+    public static byte[] enableAllSensorSending()
+    {
+	byte[] cmd = new byte[9];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_ALL_SENSOR_DATA;
-		cmd[5] = 0; // len
-		cmd[6] = crc(cmd);
-		cmd[7] = ETX0;
-		cmd[8] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_ALL_SENSOR_DATA;
+	cmd[5] = 0; // len
+	cmd[6] = crc(cmd);
+	cmd[7] = ETX0;
+	cmd[8] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Disables batch updating of motor-related sensor packets.
      *
      * @see enableMotorSensorSending
      */
-	public static byte[] disableMotorSensorSending()
-	{
-		byte[] cmd = new byte[10];
+    public static byte[] disableMotorSensorSending()
+    {
+	byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_MOTOR_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = 0; //(byte) (0 & 0xff);
-		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_MOTOR_SENSOR_DATA;
+	cmd[5] = 1; // len
+	cmd[6] = 0; //(byte) (0 & 0xff);
+	cmd[7] = crc(cmd);
+	cmd[8] = ETX0;
+	cmd[9] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Disables batch updating of standard sensor packets.
      *
      * @see enableStandardSensorSending
      */
-	public static byte[] disableStandardSensorSending()
-	{
-		byte[] cmd = new byte[10];
+    public static byte[] disableStandardSensorSending()
+    {
+	byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_STANDARD_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = 0; //(byte) (0 & 0xff);
-		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_STANDARD_SENSOR_DATA;
+	cmd[5] = 1; // len
+	cmd[6] = 0; //(byte) (0 & 0xff);
+	cmd[7] = crc(cmd);
+	cmd[8] = ETX0;
+	cmd[9] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Disables batch updating of custom sensor packets.
      *
      * @see enableCustomSensorSending
      */
-	public static byte[] disableCustomSensorSending()
-	{
-		byte[] cmd = new byte[10];
+    public static byte[] disableCustomSensorSending()
+    {
+	byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_CUSTOM_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = 0; //(byte) (0 & 0xff);
-		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_CUSTOM_SENSOR_DATA;
+	cmd[5] = 1; // len
+	cmd[6] = 0; //(byte) (0 & 0xff);
+	cmd[7] = crc(cmd);
+	cmd[8] = ETX0;
+	cmd[9] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Disables batch updating of all sensor packets.
      *
      * @see enableAllSensorSending
      */
-	public static byte[] disableAllSensorSending()
-	{
-		byte[] cmd = new byte[10];
+    public static byte[] disableAllSensorSending()
+    {
+	byte[] cmd = new byte[10];
 		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
-		cmd[4] = GET_ALL_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = 0; //(byte) (0 & 0xff);
-		cmd[7] = crc(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
+	cmd[0] = STX0;
+	cmd[1] = STX1;
+	cmd[2] = 1;
+	cmd[3] = 0;
+	cmd[4] = GET_ALL_SENSOR_DATA;
+	cmd[5] = 1; // len
+	cmd[6] = 0; //(byte) (0 & 0xff);
+	cmd[7] = crc(cmd);
+	cmd[8] = ETX0;
+	cmd[9] = ETX1;
 		
-		return cmd;
-	}
+	return cmd;
+    }
 	
     /**
      * Sets the refresh rate for batch updating by motor-related sensor packets.
@@ -486,11 +486,11 @@ public class PMS5005
      *
      * @see motorSensorRequest
      */
-	public static byte[] setMotorSensorPeriod(short timePeriod)
-	{
-		// TODO stub
-		return null;
-	}
+    public static byte[] setMotorSensorPeriod(short timePeriod)
+    {
+	// TODO stub
+	return null;
+    }
 	
     /**
      * Sets the refresh rate for batch updating by standard sensor packets.
@@ -503,11 +503,11 @@ public class PMS5005
      *
      * @see standardSensorRequest
      */
-	public static byte[] setStandardSensorPeriod(short timePeriod)
-	{
-		// TODO stub
-		return null;
-	}
+    public static byte[] setStandardSensorPeriod(short timePeriod)
+    {
+	// TODO stub
+	return null;
+    }
 	
     /**
      * Sets the refresh rate for batch updating by custom sensor packets.
@@ -520,11 +520,11 @@ public class PMS5005
      *
      * @see customSensorRequest
      */
-	public static byte[] setCustomSensorPeriod(short timePeriod)
-	{
-		// TODO stub
-		return null;
-	}
+    public static byte[] setCustomSensorPeriod(short timePeriod)
+    {
+	// TODO stub
+	return null;
+    }
 	
     /**
      * Sets the refresh rate for batch updating of all sensor packets.
@@ -537,11 +537,11 @@ public class PMS5005
      *
      * @see allSensorRequest
      */
-	public static byte[] setAllSensorPeriod(short timePeriod)
-	{
-		// TODO stub
-		return null;
-	}
+    public static byte[] setAllSensorPeriod(short timePeriod)
+    {
+	// TODO stub
+	return null;
+    }
 	
     /**
      * Returns the current distance value between the relevant ultrasonic 
@@ -557,10 +557,10 @@ public class PMS5005
      * with the left-front sensor (robot first person perspective) at Sonar #1 
      * (channel 0).
      */
-	public static short getSensorSonar(short channel, int[] standardSensorAry)
-	{
-		return (byte) (standardSensorAry[channel + ULTRASONIC_OFFSET] & 0xff);
-	}
+    public static short getSensorSonar(short channel, int[] standardSensorAry)
+    {
+	return (byte) (standardSensorAry[channel + ULTRASONIC_OFFSET] & 0xff);
+    }
 	
     /**
      * Returns the current distance measurement value between an infrared 
@@ -578,21 +578,21 @@ public class PMS5005
      * digital converter.  The output voltage of the sensor can be calculated 
      * from the following equation: sensorOutputVoltage = (ival)*3.0/4095(v)
      */
-	public static short getSensorIrRange(short channel, int[] standardSensorAry, int[] customSensorAry)
+    public static short getSensorIrRange(short channel, int[] standardSensorAry, int[] customSensorAry)
+    {
+	short result = -1;
+		
+	if (0 <= channel && channel < 1)
 	{
-		short result = -1;
-		
-		if (0 <= channel && channel < 1)
-		{
-			result = (short) (((standardSensorAry[STANDARD_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[STANDARD_IR_RANGE_OFFSET] & 0xff));
-		}
-		else
-		{
-			result = (short) (((customSensorAry[2*(channel-1) + CUSTOM_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[2*(channel-1) + CUSTOM_IR_RANGE_OFFSET] & 0xff));
-		}
-		
-		return result;
+	    result = (short) (((standardSensorAry[STANDARD_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[STANDARD_IR_RANGE_OFFSET] & 0xff));
 	}
+	else
+	{
+	    result = (short) (((customSensorAry[2*(channel-1) + CUSTOM_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[2*(channel-1) + CUSTOM_IR_RANGE_OFFSET] & 0xff));
+	}
+		
+	return result;
+    }
 	
     /**
      * Returns the current human alarm data from the DHM5150 Human Motion 
@@ -613,11 +613,11 @@ public class PMS5005
      * threshold determines the sensitivity of the sensor.  The higher the 
      * threshold, the lower the sensitivity will be.
      */
-	public static short getSensorHumanAlarm(short channel, int[] standardSensorAry)
-	{
-		int offset = 2*channel + HUMAN_ALARM_OFFSET;
-		return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
-	}
+    public static short getSensorHumanAlarm(short channel, int[] standardSensorAry)
+    {
+	int offset = 2*channel + HUMAN_ALARM_OFFSET;
+	return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
+    }
 	
     /**
      * Returns the current human motion value from the DHM5150 Human Motion 
@@ -637,11 +637,11 @@ public class PMS5005
      * human motion, the different patterns of the two sensor modules manifest 
      * the direction of motion.  The relationship can be obtained empirically.
      */
-	public static short getSensorHumanMotion(short channel, int[] standardSensorAry)
-	{
-		int offset = 2*channel + HUMAN_MOTION_OFFSET;
-		return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
-	}
+    public static short getSensorHumanMotion(short channel, int[] standardSensorAry)
+    {
+	int offset = 2*channel + HUMAN_MOTION_OFFSET;
+	return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
+    }
 	
     /**
      * Returns the current tilt angle value in the horizontal direction from 
@@ -661,10 +661,10 @@ public class PMS5005
      * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
      * ZeroGValue) is about 1250.
      */
-	public static short getSensorTiltingX(int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[TILTING_X_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TILTING_X_OFFSET] & 0xff));
-	}
+    public static short getSensorTiltingX(int[] standardSensorAry)
+    {
+	return (short) (((standardSensorAry[TILTING_X_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TILTING_X_OFFSET] & 0xff));
+    }
 	
     /**
      * Returns the current tilt angle value in the vertical direction from 
@@ -684,10 +684,10 @@ public class PMS5005
      * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
      * ZeroGValue) is about 1250.
      */
-	public static short getSensorTiltingY(int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[TILTING_Y_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TILTING_Y_OFFSET] & 0xff));
-	}
+    public static short getSensorTiltingY(int[] standardSensorAry)
+    {
+	return (short) (((standardSensorAry[TILTING_Y_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TILTING_Y_OFFSET] & 0xff));
+    }
 	
     /**
      * Returns the current air temperature values near the relevant DC motor 
@@ -709,11 +709,11 @@ public class PMS5005
      * from the following equation: Temperature = 100 - (ival - 980)/11.6 
      * where Temperature is in degrees Celsius.
      */
-	public static short getSensorOverheat(short channel, int[] standardSensorAry)
-	{
-		int offset = 2*channel + OVERHEAT_SENSOR_OFFSET;
-		return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
-	}
+    public static short getSensorOverheat(short channel, int[] standardSensorAry)
+    {
+	int offset = 2*channel + OVERHEAT_SENSOR_OFFSET;
+	return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
+    }
 	
     /**
      * Returns the current temperature value from the 
@@ -722,10 +722,10 @@ public class PMS5005
      * @return Temperature = (ival - 1256) / 34.8, where Temperature is in 
      * degrees Celsius.
      */
-	public static short getSensorTemperature(int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[TEMPERATURE_AD_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TEMPERATURE_AD_OFFSET] & 0xff));
-	}
+    public static short getSensorTemperature(int[] standardSensorAry)
+    {
+	return (short) (((standardSensorAry[TEMPERATURE_AD_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TEMPERATURE_AD_OFFSET] & 0xff));
+    }
 	
     /**
      * Returns the four parts of a two-16-bit-code infrared 
@@ -739,10 +739,10 @@ public class PMS5005
      * Repeat Code: byte[3]
      * Where the repeat byte would be 255 if the button is pressed continuously
      */
-	public static short getSensorIrCode(short index, int[] standardSensorAry)
-	{
-		return (short) standardSensorAry[INFRARED_COMMAND_OFFSET + index];
-	}
+    public static short getSensorIrCode(short index, int[] standardSensorAry)
+    {
+	return (short) standardSensorAry[INFRARED_COMMAND_OFFSET + index];
+    }
 	
     /**
      * Sends two 16-bit words of infrared communication output data to the 
@@ -762,11 +762,11 @@ public class PMS5005
      *    the command is sent.
      * 3) This API method is under development and will be available soon.
      */
-	public static byte[] setInfraredControlOutput(short lowWord, short highWord)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public static byte[] setInfraredControlOutput(short lowWord, short highWord)
+    {
+	// TODO Auto-generated method stub
+	return null;
+    }
 	
     /**
      * Returns the current value of the power supply voltage for the channel 
@@ -793,10 +793,10 @@ public class PMS5005
      * 2) Power supply voltage of DC motors = 24v*(ival/4095)
      * 3) Power supply voltage of servo motors = 9v*(ival/4095)
      */
-	public static short getSensorBatteryAd(short channel, int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[2*channel + BATTERY_SENSOR_OFFSET + 1] & 0xff) << 8 | standardSensorAry[2*channel + BATTERY_SENSOR_OFFSET] & 0xff));
-	}
+    public static short getSensorBatteryAd(short channel, int[] standardSensorAry)
+    {
+	return (short) (((standardSensorAry[2*channel + BATTERY_SENSOR_OFFSET + 1] & 0xff) << 8 | standardSensorAry[2*channel + BATTERY_SENSOR_OFFSET] & 0xff));
+    }
 	
     /**
      * Returns the current value of the reference voltage of the A/D converter 
@@ -807,10 +807,10 @@ public class PMS5005
      * The following equation can be used to calculate the actual voltage 
      * values: Voltage = 6v*(ival/4095)
      */
-	public static short getSensorRefVoltage(int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[REFERENCE_VOLTAGE_OFFSET + 1] & 0xff) << 8 | standardSensorAry[REFERENCE_VOLTAGE_OFFSET] & 0xff));
-	}
+    public static short getSensorRefVoltage(int[] standardSensorAry)
+    {
+	return (short) (((standardSensorAry[REFERENCE_VOLTAGE_OFFSET + 1] & 0xff) << 8 | standardSensorAry[REFERENCE_VOLTAGE_OFFSET] & 0xff));
+    }
 	
     /**
      * Returns the current value of the reference voltage of the A/D converter 
@@ -821,10 +821,10 @@ public class PMS5005
      * The following equation can be used to calculate the actual voltage 
      * values: Voltage = 6v*(ival/4095)
      */
-	public static short getSensorPotVoltage(int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[POTENTIOMETER_POWER_OFFSET + 1] & 0xff) << 8 | standardSensorAry[POTENTIOMETER_POWER_OFFSET] & 0xff));
-	}
+    public static short getSensorPotVoltage(int[] standardSensorAry)
+    {
+	return (short) (((standardSensorAry[POTENTIOMETER_POWER_OFFSET + 1] & 0xff) << 8 | standardSensorAry[POTENTIOMETER_POWER_OFFSET] & 0xff));
+    }
 	
     /**
      * Returns the current value of the specified potentiometer position sensor
@@ -856,10 +856,10 @@ public class PMS5005
      *
      * @see setDcMotorSensorUsage
      */
-	public static short getSensorPot(short channel, int[] motorSensorAry)
-	{
-		return (short) (((motorSensorAry[2*channel + POTENTIOMETER_SENSOR_OFFSET] + 1) << 8 | motorSensorAry[2*channel + POTENTIOMETER_SENSOR_OFFSET]));
-	}
+    public static short getSensorPot(short channel, int[] motorSensorAry)
+    {
+	return (short) (((motorSensorAry[2*channel + POTENTIOMETER_SENSOR_OFFSET] + 1) << 8 | motorSensorAry[2*channel + POTENTIOMETER_SENSOR_OFFSET]));
+    }
 	
     /**
      * Returns the sampling value of the selected motor current sensor.
@@ -871,10 +871,10 @@ public class PMS5005
      * current value can be calculated with the following formula: 
      * Motor Current (amperes) = ival/728 ( = ival*3*375/200/4095)
      */
-	public static short getMotorCurrent(short channel, int[] motorSensorAry)
-	{
-		return (short) ((((motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET + 1]) << 8 | motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET])) / 728.0);
-	}
+    public static short getMotorCurrent(short channel, int[] motorSensorAry)
+    {
+	return (short) ((((motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET + 1]) << 8 | motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET])) / 728.0);
+    }
 	
     /**
      * Returns +1, 0, or -1 to indicate the direction of rotation.
@@ -885,23 +885,23 @@ public class PMS5005
      * @return 1 to indicate positive direction, 0 to indicate no movement, 
      * and -1 to indicate negative direction.
      */
-	public static short getEncoderDirection(short channel, int[] motorSensorAry)
+    public static short getEncoderDirection(short channel, int[] motorSensorAry)
+    {
+	int offset = channel + ENCODER_DIRECTION_OFFSET;
+	short result = -1;
+		
+	switch (channel)
 	{
-		int offset = channel + ENCODER_DIRECTION_OFFSET;
-		short result = -1;
-		
-		switch (channel)
-		{
-		case 0:
-			result = (short) (motorSensorAry[offset] & 0x01);
-			break;
-		case 1:
-			result = (short) (motorSensorAry[offset] & 0x03);
-			break;
-		}
-		
-		return result;
+	case 0:
+	    result = (short) (motorSensorAry[offset] & 0x01);
+	    break;
+	case 1:
+	    result = (short) (motorSensorAry[offset] & 0x03);
+	    break;
 	}
+		
+	return result;
+    }
 	
     /**
      * Returns the current pulse counter to indicate the position of rotation.
@@ -912,11 +912,11 @@ public class PMS5005
      * @return Pulse counter, an short integral value to rotation with range of 
      * 0 to 32767 in cycles.
      */
-	public static short getEncoderPulse(short channel, int[] motorSensorAry)
-	{
-		int offset = 4*channel + ENCODER_PULSE_OFFSET;
-		return (short) (((motorSensorAry[offset + 1] & 0xff) << 8) | (motorSensorAry[offset] & 0xff));
-	}
+    public static short getEncoderPulse(short channel, int[] motorSensorAry)
+    {
+	int offset = 4*channel + ENCODER_PULSE_OFFSET;
+	return (short) (((motorSensorAry[offset + 1] & 0xff) << 8) | (motorSensorAry[offset] & 0xff));
+    }
 	
     /**
      * Returns the rotation speed.  The unit is defined as the absolute value 
@@ -927,11 +927,11 @@ public class PMS5005
      *
      * @see setDcMotorSensorUsage
      */
-	public static short getEncoderSpeed(short channel, int[] motorSensorAry)
-	{
-		int offset = 4*channel + MOTOR_SPEED_OFFSET;
-		return (short) (((motorSensorAry[offset + 1] & 0xff) << 8) | (motorSensorAry[offset] & 0xff));
-	}
+    public static short getEncoderSpeed(short channel, int[] motorSensorAry)
+    {
+	int offset = 4*channel + MOTOR_SPEED_OFFSET;
+	return (short) (((motorSensorAry[offset + 1] & 0xff) << 8) | (motorSensorAry[offset] & 0xff));
+    }
 	
     /**
      * Returns the sampling value of the custom analog to digital 
@@ -951,11 +951,11 @@ public class PMS5005
      *
      * @see getSensorBatteryAd
      */
-	public static short getCustomAd(short channel, int[] customSensorAry)
-	{
-		int offset = 2*channel + CUSTOM_AD_OFFSET;
-		return (short) (((customSensorAry[offset+1] & 0xff) << 8) | (customSensorAry[offset] & 0xff));
-	}
+    public static short getCustomAd(short channel, int[] customSensorAry)
+    {
+	int offset = 2*channel + CUSTOM_AD_OFFSET;
+	return (short) (((customSensorAry[offset+1] & 0xff) << 8) | (customSensorAry[offset] & 0xff));
+    }
 	
     /**
      * Returns a value with the lower 8 bits corresponding to the 8 channel 
@@ -963,11 +963,11 @@ public class PMS5005
      *
      * @param channel 0, 1, 2, 3, 4, 5, 6, or 7 for channel #1 through #8.
      */
-	public static short getCustomDIn(byte channel, int[] customSensorAry)
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    public static short getCustomDIn(byte channel, int[] customSensorAry)
+    {
+	// TODO Auto-generated method stub
+	return 0;
+    }
 	
     /**
      * Sets the 8-channel custom digital outputs.
@@ -976,12 +976,12 @@ public class PMS5005
      * corresponding outputs of the 8 channels.  The MSB of the lower byte 
      * represents channel #8 and LSB of the lower byte represents channel #1.
      */
-	public static byte[] setCustomDOut(byte ival)
-	{
-		return null;
-		// TODO Auto-generated method stub
+    public static byte[] setCustomDOut(byte ival)
+    {
+	return null;
+	// TODO Auto-generated method stub
 		
-	}
+    }
 	
     /**
      * Sets the motor polarity to 1 or -1 for the motor channel specified.
@@ -996,22 +996,22 @@ public class PMS5005
      * 
      * @param polarity 1 or -1
      */
-	public static byte[] setMotorPolarity(byte channel, byte polarity)
-	{
-		byte[] packet = new byte[6];
-		packet[0]  = STX0;	packet[1]  = STX1;
-		packet[2]  = 1;		packet[3]  = 0;
+    public static byte[] setMotorPolarity(byte channel, byte polarity)
+    {
+	byte[] packet = new byte[6];
+	packet[0]  = STX0;	packet[1]  = STX1;
+	packet[2]  = 1;		packet[3]  = 0;
 		
-		packet[4] = PARAM_SET;                   //DID
-		packet[5] = 5;                           //LEN
-		packet[6] = DC_SENSOR_USAGE;             //Subcommand
-		packet[7] = channel;                     //0-L | 1=R
-		packet[8] = polarity;                    //polarity 1 | -1
-		packet[9] = crc(packet);                 //Checksum
+	packet[4] = PARAM_SET;                   //DID
+	packet[5] = 5;                           //LEN
+	packet[6] = DC_SENSOR_USAGE;             //Subcommand
+	packet[7] = channel;                     //0-L | 1=R
+	packet[8] = polarity;                    //polarity 1 | -1
+	packet[9] = crc(packet);                 //Checksum
 		
-		packet[4]  = ETX0;  packet[5]  = ETX0;
-		return packet;
-	}
+	packet[4]  = ETX0;  packet[5]  = ETX0;
+	return packet;
+    }
 	
     /**
      * Enables the specified DC motor control channel.
@@ -1022,23 +1022,23 @@ public class PMS5005
      *
      * @see resumeDcMotor
      */
-	public static byte[] enableDcMotor(byte channel)
-	{
-		byte[] packet = new byte[11];
-		packet[0]  = STX0;	packet[1]  = STX1;
-		packet[2]  = 1;		packet[3]  = 0;
+    public static byte[] enableDcMotor(byte channel)
+    {
+	byte[] packet = new byte[11];
+	packet[0]  = STX0;	packet[1]  = STX1;
+	packet[2]  = 1;		packet[3]  = 0;
 		
-		packet[4]  = TOGGLE_DC_MOTORS; //DID
-		packet[5]  = 2;                //LEN
-		packet[6]  = 1;                //1 = Enable/Resume
-		packet[7]  = channel;          //0=L | 1=R
-		packet[8]  = crc(packet);      //Checksum
+	packet[4]  = TOGGLE_DC_MOTORS; //DID
+	packet[5]  = 2;                //LEN
+	packet[6]  = 1;                //1 = Enable/Resume
+	packet[7]  = channel;          //0=L | 1=R
+	packet[8]  = crc(packet);      //Checksum
 		
-		packet[9]  = ETX0;	packet[10] = ETX1;
-		return packet;
-	}
+	packet[9]  = ETX0;	packet[10] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Disables the specified DC motor control channel.
      *
      * @param channel 0 for left, 1 for right (robot first person perspective)
@@ -1047,67 +1047,67 @@ public class PMS5005
      *
      * @see suspendDcMotor
      */
-	public static byte[] disableDcMotor(byte channel)
-	{
-		byte[] packet = new byte[10];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1; 		packet[3] = 0;
+    public static byte[] disableDcMotor(byte channel)
+    {
+	byte[] packet = new byte[11];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1; 		packet[3] = 0;
 		
-		packet[4] = TOGGLE_DC_MOTORS;         //DID
-		packet[5] = 2;                        //LEN
-		packet[6] = 0;                        //0 = Disable/Suspend
-		packet[7] = channel;                  //0=L | 1=R
-		packet[7] = crc(packet);              //Checksum
+	packet[4] = TOGGLE_DC_MOTORS;         //DID
+	packet[5] = 2;                        //LEN
+	packet[6] = 0;                        //0 = Disable/Suspend
+	packet[7] = channel;                  //0=L | 1=R
+	packet[8] = crc(packet);              //Checksum
 		
-		packet[8] = ETX0;	packet[9] = ETX1;
-		return packet;
-	}
+	packet[9] = ETX0;	packet[10] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Resumes the specified DC motor control channel.
      *
      * @param channel 0 for left, 1 for right (robot first person perspective)
      */
-	public static byte[] resumeDcMotor(byte channel)
-	{
-		byte[] packet = new byte[11];
-		packet[0]  = STX0;	packet[1]  = STX1;
-		packet[2]  = 1;		packet[3]  = 0;
+    public static byte[] resumeDcMotor(byte channel)
+    {
+	byte[] packet = new byte[11];
+	packet[0]  = STX0;	packet[1]  = STX1;
+	packet[2]  = 1;		packet[3]  = 0;
 		
-		packet[4]  = TOGGLE_DC_MOTORS; //DID
-		packet[5]  = 2;                //LEN
-		packet[6]  = 1;                //resume
-		packet[7]  = channel;          //0=L | 1=R
-		packet[8]  = crc(packet);      //Checksum
+	packet[4]  = TOGGLE_DC_MOTORS; //DID
+	packet[5]  = 2;                //LEN
+	packet[6]  = 1;                //resume
+	packet[7]  = channel;          //0=L | 1=R
+	packet[8]  = crc(packet);      //Checksum
 		
-		packet[9]  = ETX0;	packet[10] = ETX1;
-		return packet;
-	}
+	packet[9]  = ETX0;	packet[10] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Suspends the specified DC motor control channel.
      *
      * @param channel 0 for left, 1 for right (robot first person perspective)
      *
      * All motor control channels are initially suspended at boot-up.
      */
-	public static byte[] suspendDcMotor(byte channel)
-	{
-		byte[] packet = new byte[11];
-		packet[0]  = STX0;	packet[1]  = STX1;
-		packet[2]  = 1;		packet[3]  = 0;
+    public static byte[] suspendDcMotor(byte channel)
+    {
+	byte[] packet = new byte[11];
+	packet[0]  = STX0;	packet[1]  = STX1;
+	packet[2]  = 1;		packet[3]  = 0;
 		
-		packet[4]  = TOGGLE_DC_MOTORS; //DID
-		packet[5]  = 2;                //LEN
-		packet[6]  = 0;                //SUSPEND
-		packet[7]  = channel;          //0=L | 1=R
-		packet[8]  = crc(packet);      //Checksum
+	packet[4]  = TOGGLE_DC_MOTORS; //DID
+	packet[5]  = 2;                //LEN
+	packet[6]  = 0;                //SUSPEND
+	packet[7]  = channel;          //0=L | 1=R
+	packet[8]  = crc(packet);      //Checksum
 		
-		packet[9]  = ETX0;	packet[10] = ETX1;
-		return packet;
-	}
+	packet[9]  = ETX0;	packet[10] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sets up the PID control parameters of the specified DC motor channel 
      * for position control.
      *
@@ -1120,19 +1120,19 @@ public class PMS5005
      *
      * @see setDcMotorControlMode
      */
-	public static byte[] setDcMotorPositionControlPid(byte channel, short Kp, short Kd, short Ki)
-	{
-		byte[] packet = new byte[20];
-		packet[0]  = STX0;	packet[1]  = STX1;
-		packet[2]  = 1;		packet[3]  = 0;
+    public static byte[] setDcMotorPositionControlPid(byte channel, short Kp, short Kd, short Ki)
+    {
+	byte[] packet = new byte[20];
+	packet[0]  = STX0;	packet[1]  = STX1;
+	packet[2]  = 1;		packet[3]  = 0;
 		
-		packet[4]  = PARAM_SET;   				 //DID
-		packet[5]  = 11;                         //LEN 
-		packet[6]  = DC_POSITION_PID;            //Subcommand
-		packet[7]  = channel;                    //0=L | 1=R
-		packet[8]  = KpId;                       //Proportional gain
-		packet[9]  = (byte) (Kp & 0xff);        
-	    packet[10] = (byte) ((Kp >>> 8) & 0xff);
+	packet[4]  = PARAM_SET;   				 //DID
+	packet[5]  = 11;                         //LEN 
+	packet[6]  = DC_POSITION_PID;            //Subcommand
+	packet[7]  = channel;                    //0=L | 1=R
+	packet[8]  = KpId;                       //Proportional gain
+	packet[9]  = (byte) (Kp & 0xff);        
+	packet[10] = (byte) ((Kp >>> 8) & 0xff);
         packet[11] = KdId;                       //Derivative gain
         packet[12] = (byte) (Kd & 0xff);        
         packet[13] = (byte) ((Kd >>> 8) & 0xff);
@@ -1141,23 +1141,23 @@ public class PMS5005
         packet[16] = (byte) ((Ki >>> 8) & 0xff);
         packet[17] = crc(packet);                //Checksum
 
-	    packet[18] = ETX0; packet[19] = ETX1;
-	    return packet;
-	}
+	packet[18] = ETX0; packet[19] = ETX1;
+	return packet;
+    }
 	
     public static byte[] setDcMotorVelocityControlPID(byte channel, int Kp, int Kd, int Ki) 
     {
     	byte[] packet = new byte[20];
-		packet[0]  = STX0;	packet[1]  = STX1;
-		packet[2]  = 1;		packet[3]  = 0;
+	packet[0]  = STX0;	packet[1]  = STX1;
+	packet[2]  = 1;		packet[3]  = 0;
 		
-		packet[4]  = PARAM_SET;                  //DID
-		packet[5]  = 11;                         //LEN 
-		packet[6]  = DC_VELOCITY_PID;            //Subcommand
-		packet[7]  = channel;                    //0=L | 1=R
-		packet[8]  = KpId;                       //Proportional gain
-		packet[9]  = (byte) (Kp & 0xff);         
-	    packet[10] = (byte) ((Kp >>> 8) & 0xff);
+	packet[4]  = PARAM_SET;                  //DID
+	packet[5]  = 11;                         //LEN 
+	packet[6]  = DC_VELOCITY_PID;            //Subcommand
+	packet[7]  = channel;                    //0=L | 1=R
+	packet[8]  = KpId;                       //Proportional gain
+	packet[9]  = (byte) (Kp & 0xff);         
+	packet[10] = (byte) ((Kp >>> 8) & 0xff);
         packet[11] = KdId;                       //Derivative gain
         packet[12] = (byte) (Kd & 0xff);         
         packet[13] = (byte) ((Kd >>> 8) & 0xff);
@@ -1166,20 +1166,20 @@ public class PMS5005
         packet[16] = (byte) ((Ki >>> 8) & 0xff);
         packet[17] = crc(packet);                //Checksum
 
-	    packet[18] = ETX0; packet[19] = ETX1;
-	    return packet;
+	packet[18] = ETX0; packet[19] = ETX1;
+	return packet;
     }
 	
-	/**
+    /**
      * This filtering feature is still under development. All data will be 
      * treated as raw data.
      */
-	public static byte[] setDcMotorSensorFilter(byte channel, short filterMethod)
-	{
-		return null;
-	}
+    public static byte[] setDcMotorSensorFilter(byte channel, short filterMethod)
+    {
+	return null;
+    }
 	
-	/**
+    /**
      * Set the sensor type for the specified DC motor control channel on the 
      * Sensing and Motion Controller (PMS5005).
      * 
@@ -1207,24 +1207,24 @@ public class PMS5005
      *
      * @see getSensorPot
      */
-	public static byte[] setDcMotorSensorUsage(byte channel, byte sensorType)
-	{
-		byte[] packet = new byte[6];
-		packet[0]  = STX0;	packet[1]  = STX1;
-		packet[2]  = 1;		packet[3]  = 0;
+    public static byte[] setDcMotorSensorUsage(byte channel, byte sensorType)
+    {
+	byte[] packet = new byte[6];
+	packet[0]  = STX0;	packet[1]  = STX1;
+	packet[2]  = 1;		packet[3]  = 0;
 		
-		packet[4] = PARAM_SET;                   //DID
-		packet[5] = 5;                           //LEN
-		packet[6] = DC_SENSOR_USAGE;             //Subcommand
-		packet[7] = channel;                     //0-5  = Single Potentiometer, 0-2  = Dual Potentiometer, 0-1  = Encoder
-		packet[8] = sensorType;                  //0x00 = Single Potentiometer, 0x01 = Dual Potentiometer, 0x02 = Encoder
-		packet[9] = crc(packet);                 //Checksum
+	packet[4] = PARAM_SET;                   //DID
+	packet[5] = 5;                           //LEN
+	packet[6] = DC_SENSOR_USAGE;             //Subcommand
+	packet[7] = channel;                     //0-5  = Single Potentiometer, 0-2  = Dual Potentiometer, 0-1  = Encoder
+	packet[8] = sensorType;                  //0x00 = Single Potentiometer, 0x01 = Dual Potentiometer, 0x02 = Encoder
+	packet[9] = crc(packet);                 //Checksum
 		
-		packet[4]  = ETX0;  packet[5]  = ETX0;
-		return packet;
-	}
+	packet[4]  = ETX0;  packet[5]  = ETX0;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sets the control mode of the specified DC motor control channel on the 
      * Sensing and Motion Controller (PMS5005).  The available control modes 
      * are open-loop PWM control, closed-loop position control, and closed-
@@ -1237,24 +1237,24 @@ public class PMS5005
      * @see setDcMotorPositionControlPid
      * @see setDcMotorVelocityControlPid
      */
-	public static byte[] setDcMotorControlMode(byte channel, byte controlMode)
-	{
-		byte[] packet = new byte[6];
-		packet[0]  = STX0;	packet[1]  = STX1;
-		packet[2]  = 1;		packet[3]  = 0;
+    public static byte[] setDcMotorControlMode(byte channel, byte controlMode)
+    {
+	byte[] packet = new byte[6];
+	packet[0]  = STX0;	packet[1]  = STX1;
+	packet[2]  = 1;		packet[3]  = 0;
 		
-		packet[4]  = PARAM_SET;				//DID
-		packet[5]  = 3;						//LEN
-		packet[6]  = DC_CTRL_MODE;			//Subcommand
-		packet[7]  = channel;				//channel 0-5
-		packet[8]  = controlMode;			//0 = open, 1 = closed position, 2 = closed velocity
-		packet[9]  = crc(packet);			//Checksum
+	packet[4]  = PARAM_SET;				//DID
+	packet[5]  = 3;						//LEN
+	packet[6]  = DC_CTRL_MODE;			//Subcommand
+	packet[7]  = channel;				//channel 0-5
+	packet[8]  = controlMode;			//0 = open, 1 = closed position, 2 = closed velocity
+	packet[9]  = crc(packet);			//Checksum
 		
-		packet[4]  = ETX0;  packet[5]  = ETX0;
-		return packet;
-	}
+	packet[4]  = ETX0;  packet[5]  = ETX0;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sends the position control command to the specified motion control 
      * channel on the Sensing and Motion Controller (PMS5005).  
      * The command includes the target position and the target time 
@@ -1265,26 +1265,26 @@ public class PMS5005
      * @param cmdValue Target position value
      * @param timePeriod Executing time in milliseconds
      */
-	public static byte[] dcMotorPositionTimeCtrl(byte channel, short cmdValue, short time)
-	{
-		byte[] packet = new byte[14];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1;		packet[3] = 0;
+    public static byte[] dcMotorPositionTimeCtrl(byte channel, short cmdValue, short time)
+    {
+	byte[] packet = new byte[14];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1;		packet[3] = 0;
 		
-		packet[4]  = POSITION_CTRL;					//DID
-		packet[5]  = 5;								//LEN
-		packet[6]  = channel;						//Channel 0-5
-		packet[7]  = (byte)(cmdValue & 0xFF);		//cmdValue
-		packet[8]  = (byte)((cmdValue >>> 8) & 0xFF);
-		packet[9]  = (byte)(time & 0xFF);			//time
-		packet[10] = (byte)((time >>> 8) & 0xFF);
-		packet[11] = crc(packet);					//Checksum
+	packet[4]  = POSITION_CTRL;					//DID
+	packet[5]  = 5;								//LEN
+	packet[6]  = channel;						//Channel 0-5
+	packet[7]  = (byte)(cmdValue & 0xFF);		//cmdValue
+	packet[8]  = (byte)((cmdValue >>> 8) & 0xFF);
+	packet[9]  = (byte)(time & 0xFF);			//time
+	packet[10] = (byte)((time >>> 8) & 0xFF);
+	packet[11] = crc(packet);					//Checksum
 		
-		packet[12] = ETX0;	packet[13] = ETX1;
-		return packet;
-	}
+	packet[12] = ETX0;	packet[13] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sends the position control command to the specified motion control 
      * channel on the Sensing and Motion Controller (PMS5005).  The command 
      * includes the target position but no time period specified to execute 
@@ -1305,24 +1305,24 @@ public class PMS5005
      * @see dcMotorVelocityTimeCtrl
      * @see getSensorPot
      */
-	public static byte[] dcMotorPositionNonTimeCtrl(byte channel, short cmdValue)
-	{
-		byte[] packet = new byte[12];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1;		packet[3] = 0;
+    public static byte[] dcMotorPositionNonTimeCtrl(byte channel, short cmdValue)
+    {
+	byte[] packet = new byte[12];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1;		packet[3] = 0;
 		
-		packet[4] = POSITION_CTRL;					//DID
-		packet[5] = 3;								//LEN
-		packet[6] = channel;						//channel 0-5
-		packet[7] = (byte)(cmdValue & 0xFF);		//cmdValue
-		packet[8] = (byte)((cmdValue >>> 8) & 0xFF);
-		packet[9] = crc(packet);					//Checksum
+	packet[4] = POSITION_CTRL;					//DID
+	packet[5] = 3;								//LEN
+	packet[6] = channel;						//channel 0-5
+	packet[7] = (byte)(cmdValue & 0xFF);		//cmdValue
+	packet[8] = (byte)((cmdValue >>> 8) & 0xFF);
+	packet[9] = crc(packet);					//Checksum
 		
-		packet[10] = ETX0;	packet[11] = ETX1;
-		return packet;
-	}
+	packet[10] = ETX0;	packet[11] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sends the PWM control command to the specified motion control channel on 
      * the Sensing and Motion Controller (PMS5005).  The command includes the 
      * target pulse width value and the time period to execute the command. 
@@ -1344,26 +1344,26 @@ public class PMS5005
      * 
      * @see dcMotorPwmNonTimeCtrl
      */
-	public static byte[] dcMotorPwmTimeCtrl(byte channel, short cmdValue, short time)
-	{
-		byte[] packet = new byte[14];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1;		packet[3] = 0;
+    public static byte[] dcMotorPwmTimeCtrl(byte channel, short cmdValue, short time)
+    {
+	byte[] packet = new byte[14];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1;		packet[3] = 0;
 		
-		packet[4]  = PWM_CTRL;						//DID
-		packet[5]  = 5;								//LEN
-		packet[6]  = channel;						//Channel 0-5
-		packet[7]  = (byte)(cmdValue & 0xFF);		//cmdValue
-		packet[8]  = (byte)((cmdValue >>> 8) & 0xFF);
-		packet[9]  = (byte)(time & 0xFF);			//time
-		packet[10] = (byte)((time >>> 8) & 0xFF);
-		packet[11] = crc(packet);					//Checksum
+	packet[4]  = PWM_CTRL;						//DID
+	packet[5]  = 5;								//LEN
+	packet[6]  = channel;						//Channel 0-5
+	packet[7]  = (byte)(cmdValue & 0xFF);		//cmdValue
+	packet[8]  = (byte)((cmdValue >>> 8) & 0xFF);
+	packet[9]  = (byte)(time & 0xFF);			//time
+	packet[10] = (byte)((time >>> 8) & 0xFF);
+	packet[11] = crc(packet);					//Checksum
 		
-		packet[12] = ETX0;	packet[13] = ETX1;
-		return packet;
-	}
+	packet[12] = ETX0;	packet[13] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sends the PWM control command to the specified motion control channel on 
      * the Sensing and Motion Controller (PMS5005).  The command includes the 
      * target pulse width value without an execution time period specified.  
@@ -1385,24 +1385,24 @@ public class PMS5005
      * 
      * @see dcMotorPwmTimeCtrl
      */
-	public static byte[] dcMotorPwmNonTimeCtrl(byte channel, short cmdValue)
-	{
-		byte[] packet = new byte[12];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1;		packet[3] = 0;
+    public static byte[] dcMotorPwmNonTimeCtrl(byte channel, short cmdValue)
+    {
+	byte[] packet = new byte[12];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1;		packet[3] = 0;
 		
-		packet[4] = PWM_CTRL;						//DID
-		packet[5] = 3;								//LEN
-		packet[6] = channel;						//Channel 0-5
-		packet[7] = (byte)(cmdValue & 0xFF);		//cmdValue
-		packet[8] = (byte)((cmdValue >>> 8) & 0xFF);
-		packet[9] = crc(packet);					//Checksum
+	packet[4] = PWM_CTRL;						//DID
+	packet[5] = 3;								//LEN
+	packet[6] = channel;						//Channel 0-5
+	packet[7] = (byte)(cmdValue & 0xFF);		//cmdValue
+	packet[8] = (byte)((cmdValue >>> 8) & 0xFF);
+	packet[9] = crc(packet);					//Checksum
 		
-		packet[10] = ETX0;	packet[11] = ETX1;
-		return packet;
-	}
+	packet[10] = ETX0;	packet[11] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sends the position control command to all 6 DC motor control channels on 
      * the sensing and motion controller (PMS5005) at the same time.  The 
      * command includes the target positions and the time period to execute the 
@@ -1431,35 +1431,35 @@ public class PMS5005
      * @see getSensorPot
      * @see dcMotorPositionTimeCtrl
      */
-	public static byte[] dcMotorPositionTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
-	{
-		byte[] packet = new byte[23];
-		packet[0] = STX0;  packet[1] = STX1;
-		packet[2] = 1;   packet[3] = 0;
+    public static byte[] dcMotorPositionTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+    {
+	byte[] packet = new byte[23];
+	packet[0] = STX0;  packet[1] = STX1;
+	packet[2] = 1;   packet[3] = 0;
 		
-		packet[4]  = ALL_POSITION_CTRL;                 //DID
-		packet[5]  = 14;                                //LEN
-		packet[6]  = (byte)(pos1 & 0xff);               //channel 1
-		packet[7]  = (byte)((pos1 >>> 8) & 0xff);
-		packet[8]  = (byte)(pos2 & 0xff);               //channel 2
-		packet[9]  = (byte)((pos2 >>> 8) & 0xff);
-		packet[10] = (byte)(pos3 & 0xff);               //channel 3
-		packet[11] = (byte)((pos3 >>> 8) & 0xff);
-		packet[12] = (byte)(pos4 & 0xff);               //channel 4
-		packet[13] = (byte)((pos4 >>> 8) & 0xff);
-		packet[14] = (byte)(pos5 & 0xff);               //channel 5
-		packet[15] = (byte)((pos5 >>> 8) & 0xff);
-		packet[16] = (byte)(pos6 & 0xff);               //channel 6
-		packet[17] = (byte)((pos6 >>> 8) & 0xff);
-		packet[18] = (byte)(time & 0xff);				//time
-		packet[19] = (byte)((time >>> 8) & 0x0ff);
-		packet[20] = crc(packet);                       //Checksum
+	packet[4]  = ALL_POSITION_CTRL;                 //DID
+	packet[5]  = 14;                                //LEN
+	packet[6]  = (byte)(pos1 & 0xff);               //channel 1
+	packet[7]  = (byte)((pos1 >>> 8) & 0xff);
+	packet[8]  = (byte)(pos2 & 0xff);               //channel 2
+	packet[9]  = (byte)((pos2 >>> 8) & 0xff);
+	packet[10] = (byte)(pos3 & 0xff);               //channel 3
+	packet[11] = (byte)((pos3 >>> 8) & 0xff);
+	packet[12] = (byte)(pos4 & 0xff);               //channel 4
+	packet[13] = (byte)((pos4 >>> 8) & 0xff);
+	packet[14] = (byte)(pos5 & 0xff);               //channel 5
+	packet[15] = (byte)((pos5 >>> 8) & 0xff);
+	packet[16] = (byte)(pos6 & 0xff);               //channel 6
+	packet[17] = (byte)((pos6 >>> 8) & 0xff);
+	packet[18] = (byte)(time & 0xff);				//time
+	packet[19] = (byte)((time >>> 8) & 0x0ff);
+	packet[20] = crc(packet);                       //Checksum
 
-		packet[21] = ETX0; packet[22] = ETX1;
-		return packet;
-	}
+	packet[21] = ETX0; packet[22] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sends the position control command to all 6 DC motor control channels on 
      * the Sensing and Motion Controller (PMS5005) at the same time.  The 
      * command includes the target positions without a specified time period 
@@ -1487,33 +1487,33 @@ public class PMS5005
      * @see getSensorPot
      * @see dcMotorPositionNonTimeCtrl
      */
-	public static byte[] dcMotorPositionNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
-	{
-		byte[] packet = new byte[21];
-		packet[0] = STX0;  packet[1] = STX1;
-		packet[2] = 1;   packet[3] = 0;
+    public static byte[] dcMotorPositionNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+    {
+	byte[] packet = new byte[21];
+	packet[0] = STX0;  packet[1] = STX1;
+	packet[2] = 1;   packet[3] = 0;
 		
-		packet[4]  = ALL_POSITION_CTRL;                 //DID
-		packet[5]  = 12;                                //LEN
-		packet[6]  = (byte)(pos1 & 0xff);               //channel 1
-		packet[7]  = (byte)((pos1 >>> 8) & 0xff);
-		packet[8]  = (byte)(pos2 & 0xff);               //channel 2
-		packet[9]  = (byte)((pos2 >>> 8) & 0xff);
-		packet[10] = (byte)(pos3 & 0xff);               //channel 3
-		packet[11] = (byte)((pos3 >>> 8) & 0xff);
-		packet[12] = (byte)(pos4 & 0xff);               //channel 4
-		packet[13] = (byte)((pos4 >>> 8) & 0xff);
-		packet[14] = (byte)(pos5 & 0xff);               //channel 5
-		packet[15] = (byte)((pos5 >>> 8) & 0xff);
-		packet[16] = (byte)(pos6 & 0xff);               //channel 6
-		packet[17] = (byte)((pos6 >>> 8) & 0xff);
-		packet[18] = crc(packet);                       //Checksum
+	packet[4]  = ALL_POSITION_CTRL;                 //DID
+	packet[5]  = 12;                                //LEN
+	packet[6]  = (byte)(pos1 & 0xff);               //channel 1
+	packet[7]  = (byte)((pos1 >>> 8) & 0xff);
+	packet[8]  = (byte)(pos2 & 0xff);               //channel 2
+	packet[9]  = (byte)((pos2 >>> 8) & 0xff);
+	packet[10] = (byte)(pos3 & 0xff);               //channel 3
+	packet[11] = (byte)((pos3 >>> 8) & 0xff);
+	packet[12] = (byte)(pos4 & 0xff);               //channel 4
+	packet[13] = (byte)((pos4 >>> 8) & 0xff);
+	packet[14] = (byte)(pos5 & 0xff);               //channel 5
+	packet[15] = (byte)((pos5 >>> 8) & 0xff);
+	packet[16] = (byte)(pos6 & 0xff);               //channel 6
+	packet[17] = (byte)((pos6 >>> 8) & 0xff);
+	packet[18] = crc(packet);                       //Checksum
 
-		packet[19] = ETX0; packet[20] = ETX1;
-		return packet;
-	}
+	packet[19] = ETX0; packet[20] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sends the velocity control command to all 6 DC motor control channels on 
      * the Sensing and Motion Controller (PMS5005) at the same time.  The 
      * command includes the target velocities and the time period to execute 
@@ -1541,35 +1541,35 @@ public class PMS5005
      * 
      * @see dcMotorVelocityTimeCtrl
      */
-	public static byte[] dcMotorVelocityTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
-	{
-		byte[] packet = new byte[23];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1;		packet[3] = 0;
+    public static byte[] dcMotorVelocityTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+    {
+	byte[] packet = new byte[23];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1;		packet[3] = 0;
 		
-		packet[4]  = ALL_VELOCITY_CTRL;			//DID
-		packet[5]  = 14;						//LEN
-		packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
-		packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
-		packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
-		packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
-		packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
-		packet[11] = (byte)((pos3 >>> 8) & 0xFF);
-		packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
-		packet[13] = (byte)((pos4 >>> 8) & 0xFF);
-		packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
-		packet[15] = (byte)((pos5 >>> 8) & 0xFF);
-		packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
-		packet[17] = (byte)((pos6 >>> 8) & 0xFF);
-		packet[18] = (byte)(time & 0xFF);		//time
-		packet[19] = (byte)((time >>> 8) & 0xFF);
-		packet[20] = crc(packet);				//Checksum
+	packet[4]  = ALL_VELOCITY_CTRL;			//DID
+	packet[5]  = 14;						//LEN
+	packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
+	packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
+	packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
+	packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
+	packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
+	packet[11] = (byte)((pos3 >>> 8) & 0xFF);
+	packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
+	packet[13] = (byte)((pos4 >>> 8) & 0xFF);
+	packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
+	packet[15] = (byte)((pos5 >>> 8) & 0xFF);
+	packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
+	packet[17] = (byte)((pos6 >>> 8) & 0xFF);
+	packet[18] = (byte)(time & 0xFF);		//time
+	packet[19] = (byte)((time >>> 8) & 0xFF);
+	packet[20] = crc(packet);				//Checksum
 		
-		packet[21] = ETX0;  packet[22] = ETX1;
-		return packet;
-	}
+	packet[21] = ETX0;  packet[22] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sends the velocity control command to all 6 DC motor control channels on 
      * the Sensing and Motion Controller (PMS5005) at the same time.  The 
      * command includes the target velocities without specifying an execution 
@@ -1597,33 +1597,33 @@ public class PMS5005
      * 
      * @see dcMotorVelocityNonTimeCtrl
      */
-	public static byte[] dcMotorVelocityNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
-	{
-		byte[] packet = new byte[21];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1;		packet[3] = 0;
+    public static byte[] dcMotorVelocityNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+    {
+	byte[] packet = new byte[21];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1;		packet[3] = 0;
 		
-		packet[4]  = ALL_VELOCITY_CTRL;			//DID
-		packet[5]  = 12;						//LEN
-		packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
-		packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
-		packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
-		packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
-		packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
-		packet[11] = (byte)((pos3 >>> 8) & 0xFF);
-		packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
-		packet[13] = (byte)((pos4 >>> 8) & 0xFF);
-		packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
-		packet[15] = (byte)((pos5 >>> 8) & 0xFF);
-		packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
-		packet[17] = (byte)((pos6 >>> 8) & 0xFF);
-		packet[18] = crc(packet);				//Checksum
+	packet[4]  = ALL_VELOCITY_CTRL;			//DID
+	packet[5]  = 12;						//LEN
+	packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
+	packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
+	packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
+	packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
+	packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
+	packet[11] = (byte)((pos3 >>> 8) & 0xFF);
+	packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
+	packet[13] = (byte)((pos4 >>> 8) & 0xFF);
+	packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
+	packet[15] = (byte)((pos5 >>> 8) & 0xFF);
+	packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
+	packet[17] = (byte)((pos6 >>> 8) & 0xFF);
+	packet[18] = crc(packet);				//Checksum
 		
-		packet[19] = ETX0;  packet[20] = ETX1;
-		return packet;	
-	}
+	packet[19] = ETX0;  packet[20] = ETX1;
+	return packet;	
+    }
 	
-	/**
+    /**
      * Sends the PWM control command to all 6 DC motor control channels on the 
      * Sensing and Motion Controller (PMS5005) at the same time.  The command 
      * includes the target PWM values and the time period for execution.  The 
@@ -1649,35 +1649,35 @@ public class PMS5005
      * 4) When omitting motors from control, the command value of -32768
      *    (0x8000), should be sent.  This implies NO_CTRL.
      */
-	public static byte[] dcMotorPwmTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
-	{
-		byte[] packet = new byte[23];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1;		packet[3] = 0;
+    public static byte[] dcMotorPwmTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+    {
+	byte[] packet = new byte[23];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1;		packet[3] = 0;
 		
-		packet[4]  = ALL_PWM_CTRL;				//DID
-		packet[5]  = 14;						//LEN
-		packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
-		packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
-		packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
-		packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
-		packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
-		packet[11] = (byte)((pos3 >>> 8) & 0xFF);
-		packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
-		packet[13] = (byte)((pos4 >>> 8) & 0xFF);
-		packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
-		packet[15] = (byte)((pos5 >>> 8) & 0xFF);
-		packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
-		packet[17] = (byte)((pos6 >>> 8) & 0xFF);
-		packet[18] = (byte)(time & 0xFF);		//time
-		packet[19] = (byte)((time >>> 8) & 0xFF);
-		packet[20] = crc(packet);				//Checksum
+	packet[4]  = ALL_PWM_CTRL;				//DID
+	packet[5]  = 14;						//LEN
+	packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
+	packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
+	packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
+	packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
+	packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
+	packet[11] = (byte)((pos3 >>> 8) & 0xFF);
+	packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
+	packet[13] = (byte)((pos4 >>> 8) & 0xFF);
+	packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
+	packet[15] = (byte)((pos5 >>> 8) & 0xFF);
+	packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
+	packet[17] = (byte)((pos6 >>> 8) & 0xFF);
+	packet[18] = (byte)(time & 0xFF);		//time
+	packet[19] = (byte)((time >>> 8) & 0xFF);
+	packet[20] = crc(packet);				//Checksum
 		
-		packet[21] = ETX0;  packet[22] = ETX1;
-		return packet;
-	}
+	packet[21] = ETX0;  packet[22] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sends the PWM control command to all 6 DC motor control channels on the 
      * Sensing and Motion Controller (PMS5005) at the same time.  The command 
      * includes the target PWM values without a specified time period for 
@@ -1703,33 +1703,33 @@ public class PMS5005
      * 4) When omitting motors from control, the command value of -32768
      *    (0x8000), should be sent.  This implies NO_CTRL.
      */
-	public static byte[] dcMotorPwmNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
-	{
-		byte[] packet = new byte[21];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1;		packet[3] = 0;
+    public static byte[] dcMotorPwmNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+    {
+	byte[] packet = new byte[21];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1;		packet[3] = 0;
 		
-		packet[4]  = ALL_PWM_CTRL;				//DID
-		packet[5]  = 12;						//LEN
-		packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
-		packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
-		packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
-		packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
-		packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
-		packet[11] = (byte)((pos3 >>> 8) & 0xFF);
-		packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
-		packet[13] = (byte)((pos4 >>> 8) & 0xFF);
-		packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
-		packet[15] = (byte)((pos5 >>> 8) & 0xFF);
-		packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
-		packet[17] = (byte)((pos6 >>> 8) & 0xFF);
-		packet[18] = crc(packet);				//Checksum
+	packet[4]  = ALL_PWM_CTRL;				//DID
+	packet[5]  = 12;						//LEN
+	packet[6]  = (byte)(pos1 & 0xFF);		//MOTOR 1
+	packet[7]  = (byte)((pos1 >>> 8) & 0xFF);
+	packet[8]  = (byte)(pos2 & 0xFF);		//MOTOR 2
+	packet[9]  = (byte)((pos2 >>> 8) & 0xFF);
+	packet[10] = (byte)(pos3 & 0xFF);		//MOTOR 3
+	packet[11] = (byte)((pos3 >>> 8) & 0xFF);
+	packet[12] = (byte)(pos4 & 0xFF);		//MOTOR 4
+	packet[13] = (byte)((pos4 >>> 8) & 0xFF);
+	packet[14] = (byte)(pos5 & 0xFF);		//MOTOR 5
+	packet[15] = (byte)((pos5 >>> 8) & 0xFF);
+	packet[16] = (byte)(pos6 & 0xFF);		//MOTOR 6
+	packet[17] = (byte)((pos6 >>> 8) & 0xFF);
+	packet[18] = crc(packet);				//Checksum
 		
-		packet[19] = ETX0;  packet[20] = ETX1;
-		return packet;
-	}
+	packet[19] = ETX0;  packet[20] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Enables the specified servo motor control channel.
      * 
      * @param channel 0, 1, 2, 3, 4, or 5
@@ -1739,23 +1739,23 @@ public class PMS5005
      * 
      * @see disableServo
      */
-	public static byte[] enableServo(byte channel)
-	{
-		byte[] packet = new byte[10];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1; 		packet[3] = 0;
+    public static byte[] enableServo(byte channel)
+    {
+	byte[] packet = new byte[10];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1; 		packet[3] = 0;
 		
-		packet[4] = TOGGLE_DC_MOTORS;         //DID
-		packet[5] = 2;                        //LEN
-		packet[6] = 0;                        //0 = Enable
-		packet[7] = channel;                  //6-11 SERVO
-		packet[7] = crc(packet);              //Checksum
+	packet[4] = TOGGLE_DC_MOTORS;         //DID
+	packet[5] = 2;                        //LEN
+	packet[6] = 0;                        //0 = Enable
+	packet[7] = channel;                  //6-11 SERVO
+	packet[7] = crc(packet);              //Checksum
 		
-		packet[8] = ETX0;	packet[9] = ETX1;
-		return packet;
-	}
+	packet[8] = ETX0;	packet[9] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Disables the specified servo motor control channel.
      * 
      * @param channel 0, 1, 2, 3, 4, or 5
@@ -1765,23 +1765,23 @@ public class PMS5005
      * 
      * @see enableServo
      */
-	public static byte[] disableServo(byte channel)
-	{
-		byte[] packet = new byte[10];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1; 		packet[3] = 0;
+    public static byte[] disableServo(byte channel)
+    {
+	byte[] packet = new byte[10];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1; 		packet[3] = 0;
 		
-		packet[4] = TOGGLE_DC_MOTORS;         //DID
-		packet[5] = 2;                        //LEN
-		packet[6] = 0;                        //0 = Disable
-		packet[7] = channel;                  //6-11 = SERVO
-		packet[7] = crc(packet);              //Checksum
+	packet[4] = TOGGLE_DC_MOTORS;         //DID
+	packet[5] = 2;                        //LEN
+	packet[6] = 0;                        //0 = Disable
+	packet[7] = channel;                  //6-11 = SERVO
+	packet[7] = crc(packet);              //Checksum
 		
-		packet[8] = ETX0;	packet[9] = ETX1;
-		return packet;
-	}
+	packet[8] = ETX0;	packet[9] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sends the position control command to the specified servo motor control 
      * channel on the Sensing and Motion Controller (PMS5005).  The command 
      * includes the target position command and the time period to execute the 
@@ -1802,16 +1802,16 @@ public class PMS5005
      * 
      * @see servoNonTimeCtrl
      */
-	public static byte[] servoTimeCtrl(byte channel, short cmdValue, short time)
-	{
-		byte[] packet = new byte[15];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1;		packet[3] = 0;
+    public static byte[] servoTimeCtrl(byte channel, short cmdValue, short time)
+    {
+	byte[] packet = new byte[15];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1;		packet[3] = 0;
 		
-		packet[4]  = SERVO_CTRL;                        //DID
-		packet[5]  = 6;                                 //LEN
-		packet[6]  = channel;                           //channel
-		packet[7]  = (byte)(cmdValue & 0xff);           //command value low 8 bit
+	packet[4]  = SERVO_CTRL;                        //DID
+	packet[5]  = 6;                                 //LEN
+	packet[6]  = channel;                           //channel
+	packet[7]  = (byte)(cmdValue & 0xff);           //command value low 8 bit
         packet[8]  = (byte)((cmdValue >>> 8) & 0xff);   //high 8 bit
         packet[9]  = 6;                                 //flag
         packet[10] = (byte)(time & 0xff);               //time low 8 bit
@@ -1820,9 +1820,9 @@ public class PMS5005
         
         packet[13] = ETX0;	packet[14] = ETX1;
         return packet;
-	}
+    }
 	
-	/**
+    /**
      * Sends the position control command to the specified servo motor control 
      * channel on the Sensing and Motion Controller (PMS5005).  The command 
      * includes the target position command without a specific time period for 
@@ -1834,25 +1834,25 @@ public class PMS5005
      * 
      * @see servoTimeCtrl
      */
-	public static byte[] servoNonTimeCtrl(byte channel, short cmdValue)
-	{
-		byte[] packet = new byte[13];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1;		packet[3] = 0;
+    public static byte[] servoNonTimeCtrl(byte channel, short cmdValue)
+    {
+	byte[] packet = new byte[13];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1;		packet[3] = 0;
 		
-		packet[4]  = SERVO_CTRL;                        //DID
-		packet[5]  = 4;                                 //LEN
-		packet[6]  = channel;                           //channel
-		packet[7]  = (byte)(cmdValue & 0xff);           //command value low 8 bit
+	packet[4]  = SERVO_CTRL;                        //DID
+	packet[5]  = 4;                                 //LEN
+	packet[6]  = channel;                           //channel
+	packet[7]  = (byte)(cmdValue & 0xff);           //command value low 8 bit
         packet[8]  = (byte)((cmdValue >>> 8) & 0xff);   //high 8 bit
         packet[9]  = 6;                                 //flag
         packet[10] = crc(packet);                       //Checksum
         
         packet[11] = ETX0;	packet[12] = ETX1;
         return packet;
-	}
+    }
 	
-	/**
+    /**
      * Sends the position control command to all 6 servo motor 
      * control channels on the Sensing and Motion Controller (PMS5005) at the 
      * same time.
@@ -1874,35 +1874,35 @@ public class PMS5005
      * 
      * @see servoTimeCtrl
      */
-	public static byte[] servoTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
-	{
-		byte[] packet = new byte[23];
-		packet[0] = STX0;	packet[1] = STX1;
-		packet[2] = 1; 	packet[3] = 0;
+    public static byte[] servoTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+    {
+	byte[] packet = new byte[23];
+	packet[0] = STX0;	packet[1] = STX1;
+	packet[2] = 1; 	packet[3] = 0;
 		
-		packet[4]  = ALL_SERVO_CTRL;                        //DID
-		packet[5]  = 14;                                    //LEN
-		packet[6]  = (byte) (pos1 & 0xff);				    //channel 1
-		packet[7]  = (byte) ((pos1 >>> 8) & 0xff);			
-		packet[8]  = (byte) (pos2 & 0xff);					//channel 2
-		packet[9]  = (byte) ((pos2 >>> 8) & 0xff);		
-		packet[10] = (byte) (pos3 & 0xff);					//channel 3
-		packet[11] = (byte) ((pos3 >>> 8) & 0xff);
-		packet[12] = (byte) (pos4 & 0xff);					//channel 4
-		packet[13] = (byte) ((pos4 >>> 8) & 0xff);
-		packet[14] = (byte) (pos5 & 0xff);					//channel 5
-		packet[15] = (byte) ((pos5 >>> 8) & 0xff);
-		packet[16] = (byte) (pos6 & 0xff);					//channel 6
-		packet[17] = (byte) ((pos6 >>> 8) & 0xff);
-		packet[18] = (byte) (time & 0xff);					//time
-		packet[19] = (byte) ((time >>> 8) & 0xff);
-		packet[20] = crc(packet);							//Checksum
+	packet[4]  = ALL_SERVO_CTRL;                        //DID
+	packet[5]  = 14;                                    //LEN
+	packet[6]  = (byte) (pos1 & 0xff);				    //channel 1
+	packet[7]  = (byte) ((pos1 >>> 8) & 0xff);			
+	packet[8]  = (byte) (pos2 & 0xff);					//channel 2
+	packet[9]  = (byte) ((pos2 >>> 8) & 0xff);		
+	packet[10] = (byte) (pos3 & 0xff);					//channel 3
+	packet[11] = (byte) ((pos3 >>> 8) & 0xff);
+	packet[12] = (byte) (pos4 & 0xff);					//channel 4
+	packet[13] = (byte) ((pos4 >>> 8) & 0xff);
+	packet[14] = (byte) (pos5 & 0xff);					//channel 5
+	packet[15] = (byte) ((pos5 >>> 8) & 0xff);
+	packet[16] = (byte) (pos6 & 0xff);					//channel 6
+	packet[17] = (byte) ((pos6 >>> 8) & 0xff);
+	packet[18] = (byte) (time & 0xff);					//time
+	packet[19] = (byte) ((time >>> 8) & 0xff);
+	packet[20] = crc(packet);							//Checksum
 		
-		packet[21] = ETX0;	packet[22] = ETX1;
-		return packet;
-	}
+	packet[21] = ETX0;	packet[22] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Sends the position control command to all 6 servo motor 
      * control channels on the Sensing and Motion Controller (PMS5005) at the 
      * same time.
@@ -1923,33 +1923,33 @@ public class PMS5005
      * 
      * @see servoNonTimeCtrl
      */
-	public static byte[] servoNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
-	{
-		  byte[] packet = new byte[21];
-		  packet[0] = STX0;	  packet[1] = STX1;
-		  packet[2] = 1;	  packet[3] = 0;
+    public static byte[] servoNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+    {
+	byte[] packet = new byte[21];
+	packet[0] = STX0;	  packet[1] = STX1;
+	packet[2] = 1;	  packet[3] = 0;
 		  
-		  packet[4]  = ALL_SERVO_CTRL;                //DID
-		  packet[5]  = 12;                            //LEN
-		  packet[6]  = (byte)(pos1 & 0xff);           //motor 1
-		  packet[7]  = (byte)((pos1 >>> 8) & 0xff);             
-		  packet[8]  = (byte)(pos2 & 0xff);           //motor 2
-		  packet[9]  = (byte)((pos2 >>> 8) & 0xff);
-		  packet[10] = (byte)(pos3 & 0xff);           //motor 3
-		  packet[11] = (byte)((pos3 >>> 8) & 0xff);
-		  packet[12] = (byte)(pos4 & 0xff);           //motor 4
-		  packet[13] = (byte)((pos4 >>> 8) & 0xff);
-		  packet[14] = (byte)(pos5 & 0xff);           //motor 5
-		  packet[15] = (byte)((pos5 >>> 8) & 0xff);           
-		  packet[16] = (byte)(pos6 & 0xff);           //motor 6
-		  packet[17] = (byte)((pos6 >>> 8) & 0xff);            
-		  packet[18] = crc(packet);                   //Checksum
+	packet[4]  = ALL_SERVO_CTRL;                //DID
+	packet[5]  = 12;                            //LEN
+	packet[6]  = (byte)(pos1 & 0xff);           //motor 1
+	packet[7]  = (byte)((pos1 >>> 8) & 0xff);             
+	packet[8]  = (byte)(pos2 & 0xff);           //motor 2
+	packet[9]  = (byte)((pos2 >>> 8) & 0xff);
+	packet[10] = (byte)(pos3 & 0xff);           //motor 3
+	packet[11] = (byte)((pos3 >>> 8) & 0xff);
+	packet[12] = (byte)(pos4 & 0xff);           //motor 4
+	packet[13] = (byte)((pos4 >>> 8) & 0xff);
+	packet[14] = (byte)(pos5 & 0xff);           //motor 5
+	packet[15] = (byte)((pos5 >>> 8) & 0xff);           
+	packet[16] = (byte)(pos6 & 0xff);           //motor 6
+	packet[17] = (byte)((pos6 >>> 8) & 0xff);            
+	packet[18] = crc(packet);                   //Checksum
 		  
-		  packet[19] = ETX0;  packet[20] = ETX1;
-		  return packet;
-	}
+	packet[19] = ETX0;  packet[20] = ETX1;
+	return packet;
+    }
 	
-	/**
+    /**
      * Displays the image data in the file bmpFileName (BMP format) on the 
      * graphic LCD connected to the Sensing and Motion Controller (PMS5005).
      * 
@@ -1958,9 +1958,9 @@ public class PMS5005
      * The graphic LCD display is monochrome with dimensions 128 by 64 pixels.  
      * The bmp image must be 128x64 pixels in mono.
      */
-	public static byte[] lcdDisplayPMS(String bmpFileName)
-	{
-		return null;
-		// TODO Auto-generated method stub
-	}
+    public static byte[] lcdDisplayPMS(String bmpFileName)
+    {
+	return null;
+	// TODO Auto-generated method stub
+    }
 }
