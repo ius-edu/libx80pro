@@ -1,4 +1,8 @@
-#include "../lib/Buffer.h"
+#pragma once
+#ifndef PMS5005_H
+#define PMS5005_H
+
+#include "../Buffer.h"
 
 /* or typedef struct PMS5005 */
 typedef struct PMS5005
@@ -186,3 +190,5 @@ typedef struct PMS5005
     Buffer* (*servoNonTimeCtrlBoth)(short, short);
     Buffer* (*lcdDisplayPms)(char*);
 } PMS5005;
+
+#endif

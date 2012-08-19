@@ -1,4 +1,5 @@
-#include <Buffer.h>
+#include <stdlib.h>
+#include "../Buffer.h"
 
 /* 
  * C implmentation written by Jesse Riddle and Colton Jenkins, with 
