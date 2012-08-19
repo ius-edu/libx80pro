@@ -1,7 +1,7 @@
-#include "../lib/buffer.h"
+#include "../lib/Buffer.h"
 
 /* or typedef struct PMS5005 */
-struct PMS5005_t
+typedef struct PMS5005
 {
     const int HEADER_LENGTH = 7;
     const int PAYLOAD_OFFSET = 6;
@@ -74,7 +74,7 @@ struct PMS5005_t
     const byte GET_CUSTOM_SENSOR_DATA_DID = 124;
     const byte GET_STANDARD_SENSOR_DATA_DID = 125;
     const byte GET_ALL_SENSOR_DATA_DID = 127;
-// to use as ubyte: (byte)(SETUP_COM & 0xff)
+/* to use as ubyte: (byte)(SETUP_COM & 0xff) */
     const short SETUP_COM = 255;
 /* End Data ID (DID) descriptor listing */
 
@@ -138,7 +138,7 @@ struct PMS5005_t
     short (*getSensorOverHeat)(short, const int[]);
     short (*getSensorTemperature)(const int[]);
     short (*getSensorIrCode)(const int[]);
-    Buffer* (*setInfraredControlOutput)(short, short);
+    Buffer* (*setIrCtrlOutput)(short, short);
     short (*getSensorBatteryAd)(short, const int[]);
     short (*getSensorRefVoltage)(const int[]);
     short (*getSensorPotVoltage)(const int[]);
@@ -153,5 +153,36 @@ struct PMS5005_t
     Buffer* (*setMotorPolarity)(byte, byte);
     Buffer* (*enableDcMotor)(byte);
     Buffer* (*disableDcMotor)(byte);
-    
+    Buffer* (*resumeDcMotor)(byte);
+    Buffer* (*suspendDcMotor)(byte);
+    Buffer* (*setDcMotorPositionCtrlPid)(byte, short, short, short);
+    Buffer* (*setDcMotorVelocityCtrlPid)(byte, short, short, short);
+    Buffer* (*setDcMotorSensorFilter)(byte, short);
+    Buffer* (*setDcMotorSensorUsage)(byte, byte);
+    Buffer* (*setDcMotorCtrlMode)(byte, byte);
+    Buffer* (*dcMotorPositionTimeCtrl)(byte, short, short);
+    Buffer* (*dcMotorPositionNonTimeCtrl)(byte, short);
+    Buffer* (*dcMotorPwmTimeCtrl)(byte, short, short);
+    Buffer* (*dcMotorPwmNonTimeCtrl)(byte, short);
+    Buffer* (*dcMotorPositionTimeCtrlAll)(short, short, short, short, short, short, short);
+    Buffer* (*dcMotorPositionNonTimeCtrlAll)(short, short, short, short, short, short);
+    Buffer* (*dcMotorPositionTimeCtrlBoth)(short, short, short);
+    Buffer* (*dcMotorPositionNonTimeCtrlBoth)(short, short);
+    Buffer* (*dcMotorVelocityTimeCtrlAll)(short, short, short, short, short, short, short);
+    Buffer* (*dcMotorVelocityNonTimeCtrlAll)(short, short, short, short, short, short);
+    Buffer* (*dcMotorVelocityTimeCtrlBoth)(short, short, short);
+    Buffer* (*dcMotorVelocityNonTimeCtrlBoth)(short, short);
+    Buffer* (*dcMotorPwmTimeCtrlAll)(short, short, short, short, short, short, short);
+    Buffer* (*dcMotorPwmNonTimeCtrlAll)(short, short, short, short, short, short);
+    Buffer* (*dcMotorPwmTimeCtrlBoth)(short, short, short);
+    Buffer* (*dcMotorPwmNonTimeCtrlBoth)(short, short);
+    Buffer* (*enableServo)(byte);
+    Buffer* (*disableServo)(byte);
+    Buffer* (*servoTimeCtrl)(byte, short, short);
+    Buffer* (*servoNonTimeCtrl)(byte, short);
+    Buffer* (*servoTimeCtrlAll)(short, short, short, short, short, short, short);
+    Buffer* (*servoNonTimeCtrlAll)(short, short, short, short, short, short);
+    Buffer* (*servoTimeCtrlBoth)(short, short, short);
+    Buffer* (*servoNonTimeCtrlBoth)(short, short);
+    Buffer* (*lcdDisplayPms)(char*);
 } PMS5005;

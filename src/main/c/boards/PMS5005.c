@@ -1,4 +1,4 @@
-#include <buffer.h>
+#include <Buffer.h>
 
 /* 
  * C implmentation written by Jesse Riddle and Colton Jenkins, with 
@@ -7,7 +7,7 @@
  * Version: 1.0.8 Feb. 2004 by DrRobot, Inc. and some parts from the DrRobot 
  * Java motion control demo program.
  */
-	
+
 /*
  * The structure for a packet to the PMS5005 is the following: STX0 = 94
  * (always) STX1 = 2 (always) RID = 1 (generally) Reserved = 0 (generally)
@@ -16,8 +16,86 @@
  * length) CHECKSUM = <cksum> (use crc() method to calculate on packet) ETX0 =
  * 94 (always) ETX1 = 13 (always)
  */
-	
-	
+
+PMS5005* new_PMS5005()
+{
+    PMS5005->crc = crc;
+    PMS5005->motorSensorRequest = motorSensorRequest;
+    PMS5005->standardSensorRequest = standardSensorRequest;
+    PMS5005->customSensorRequest = customSensorRequest;
+    PMS5005->allSensorRequest = allSensorRequest;
+    PMS5005->enableMotorSensorSending = enableMotorSensorSending;
+    PMS5005->enableStandardSensorSending = enableStandardSensorSending;
+    PMS5005->enableCustomSensorSending = enableCustomSensorSending;
+    PMS5005->enableAllSensorSending = enableAllSensorSending;
+    PMS5005->disableMotorSensorSending = disableMotorSensorSending;
+    PMS5005->disableStandardSensorSending = disableStandardSensorSending;
+    PMS5005->disableCustomSensorSending = disableCustomSensorSending;
+    PMS5005->disableAllSensorSending = disableAllSensorSending;
+    PMS5005->setMotorSensorPeriod = setMotorSensorPeriod;
+    PMS5005->setStandardSensorPeriod = setStandardSensorPeriod;
+    PMS5005->setCustomSensorPeriod = setCustomSensorPeriod;
+    PMS5005->setAllSensorPeriod = setAllSensorPeriod;
+    PMS5005->getSensorSonar = setSensorSonar;
+    PMS5005->getSensorIrRange = getSensorIrRange;
+    PMS5005->getSensorHumanAlarm = getSensorHumanAlarm;
+    PMS5005->getSensorHumanMotion = getSensorHumanMotion;
+    PMS5005->getSensorTiltingX = getSensorTiltingX;
+    PMS5005->getSensorTiltingY = getSensorTiltingY;
+    PMS5005->getSensorOverHeat = getSensorOverHeat;
+    PMS5005->getSensorTemperature = getSensorTemperature;
+    PMS5005->getSensorIrCode = getSensorIrCode;
+    PMS5005->setIrCtrlOutput = setIrCtrlOutput;
+    PMS5005->getSensorBatteryAd = getSensorBatteryAd;
+    PMS5005->getSensorRefVoltage = getSensorRefVoltage;
+    PMS5005->getSensorPotVoltage = getSensorPotVoltage;
+    PMS5005->getSensorPot = getSensorPot;
+    PMS5005->getMotorCurrent = getMotorCurrent;
+    PMS5005->getEncoderDirection = getEncoderDirection;
+    PMS5005->getEncoderPulse = getEncoderPulse;
+    PMS5005->getEncoderSpeed = getEncoderSpeed;
+    PMS5005->getCustomAd = getCustomAd;
+    PMS5005->getCustomDIn = getCustomDIn;
+    PMS5005->getCustomDOut = getCustomDOut;
+    PMS5005->setMotorPolarity = setMotorPolarity;
+    PMS5005->enableDcMotor = enableDcMotor;
+    PMS5005->disableDcMotor = disableDcMotor;
+    PMS5005->resumeDcMotor = resumeDcMotor;
+    PMS5005->suspendDcMotor = suspendDcMotor;
+    PMS5005->setDcMotorPositionCtrlPid = setDcMotorPositionCtrlPid;
+    PMS5005->setDcMotorVelocityPid = setDcMotorVelocityPid;
+    PMS5005->setDcMotorSensorFilter = setDcMotorSensorFilter;
+    PMS5005->setDcMotorSensorUsage = setDcMotorSensorUsage;
+    PMS5005->setDcMotorCtrlMode = setDcMotorCtrlMode;
+    PMS5005->dcMotorPositionTimeCtrl = dcMotorPositionTimeCtrl;
+    PMS5005->dcMotorPositionNonTimeCtrl = dcMotorPositionNonTimeCtrl;
+    PMS5005->dcMotorPwmTimeCtrl = dcMotorPwmTimeCtrl;
+    PMS5005->dcMotorPwmNonTimeCtrl = dcMotorPwmNonTimeCtrl;
+    PMS5005->dcMotorPositionTimeCtrlAll = dcMotorPositionTimeCtrlAll;
+    PMS5005->dcMotorPositionNonTimeCtrlAll = dcMotorPositionNonTimeCtrlAll;
+    PMS5005->dcMotorVelocityTimeCtrlAll = dcMotorVelocityTimeCtrlAll;
+    PMS5005->dcMotorVelocityNonTimeCtrlAll = dcMotorVelocityNonTimeCtrlAll;
+    PMS5005->dcMotorPwmTimeCtrlAll = dcMotorPwmTimeCtrlAll;
+    PMS5005->dcMotorPwmNonTimeCtrlAll = dcMotorPwmNonTimeCtrlAll;
+    PMS5005->dcMotorPositionTimeCtrlBoth = dcMotorPositionTimeCtrlBoth;
+    PMS5005->dcMotorPositionNonTimeCtrlBoth = dcMotorPositionNonTimeCtrlBoth;
+    PMS5005->dcMotorVelocityTimeCtrlBoth = dcMotorVelocityTimeCtrlBoth;
+    PMS5005->dcMotorVelocityNonTimeCtrlBoth = dcMotorVelocityNonTimeCtrlBoth;
+    PMS5005->dcMotorPwmTimeCtrlBoth = dcMotorPwmTimeCtrlBoth;
+    PMS5005->dcMotorPwmNonTimeCtrlBoth = dcMotorPwmNonTimeCtrlBoth;
+    PMS5005->enableServo = enableServo;
+    PMS5005->disableServo = disableServo;
+    PMS5005->servoTimeCtrl = servoTimeCtrl;
+    PMS5005->servoNonTimeCtrl = servoNonTimeCtrl;
+    PMS5005->servoTimeCtrlAll = servoTimeCtrlAll;
+    PMS5005->servoNonTimeCtrlAll = servoNonTimeCtrlAll;
+    PMS5005->servoTimeCtrlBoth = servoTimeCtrlBoth;
+    PMS5005->servoNonTimeCtrlBoth = servoNonTimeCtrlBoth;
+    PMS5005->lcdDisplayPms = lcdDisplayPms;
+
+    reutrn PMS5005;
+}
+
 /**
  * Calculates a valid crc value to be used in order to check the integrity 
  * of the contents of a request packet.
@@ -26,14 +104,15 @@
  *
  * @return The crc value calculated from the given packetfer.
  */
-static byte crc(byte* buf, int bufSize)
+static byte crc(Buffer* buf)
 {
     byte shift_reg, sr_lsb, data_bit, v;
-    int i, j;
+    int i, j, z;
     byte fb_bit;
     shift_reg = 0;               // initialize the shift register
     /* z = bufSize - 3; // Don't include crc and PMS5005.ETX (z=length-3) */
-    for (i = 0; i < bufSize; ++i)// Don't include PMS5005.STX (i=2)
+    z = buf->length;
+    for (i = 0; i < z; ++i)// Don't include PMS5005.STX (i=2)
     {
 	/* v = packet[i + 2] & 0x0000ffff; */
 	v = packet[i] & 0x0000ffff;
@@ -56,7 +135,7 @@ static byte crc(byte* buf, int bufSize)
 		
     return shift_reg;
 }
-	
+
 /**
  * Sends a request command to the Sensing and Motion Controller (PMS5005) 
  * in order to get the sensor data related to motor control.
@@ -74,22 +153,25 @@ static byte crc(byte* buf, int bufSize)
  *
  * See Also: setMotorSensorPeriod
  */
-static buffer* motorSensorRequest(short packetNumber)
+static Buffer* motorSensorRequest(short packetNumber)
 {
-    buffer buf = new_Buffer(10);
+    Buffer* buf = new_Buffer(10);
 
-    buf[0] = PMS5005.STX0;
-    buf[1] = PMS5005.STX1;
-    buf[2] = 1;
-    buf[3] = 0;
-    buf[4] = PMS5005.GET_MOTOR_SENSOR_DATA_DID;
-    buf[5] = 1; // len
-    buf[6] = packetNumber;
-    buf[7] = crc(buf, PMS5005.MOTOR_SENSOR_REQUEST_SIZE);
-    buf[8] = PMS5005.ETX0;
-    buf[9] = PMS5005.ETX1;
+    if (buf != NULL)
+    {
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.GET_MOTOR_SENSOR_DATA_DID;
+	buf.data[5] = 1; // len
+	buf.data[6] = packetNumber;
+	buf.data[7] = crc(buf);
+	buf.data[8] = PMS5005.ETX0;
+	buf.data[9] = PMS5005.ETX1;
+    }
 
-    return PMS5005.MOTOR_SENSOR_REQUEST_SIZE;
+    return buf;
 }
 
 /**
@@ -110,20 +192,25 @@ static buffer* motorSensorRequest(short packetNumber)
  *
  * See Also: setStandardSensorPeriod
  */
-static int standardSensorRequest(short packetNumber, byte* buf)
+static Buffer* standardSensorRequest(short packetNumber)
 {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PMS5005.GET_MOTOR_SENSOR_DATA;
-	buf[5] = 1; // len
-	buf[6] = packetNumber;
-	buf[7] = crc(buf, PMS5005.STANDARD_SENSOR_REQUEST_SIZE);
-	buf[8] = PMS5005.ETX0;
-	buf[9] = PMS5005.ETX1;
+    Buffer* buf = new_Buffer(10);
 
-	return PMS5005.STANDARD_SENSOR_REQUEST_SIZE;
+    if (buf != NULL)
+    {
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.DID.GET_MOTOR_SENSOR_DATA_DID;
+	buf.data[5] = 1; // len
+	buf.data[6] = packetNumber;
+	buf.data[7] = crc(buf);
+	buf.data[8] = PMS5005.ETX0;
+	buf.data[9] = PMS5005.ETX1;
+    }
+
+    return buf;
 }
 	
 /**
@@ -144,20 +231,25 @@ static int standardSensorRequest(short packetNumber, byte* buf)
  *
  * See Also: setCustomSensorPeriod
  */
-static int customSensorRequest(short packetNumber, byte* buf)
+static Buffer* customSensorRequest(short packetNumber)
 {
-buf[0] = PMS5005.STX0;
-buf[1] = PMS5005.STX1;
-buf[2] = 1;
-buf[3] = 0;
-buf[4] = PMS5005.GET_CUSTOM_SENSOR_DATA;
-buf[5] = 1; // len
-buf[6] = packetNumber;
-buf[7] = crc(buf, PMS5005.CUSTOM_SENSOR_REQUEST_SIZE);
-buf[8] = PMS5005.ETX0;
-buf[9] = PMS5005.ETX1;
+    Buffer* buf = new_Buffer(10);
 
-    return PMS5005.CUSTOM_SENSOR_REQUEST_SIZE;
+    if (buf != NULL)
+    {
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.GET_CUSTOM_SENSOR_DATA_DID;
+	buf.data[5] = 1; // len
+	buf.data[6] = packetNumber;
+	buf.data[7] = crc(buf);
+	buf.data[8] = PMS5005.ETX0;
+	buf.data[9] = PMS5005.ETX1;
+    }
+
+    return buf;
 }
 	
 /**
@@ -178,18 +270,23 @@ buf[9] = PMS5005.ETX1;
  *
  * See Also: setAllSensorPeriod
  */
-static byte* allSensorRequest(short packetNumber, byte* buf)
+static Buffer* allSensorRequest(short packetNumber)
 {
-buf[0] = PMS5005.STX0;
-buf[1] = PMS5005.STX1;
-buf[2] = 1;
-buf[3] = 0;
-buf[4] = PMS5005.GET_ALL_SENSOR_DATA;
-buf[5] = 1; // len
-buf[6] = packetNumber;
-buf[7] = crc(buf, PMS5005.ALL_SENSOR_REQUEST_SIZE);
-buf[8] = PMS5005.ETX0;
-buf[9] = PMS5005.ETX1;
+    Buffer* buf = new_Buffer(10);
+
+    if (buf != NULL)
+    {
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.GET_ALL_SENSOR_DATA_DID;
+	buf.data[5] = 1; // len
+	buf.data[6] = packetNumber;
+	buf.data[7] = crc(buf);
+	buf.data[8] = PMS5005.ETX0;
+	buf.data[9] = PMS5005.ETX1;
+    }
 
     return buf;
 }
@@ -204,21 +301,21 @@ buf[9] = PMS5005.ETX1;
  *
  * @see motorSensorRequest
  */
-static byte* enableMotorSensorSending()
+static Buffer* enableMotorSensorSending()
 {
-    byte* buf = calloc(9, sizeof(byte));
+    Buffer* buf = new_Buffer(9);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PMS5005.GET_MOTOR_SENSOR_DATA;
-	buf[5] = 0; // len
-	buf[6] = crc(buf);
-	buf[7] = PMS5005.ETX0;
-	buf[8] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.GET_MOTOR_SENSOR_DATA_DID;
+	buf.data[5] = 0; // len
+	buf.data[6] = crc(buf);
+	buf.data[7] = PMS5005.ETX0;
+	buf.data[8] = PMS5005.ETX1;
     }
 
     return buf;
@@ -234,21 +331,21 @@ static byte* enableMotorSensorSending()
  *
  * @see disableMotorSensorSending
  */
-static byte* enableStandardSensorSending()
+static Buffer* enableStandardSensorSending()
 {
-    byte* buf = calloc(9, sizeof(byte));
+    Buffer* buf = new_Buffer(9);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PMS5005.GET_STANDARD_SENSOR_DATA;
-	buf[5] = 0; // len
-	buf[6] = crc(buf);
-	buf[7] = PMS5005.ETX0;
-	buf[8] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.GET_STANDARD_SENSOR_DATA_DID;
+	buf.data[5] = 0; // len
+	buf.data[6] = crc(buf);
+	buf.data[7] = PMS5005.ETX0;
+	buf.data[8] = PMS5005.ETX1;
     }
 
     return buf;
@@ -264,21 +361,21 @@ static byte* enableStandardSensorSending()
  *
  * @see disableStandardSensorSending
  */
-static byte* enableCustomSensorSending()
+static Buffer* enableCustomSensorSending()
 {
-    byte* buf = calloc(9, sizeof(byte));
+    Buffer* buf = new_Buffer(9);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PMS5005.GET_CUSTOM_SENSOR_DATA;
-	buf[5] = 0; // len
-	buf[6] = crc(buf);
-	buf[7] = PMS5005.ETX0;
-	buf[8] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.GET_CUSTOM_SENSOR_DATA_DID;
+	buf.data[5] = 0; // len
+	buf.data[6] = crc(buf);
+	buf.data[7] = PMS5005.ETX0;
+	buf.data[8] = PMS5005.ETX1;
     }
 
     return buf;
@@ -294,21 +391,21 @@ static byte* enableCustomSensorSending()
  *
  * @see disableCustomSensorSending
  */
-static byte* enableAllSensorSending()
+static Buffer* enableAllSensorSending()
 {
-    byte* buf = calloc(9, sizeof(byte));
+    Buffer* buf = new_Buffer(9);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PMS5005.GET_ALL_SENSOR_DATA;
-	buf[5] = 0; // len
-	buf[6] = crc(buf);
-	buf[7] = PMS5005.ETX0;
-	buf[8] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.GET_ALL_SENSOR_DATA_DID;
+	buf.data[5] = 0; // len
+	buf.data[6] = crc(buf);
+	buf.data[7] = PMS5005.ETX0;
+	buf.data[8] = PMS5005.ETX1;
     }
 
     return buf;
@@ -319,22 +416,22 @@ static byte* enableAllSensorSending()
  *
  * @see enableMotorSensorSending
  */
-static byte* disableMotorSensorSending()
+static Buffer* disableMotorSensorSending()
 {
-    byte* buf = calloc(10, sizeof(byte));
+    Buffer* buf = new_Buffer(10);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PMS5005.GET_MOTOR_SENSOR_DATA;
-	buf[5] = 1; // len
-	buf[6] = 0; //(0 & 0xff);
-	buf[7] = crc(buf);
-	buf[8] = PMS5005.ETX0;
-	buf[9] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.GET_MOTOR_SENSOR_DATA_DID;
+	buf.data[5] = 1; // len
+	buf.data[6] = 0; //(0 & 0xff);
+	buf.data[7] = crc(buf);
+	buf.data[8] = PMS5005.ETX0;
+	buf.data[9] = PMS5005.ETX1;
     }
 
     return buf;
@@ -345,24 +442,24 @@ static byte* disableMotorSensorSending()
  *
  * @see enableStandardSensorSending
  */
-static byte* disableStandardSensorSending()
+static Buffer* disableStandardSensorSending()
 {
-    byte* buf = calloc(10, sizeof(byte));
+    Buffer* buf = new_Buffer(10);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PMS5005.GET_STANDARD_SENSOR_DATA;
-	buf[5] = 1; // len
-	buf[6] = 0; //(0 & 0xff);
-	buf[7] = crc(buf);
-	buf[8] = PMS5005.ETX0;
-	buf[9] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.GET_STANDARD_SENSOR_DATA_DID;
+	buf.data[5] = 1; // len
+	buf.data[6] = 0; //(0 & 0xff);
+	buf.data[7] = crc(buf);
+	buf.data[8] = PMS5005.ETX0;
+	buf.data[9] = PMS5005.ETX1;
     }
-		
+	
     return buf;
 }
 
@@ -371,22 +468,22 @@ static byte* disableStandardSensorSending()
  *
  * @see enableCustomSensorSending
  */
-static byte* disableCustomSensorSending()
+static Buffer* disableCustomSensorSending()
 {
-    byte* buf = calloc(10, sizeof(byte));
+    Buffer* buf = new_Buffer(10);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PMS5005.GET_CUSTOM_SENSOR_DATA;
-	buf[5] = 1; // len
-	buf[6] = 0; //(0 & 0xff);
-	buf[7] = crc(buf);
-	buf[8] = PMS5005.ETX0;
-	buf[9] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.GET_CUSTOM_SENSOR_DATA_DID;
+	buf.data[5] = 1; // len
+	buf.data[6] = 0; //(0 & 0xff);
+	buf.data[7] = crc(buf);
+	buf.data[8] = PMS5005.ETX0;
+	buf.data[9] = PMS5005.ETX1;
     }
 
     return buf;
@@ -397,22 +494,22 @@ static byte* disableCustomSensorSending()
  *
  * @see enableAllSensorSending
  */
-static byte* disableAllSensorSending()
+static Buffer* disableAllSensorSending()
 {
-    byte* buf = calloc(10, sizeof(byte));
+    Buffer* buf = new_Buffer(10);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PMS5005.GET_ALL_SENSOR_DATA;
-	buf[5] = 1; // len
-	buf[6] = 0; //(0 & 0xff);
-	buf[7] = crc(buf);
-	buf[8] = PMS5005.ETX0;
-	buf[9] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.GET_ALL_SENSOR_DATA_DID;
+	buf.data[5] = 1; // len
+	buf.data[6] = 0; //(0 & 0xff);
+	buf.data[7] = crc(buf);
+	buf.data[8] = PMS5005.ETX0;
+	buf.data[9] = PMS5005.ETX1;
     }
 
     return buf;
@@ -429,7 +526,7 @@ static byte* disableAllSensorSending()
  *
  * @see motorSensorRequest
  */
-static byte* setMotorSensorPeriod(short timePeriod)
+static Buffer* setMotorSensorPeriod(short timePeriod)
 {
     // TODO stub
     return NULL;
@@ -446,7 +543,7 @@ static byte* setMotorSensorPeriod(short timePeriod)
  *
  * @see standardSensorRequest
  */
-static byte* setStandardSensorPeriod(short timePeriod)
+static Buffer* setStandardSensorPeriod(short timePeriod)
 {
     // TODO stub
     return NULL;
@@ -463,7 +560,7 @@ static byte* setStandardSensorPeriod(short timePeriod)
  *
  * @see customSensorRequest
  */
-static byte* setCustomSensorPeriod(short timePeriod)
+static Buffer* setCustomSensorPeriod(short timePeriod)
 {
     // TODO stub
     return NULL;
@@ -480,7 +577,7 @@ static byte* setCustomSensorPeriod(short timePeriod)
  *
  * @see allSensorRequest
  */
-static byte* setAllSensorPeriod(short timePeriod)
+static Buffer* setAllSensorPeriod(short timePeriod)
 {
     // TODO stub
     return NULL;
@@ -500,7 +597,7 @@ static byte* setAllSensorPeriod(short timePeriod)
  * with the left-front sensor (robot first person perspective) at Sonar #1 
  * (channel 0).
  */
-static short getSensorSonar(short channel, int[] standardSensorAry)
+static short getSensorSonar(short channel, const int standardSensorAry[])
 {
     return standardSensorAry[channel + ULTRASONIC_OFFSET];
 }
@@ -521,7 +618,7 @@ static short getSensorSonar(short channel, int[] standardSensorAry)
  * digital converter.  The output voltage of the sensor can be calculated 
  * from the following equation: sensorOutputVoltage = (ival)*3.0/4095(v)
  */
-static short getSensorIrRange(short channel, int[] standardSensorAry, int[] customSensorAry)
+static short getSensorIrRange(short channel, const int standardSensorAry[], const int customSensorAry[])
 {
     short result = -1;
 		
@@ -556,7 +653,7 @@ static short getSensorIrRange(short channel, int[] standardSensorAry, int[] cust
  * threshold determines the sensitivity of the sensor.  The higher the 
  * threshold, the lower the sensitivity will be.
  */
-static short getSensorHumanAlarm(short channel, int[] standardSensorAry)
+static short getSensorHumanAlarm(short channel, const int standardSensorAry[])
 {
     int offset = 2*channel + HUMAN_ALARM_OFFSET;
     return standardSensorAry[offset + 1] << 8 | standardSensorAry[offset];
@@ -580,7 +677,7 @@ static short getSensorHumanAlarm(short channel, int[] standardSensorAry)
  * human motion, the different patterns of the two sensor modules manifest 
  * the direction of motion.  The relationship can be obtained empirically.
  */
-static short getSensorHumanMotion(short channel, int[] standardSensorAry)
+static short getSensorHumanMotion(short channel, const int standardSensorAry[])
 {
     int offset = 2*channel + HUMAN_MOTION_OFFSET;
     return standardSensorAry[offset + 1] << 8 | standardSensorAry[offset];
@@ -604,7 +701,7 @@ static short getSensorHumanMotion(short channel, int[] standardSensorAry)
  * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
  * ZeroGValue) is about 1250.
  */
-static short getSensorTiltingX(int[] standardSensorAry)
+static short getSensorTiltingX(const int standardSensorAry[])
 {
     return standardSensorAry[TILTING_X_OFFSET + 1] << 8 | standardSensorAry[TILTING_X_OFFSET];
 }
@@ -627,7 +724,7 @@ static short getSensorTiltingX(int[] standardSensorAry)
  * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
  * ZeroGValue) is about 1250.
  */
-static short getSensorTiltingY(int[] standardSensorAry)
+static short getSensorTiltingY(const int standardSensorAry[])
 {
     return standardSensorAry[TILTING_Y_OFFSET + 1] << 8 | standardSensorAry[TILTING_Y_OFFSET];
 }
@@ -652,7 +749,7 @@ static short getSensorTiltingY(int[] standardSensorAry)
  * from the following equation: Temperature = 100 - (ival - 980)/11.6 
  * where Temperature is in degrees Celsius.
  */
-static short getSensorOverheat(short channel, int[] standardSensorAry)
+static short getSensorOverheat(short channel, const int standardSensorAry[])
 {
     int offset = 2*channel + OVERHEAT_SENSOR_OFFSET;
     return standardSensorAry[offset + 1] << 8 | standardSensorAry[offset];
@@ -665,7 +762,7 @@ static short getSensorOverheat(short channel, int[] standardSensorAry)
  * @return Temperature = (ival - 1256) / 34.8, where Temperature is in 
  * degrees Celsius.
  */
-static short getSensorTemperature(int[] standardSensorAry)
+static short getSensorTemperature(const int standardSensorAry[])
 {
     return standardSensorAry[TEMPERATURE_AD_OFFSET + 1] << 8 | standardSensorAry[TEMPERATURE_AD_OFFSET];
 }
@@ -682,7 +779,7 @@ static short getSensorTemperature(int[] standardSensorAry)
  * Repeat Code: byte[3]
  * Where the repeat byte would be 255 if the button is pressed continuously
  */
-static short getSensorIrCode(short index, int[] standardSensorAry)
+static short getSensorIrCode(short index, const int standardSensorAry[])
 {
     return standardSensorAry[INFRARED_COMMAND_OFFSET + index];
 }
@@ -705,7 +802,7 @@ static short getSensorIrCode(short index, int[] standardSensorAry)
  *    the command is sent.
  * 3) This API method is under development and will be available soon.
  */
-static byte* setInfraredControlOutput(short lowWord, short highWord)
+static Buffer* setIrCtrlOutput(short loWord, short hiWord)
 {
     // TODO Auto-generated method stub
     return null;
@@ -736,7 +833,7 @@ static byte* setInfraredControlOutput(short lowWord, short highWord)
  * 2) Power supply voltage of DC motors = 24v*(ival/4095)
  * 3) Power supply voltage of servo motors = 9v*(ival/4095)
  */
-static short getSensorBatteryAd(short channel, int[] standardSensorAry)
+static short getSensorBatteryAd(short channel, const int standardSensorAry[])
 {
     return standardSensorAry[2*channel + BATTERY_SENSOR_OFFSET + 1] << 8 | standardSensorAry[2*channel + BATTERY_SENSOR_OFFSET];
 }
@@ -750,7 +847,7 @@ static short getSensorBatteryAd(short channel, int[] standardSensorAry)
  * The following equation can be used to calculate the actual voltage 
  * values: Voltage = 6v*(ival/4095)
  */
-static short getSensorRefVoltage(int[] standardSensorAry)
+static short getSensorRefVoltage(const int standardSensorAry[])
 {
     return standardSensorAry[REFERENCE_VOLTAGE_OFFSET + 1] << 8 | standardSensorAry[REFERENCE_VOLTAGE_OFFSET];
 }
@@ -764,7 +861,7 @@ static short getSensorRefVoltage(int[] standardSensorAry)
  * The following equation can be used to calculate the actual voltage 
  * values: Voltage = 6v*(ival/4095)
  */
-static short getSensorPotVoltage(int[] standardSensorAry)
+static short getSensorPotVoltage(const int standardSensorAry[])
 {
     return standardSensorAry[POTENTIOMETER_POWER_OFFSET + 1] << 8 | standardSensorAry[POTENTIOMETER_POWER_OFFSET];
 }
@@ -799,7 +896,7 @@ static short getSensorPotVoltage(int[] standardSensorAry)
  *
  * @see setDcMotorSensorUsage
  */
-static short getSensorPot(short channel, int[] motorSensorAry)
+static short getSensorPot(short channel, const int motorSensorAry[])
 {
     return motorSensorAry[2*channel + POTENTIOMETER_SENSOR_OFFSET] + 1 << 8 | motorSensorAry[2*channel + POTENTIOMETER_SENSOR_OFFSET];
 }
@@ -814,7 +911,7 @@ static short getSensorPot(short channel, int[] motorSensorAry)
  * current value can be calculated with the following formula: 
  * Motor Current (amperes) = ival/728 ( = ival*3*375/200/4095)
  */
-static short getMotorCurrent(short channel, int[] motorSensorAry)
+static short getMotorCurrent(short channel, const int motorSensorAry[])
 {
     return (motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET + 1] << 8 | motorSensorAry[2*channel + MOTOR_CURRENT_SENSOR_OFFSET]) / 728.0;
 }
@@ -828,7 +925,7 @@ static short getMotorCurrent(short channel, int[] motorSensorAry)
  * @return 1 to indicate positive direction, 0 to indicate no movement, 
  * and -1 to indicate negative direction.
  */
-static short getEncoderDirection(short channel, int[] motorSensorAry)
+static short getEncoderDirection(short channel, const int motorSensorAry[])
 {
     int offset = channel + ENCODER_DIRECTION_OFFSET;
     short result = -1;
@@ -855,7 +952,7 @@ static short getEncoderDirection(short channel, int[] motorSensorAry)
  * @return Pulse counter, an short integral value to rotation with range of 
  * 0 to 32767 in cycles.
  */
-static short getEncoderPulse(short channel, int[] motorSensorAry)
+static short getEncoderPulse(short channel, const int motorSensorAry[])
 {
     int offset = 4*channel + ENCODER_PULSE_OFFSET;
     return motorSensorAry[offset + 1] << 8 | motorSensorAry[offset];
@@ -870,7 +967,7 @@ static short getEncoderPulse(short channel, int[] motorSensorAry)
  *
  * @see setDcMotorSensorUsage
  */
-static short getEncoderSpeed(short channel, int[] motorSensorAry)
+static short getEncoderSpeed(short channel, const int motorSensorAry[])
 {
     int offset = 4*channel + MOTOR_SPEED_OFFSET;
     return motorSensorAry[offset + 1] << 8 | motorSensorAry[offset];
@@ -894,7 +991,7 @@ static short getEncoderSpeed(short channel, int[] motorSensorAry)
  *
  * @see getSensorBatteryAd
  */
-static short getCustomAd(short channel, int[] customSensorAry)
+static short getCustomAd(short channel, const int customSensorAry[])
 {
     int offset = 2*channel + CUSTOM_AD_OFFSET;
     return customSensorAry[offset + 1] << 8 | customSensorAry[offset];
@@ -906,12 +1003,12 @@ static short getCustomAd(short channel, int[] customSensorAry)
  *
  * @param channel 0, 1, 2, 3, 4, 5, 6, or 7 for channel #1 through #8.
  */
-static short getCustomDIn(byte channel, int[] customSensorAry)
+static short getCustomDIn(byte channel, const int customSensorAry[])
 {
     // TODO Auto-generated method stub
     return 0;
 }
-	
+
 /**
  * Sets the 8-channel custom digital outputs.
  *
@@ -919,7 +1016,7 @@ static short getCustomDIn(byte channel, int[] customSensorAry)
  * corresponding outputs of the 8 channels.  The MSB of the lower byte 
  * represents channel #8 and LSB of the lower byte represents channel #1.
  */
-static byte* setCustomDOut(byte ival)
+static Buffer* setCustomDOut(byte ival)
 {
     return NULL;
     // TODO Auto-generated method stub
@@ -939,29 +1036,29 @@ static byte* setCustomDOut(byte ival)
  * 
  * @param polarity 1 or -1
  */
-static byte* setMotorPolarity(byte channel, byte polarity)
+static Buffer* setMotorPolarity(byte channel, byte polarity)
 {
-    byte* buf = calloc(12, sizeof(byte));
+    Buffer* buf = new_Buffer(12);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PARAM_SET;                   //DID
-	buf[5] = 5;                           //LEN
-	buf[6] = DC_SENSOR_USAGE;             //Subcommand
-	buf[7] = channel;                     //0-L | 1=R
-	buf[8] = polarity;                    //polarity 1 | -1
-	buf[9] = crc(buf);                 //Checksum
-	buf[10] = PMS5005.ETX0;
-	buf[11] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.PARAM_SET_DID;                   //DID
+	buf.data[5] = 5;                           //LEN
+	buf.data[6] = PMS5005.DC_SENSOR_USAGE_DID;             //Subcommand
+	buf.data[7] = channel;                     //0-L | 1=R
+	buf.data[8] = polarity;                    //polarity 1 | -1
+	buf.data[9] = crc(buf);                 //Checksum
+	buf.data[10] = PMS5005.ETX0;
+	buf.data[11] = PMS5005.ETX1;
     }
 
     return buf;
 }
-	
+
 /**
  * Enables the specified DC motor control channel.
  *
@@ -971,23 +1068,23 @@ static byte* setMotorPolarity(byte channel, byte polarity)
  *
  * @see resumeDcMotor
  */
-static byte* enableDcMotor(byte channel)
+static Buffer* enableDcMotor(byte channel)
 {
-    byte* buf = calloc(11, sizeof(byte));
+    Buffer* buf = new_Buffer(11);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = TOGGLE_DC_MOTORS; //DID
-	buf[5] = 2;                //LEN
-	buf[6] = 1;                //1 = Enable/Resume
-	buf[7] = channel;          //0=L | 1=R
-	buf[8] = crc(buf);      //Checksum
-	buf[9] = PMS5005.ETX0;
-	buf[10] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.TOGGLE_DC_MOTORS_DID; //DID
+	buf.data[5] = 2;                //LEN
+	buf.data[6] = 1;                //1 = Enable/Resume
+	buf.data[7] = channel;          //0=L | 1=R
+	buf.data[8] = crc(buf);      //Checksum
+	buf.data[9] = PMS5005.ETX0;
+	buf.data[10] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1002,23 +1099,23 @@ static byte* enableDcMotor(byte channel)
  *
  * @see suspendDcMotor
  */
-static byte* disableDcMotor(byte channel)
+static Buffer* disableDcMotor(byte channel)
 {
-    byte* buf = calloc(11, sizeof(byte));
+    Buffer* buf = new_Buffer(11);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = TOGGLE_DC_MOTORS;         //DID
-	buf[5] = 2;                        //LEN
-	buf[6] = 0;                        //0 = Disable/Suspend
-	buf[7] = channel;                  //0=L | 1=R
-	buf[8] = crc(buf);              //Checksum
-	buf[9] = PMS5005.ETX0;
-	buf[10] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.TOGGLE_DC_MOTORS_DID;         //DID
+	buf.data[5] = 2;                        //LEN
+	buf.data[6] = 0;                        //0 = Disable/Suspend
+	buf.data[7] = channel;                  //0=L | 1=R
+	buf.data[8] = crc(buf);              //Checksum
+	buf.data[9] = PMS5005.ETX0;
+	buf.data[10] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1029,23 +1126,23 @@ static byte* disableDcMotor(byte channel)
  *
  * @param channel 0 for left, 1 for right (robot first person perspective)
  */
-static byte* resumeDcMotor(byte channel)
+static Buffer* resumeDcMotor(byte channel)
 {
-    byte packet = calloc(11, sizeof(byte));
+    Buffer* buf = new_Buffer(11);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = TOGGLE_DC_MOTORS; //DID
-	buf[5] = 2;                //LEN
-	buf[6] = 1;                //resume
-	buf[7] = channel;          //0=L | 1=R
-	buf[8] = crc(buf);      //Checksum
-	buf[9] = PMS5005.ETX0;
-	buf[10] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.TOGGLE_DC_MOTORS_DID; //DID
+	buf.data[5] = 2;                //LEN
+	buf.data[6] = 1;                //resume
+	buf.data[7] = channel;          //0=L | 1=R
+	buf.data[8] = crc(buf);      //Checksum
+	buf.data[9] = PMS5005.ETX0;
+	buf.data[10] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1058,23 +1155,23 @@ static byte* resumeDcMotor(byte channel)
  *
  * All motor control channels are initially suspended at boot-up.
  */
-static byte* suspendDcMotor(byte channel)
+static Buffer* suspendDcMotor(byte channel)
 {
-    byte* buf = calloc(11, sizeof(byte));
+    Buffer* buf = new_Buffer(11);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = TOGGLE_DC_MOTORS; //DID
-	buf[5] = 2;                //LEN
-	buf[6] = 0;                //SUSPEND
-	buf[7] = channel;          //0=L | 1=R
-	buf[8] = crc(buf);      //Checksum
-	buf[9] = PMS5005.ETX0;
-	buf[10] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.TOGGLE_DC_MOTORS_DID; //DID
+	buf.data[5] = 2;                //LEN
+	buf.data[6] = 0;                //SUSPEND
+	buf.data[7] = channel;          //0=L | 1=R
+	buf.data[8] = crc(buf);      //Checksum
+	buf.data[9] = PMS5005.ETX0;
+	buf.data[10] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1093,63 +1190,63 @@ static byte* suspendDcMotor(byte channel)
  *
  * @see setDcMotorControlMode
  */
-static byte* setDcMotorPositionControlPid(byte channel, short Kp, short Kd, short Ki)
+static Buffer* setDcMotorPositionCtrlPid(byte channel, short Kp, short Kd, short Ki)
 {
-    byte* buf = calloc(20, sizeof(byte));
+    Buffer* buf = new_Buffer(20);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PARAM_SET;   				 //DID
-	buf[5] = 11;                         //LEN 
-	buf[6] = DC_POSITION_PID;            //Subcommand
-	buf[7] = channel;                    //0=L | 1=R
-	buf[8] = KpId;                       //Proportional gain
-	buf[9] = Kp;        
-	buf[10] = Kp >> 8;
-	buf[11] = KdId;                       //Derivative gain
-	buf[12] = Kd;        
-	buf[13] = Kd >> 8;
-	buf[14] = KiId;                       //Integral gain
-	buf[15] = Ki;         
-	buf[16] = Ki >> 8;
-	buf[17] = crc(buf);                //Checksum
-	buf[18] = PMS5005.ETX0;
-	buf[19] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.PARAM_SET_DID;   				 //DID
+	buf.data[5] = 11;                         //LEN 
+	buf.data[6] = PMS5005.DC_POSITION_PID_DID;            //Subcommand
+	buf.data[7] = channel;                    //0=L | 1=R
+	buf.data[8] = PMS5005.KPID;                       //Proportional gain
+	buf.data[9] = PMS5005.KP;        
+	buf.data[10] = PMS5005.KP >> 8;
+	buf.data[11] = PMS5005.KDID;                       //Derivative gain
+	buf.data[12] = PMS5005.KD;        
+	buf.data[13] = PMS5005.KD >> 8;
+	buf.data[14] = PMS5005.KIID;                       //Integral gain
+	buf.data[15] = PMS5005.KI;         
+	buf.data[16] = PMS5005.KI >> 8;
+	buf.data[17] = crc(buf);                //Checksum
+	buf.data[18] = PMS5005.ETX0;
+	buf.data[19] = PMS5005.ETX1;
     }
 
     return buf;
 }
 	
-static byte* setDcMotorVelocityControlPID(byte channel, int Kp, int Kd, int Ki) 
+static Buffer* setDcMotorVelocityCtrlPid(byte channel, short Kp, short Kd, short Ki) 
 {
-    byte* buf = calloc(20, sizeof(byte));
+    Buffer* buf = new_Buffer(20);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PARAM_SET;                  //DID
-	buf[5] = 11;                         //LEN 
-	buf[6] = DC_VELOCITY_PID;            //Subcommand
-	buf[7] = channel;                    //0=L | 1=R
-	buf[8] = KpId;                       //Proportional gain
-	buf[9] = Kp;
-	buf[10] = Kp >> 8;
-	buf[11] = KdId;                       //Derivative gain
-	buf[12] = Kd;
-	buf[13] = Kd >> 8;
-	buf[14] = KiId;                       //Integral gain
-	buf[15] = Ki;
-	buf[16] = Ki >> 8;
-	buf[17] = crc(buf);                //Checksum
-	buf[18] = PMS5005.ETX0;
-	buf[19] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PARAM_SET_DID;                  //DID
+	buf.data[5] = 11;                         //LEN 
+	buf.data[6] = DC_VELOCITY_PID_DID;            //Subcommand
+	buf.data[7] = channel;                    //0=L | 1=R
+	buf.data[8] = PMS5005.KPID;                       //Proportional gain
+	buf.data[9] = PMS5005.KP;
+	buf.data[10] = PMS5005.KP >> 8;
+	buf.data[11] = PMS5005.KDID;                       //Derivative gain
+	buf.data[12] = PMS5005.KD;
+	buf.data[13] = PMS5005.KD >> 8;
+	buf.data[14] = PMS5005.KIID;                       //Integral gain
+	buf.data[15] = PMS5005.KI;
+	buf.data[16] = PMS5005.KI >> 8;
+	buf.data[17] = crc(buf);                //Checksum
+	buf.data[18] = PMS5005.ETX0;
+	buf.data[19] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1159,7 +1256,7 @@ static byte* setDcMotorVelocityControlPID(byte channel, int Kp, int Kd, int Ki)
  * This filtering feature is still under development. All data will be 
  * treated as raw data.
  */
-static byte* setDcMotorSensorFilter(byte channel, short filterMethod)
+static Buffer* setDcMotorSensorFilter(byte channel, short filterMethod)
 {
     return NULL;
 }
@@ -1192,24 +1289,24 @@ static byte* setDcMotorSensorFilter(byte channel, short filterMethod)
  *
  * @see getSensorPot
  */
-static byte* setDcMotorSensorUsage(byte channel, byte sensorType)
+static Buffer* setDcMotorSensorUsage(byte channel, byte sensorType)
 {
-    byte* buf = calloc(12, sizeof(byte));
+    Buffer* buf = new_Buffer(12);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PARAM_SET;                   //DID
-	buf[5] = 5;                           //LEN
-	buf[6] = DC_SENSOR_USAGE;             //Subcommand
-	buf[7] = channel;                     //0-5  = Single Potentiometer, 0-2  = Dual Potentiometer, 0-1  = Encoder
-	buf[8] = sensorType;                  //0x00 = Single Potentiometer, 0x01 = Dual Potentiometer, 0x02 = Encoder
-	buf[9] = crc(buf);                 //Checksum
-	buf[10] = PMS5005.ETX0;
-	buf[11] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.PARAM_SET_DID;                   //DID
+	buf.data[5] = 5;                           //LEN
+	buf.data[6] = PMS5005.DC_SENSOR_USAGE_DID;             //Subcommand
+	buf.data[7] = channel;                     //0-5  = Single Potentiometer, 0-2  = Dual Potentiometer, 0-1  = Encoder
+	buf.data[8] = sensorType;                  //0x00 = Single Potentiometer, 0x01 = Dual Potentiometer, 0x02 = Encoder
+	buf.data[9] = crc(buf);                 //Checksum
+	buf.data[10] = PMS5005.ETX0;
+	buf.data[11] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1228,24 +1325,24 @@ static byte* setDcMotorSensorUsage(byte channel, byte sensorType)
  * @see setDcMotorPositionControlPid
  * @see setDcMotorVelocityControlPid
  */
-static byte* setDcMotorControlMode(byte channel, byte controlMode)
+static Buffer* setDcMotorCtrlMode(byte channel, byte controlMode)
 {
-    byte packet = calloc(12, sizeof(byte));
+    Buffer* buf = new_Buffer(12);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PARAM_SET;				//DID
-	buf[5] = 3;						//LEN
-	buf[6] = DC_CTRL_MODE;			//Subcommand
-	buf[7] = channel;				//channel 0-5
-	buf[8] = controlMode;			//0 = open, 1 = closed position, 2 = closed velocity
-	buf[9] = crc(buf);			//Checksum
-	buf[10] = PMS5005.ETX0;
-	buf[11] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.PARAM_SET_DID;				//DID
+	buf.data[5] = 3;						//LEN
+	buf.data[6] = PMS5005.DC_CTRL_MODE_DID;			//Subcommand
+	buf.data[7] = channel;				//channel 0-5
+	buf.data[8] = controlMode;			//0 = open, 1 = closed position, 2 = closed velocity
+	buf.data[9] = crc(buf);			//Checksum
+	buf.data[10] = PMS5005.ETX0;
+	buf.data[11] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1262,26 +1359,26 @@ static byte* setDcMotorControlMode(byte channel, byte controlMode)
  * @param packetValue Target position value
  * @param timePeriod Executing time in milliseconds
  */
-static byte* dcMotorPositionTimeCtrl(byte channel, short packetValue, short time)
+static Buffer* dcMotorPositionTimeCtrl(byte channel, short packetValue, short time)
 {
-    byte packet = calloc(14, sizeof(byte));
+    Buffer* buf = new_Buffer(14);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = POSITION_CTRL;					//DID
-	buf[5] = 5;								//LEN
-	buf[6] = channel;						//Channel 0-5
-	buf[7] = packetValue;		//packetValue
-	buf[8] = packetValue >> 8;
-	buf[9] = time;			//time
-	buf[10] = time >> 8;
-	buf[11] = crc(buf);					//Checksum
-	buf[12] = PMS5005.ETX0;
-	buf[13] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.POSITION_CTRL_DID;	//DID
+	buf.data[5] = 5;				//LEN
+	buf.data[6] = channel;			//Channel 0-5
+	buf.data[7] = packetValue;		//packetValue
+	buf.data[8] = packetValue >> 8;
+	buf.data[9] = time;			//time
+	buf.data[10] = time >> 8;
+	buf.data[11] = crc(buf);		       //Checksum
+	buf.data[12] = PMS5005.ETX0;
+	buf.data[13] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1308,24 +1405,24 @@ static byte* dcMotorPositionTimeCtrl(byte channel, short packetValue, short time
  * @see dcMotorVelocityTimeCtrl
  * @see getSensorPot
  */
-static byte* dcMotorPositionNonTimeCtrl(byte channel, short packetValue)
+static Buffer* dcMotorPositionNonTimeCtrl(byte channel, short packetValue)
 {
-    byte packet = calloc(12, sizeof(byte));
+    Buffer* buf = new_Buffer(12);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = POSITION_CTRL;					//DID
-	buf[5] = 3;								//LEN
-	buf[6] = channel;						//channel 0-5
-	buf[7] = packetValue;		//packetValue
-	buf[8] = packetValue >> 8;
-	buf[9] = crc(buf);					//Checksum
-	buf[10] = PMS5005.ETX0;
-	buf[11] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.POSITION_CTRL_DID;     // DID
+	buf.data[5] = 3;			        //LEN
+	buf.data[6] = channel;			//channel 0-5
+	buf.data[7] = packetValue;		//packetValue
+	buf.data[8] = packetValue >> 8;
+	buf.data[9] = crc(buf);			//Checksum
+	buf.data[10] = PMS5005.ETX0;
+	buf.data[11] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1353,26 +1450,26 @@ static byte* dcMotorPositionNonTimeCtrl(byte channel, short packetValue)
  * 
  * @see dcMotorPwmNonTimeCtrl
  */
-static byte* dcMotorPwmTimeCtrl(byte channel, short packetValue, short time)
+static Buffer* dcMotorPwmTimeCtrl(byte channel, short packetValue, short time)
 {
-    byte packet = calloc(14, sizeof(byte));
+    Buffer* buf = new_Buffer(14);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PWM_CTRL;						//DID
-	buf[5] = 5;								//LEN
-	buf[6] = channel;						//Channel 0-5
-	buf[7] = packetValue;		//packetValue
-	buf[8] = packetValue >> 8;
-	buf[9] = time;			//time
-	buf[10] = time >> 8;
-	buf[11] = crc(buf);					//Checksum
-	buf[12] = PMS5005.ETX0;
-	buf[13] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.PWM_CTRL_DID;	//DID
+	buf.data[5] = 5;			//LEN
+	buf.data[6] = channel;		//Channel 0-5
+	buf.data[7] = packetValue;		//packetValue
+	buf.data[8] = packetValue >> 8;
+	buf.data[9] = time;			//time
+	buf.data[10] = time >> 8;
+	buf.data[11] = crc(buf);					//Checksum
+	buf.data[12] = PMS5005.ETX0;
+	buf.data[13] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1400,24 +1497,24 @@ static byte* dcMotorPwmTimeCtrl(byte channel, short packetValue, short time)
  * 
  * @see dcMotorPwmTimeCtrl
  */
-static byte* dcMotorPwmNonTimeCtrl(byte channel, short packetValue)
+static Buffer* dcMotorPwmNonTimeCtrl(byte channel, short packetValue)
 {
-    byte* buf = calloc(12, sizeof(byte));
+    Buffer* buf = new_Buffer(12);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = PWM_CTRL;						//DID
-	buf[5] = 3;								//LEN
-	buf[6] = channel;						//Channel 0-5
-	buf[7] = packetValue;		//packetValue
-	buf[8] = packetValue >> 8;
-	buf[9] = crc(buf);					//Checksum
-	buf[10] = PMS5005.ETX0;
-	buf[11] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.PWM_CTRL_DID;  //DID
+	buf.data[5] = 3;			//LEN
+	buf.data[6] = channel;		//Channel 0-5
+	buf.data[7] = packetValue;		//packetValue
+	buf.data[8] = packetValue >> 8;
+	buf.data[9] = crc(buf);					//Checksum
+	buf.data[10] = PMS5005.ETX0;
+	buf.data[11] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1452,35 +1549,35 @@ static byte* dcMotorPwmNonTimeCtrl(byte channel, short packetValue)
  * @see getSensorPot
  * @see dcMotorPositionTimeCtrl
  */
-static byte* dcMotorPositionTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+static Buffer* dcMotorPositionTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 {
-    byte* buf = calloc(23, sizeof(byte));
+    Buffer* buf = new_Buffer(23);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = ALL_POSITION_CTRL;                 //DID
-	buf[5] = 14;                                //LEN
-	buf[6] = pos1;               //channel 1
-	buf[7] = pos1 >> 8;
-	buf[8] = pos2;               //channel 2
-	buf[9] = pos2 >> 8;
-	buf[10] = pos3;               //channel 3
-	buf[11] = pos3 >> 8;
-	buf[12] = pos4;               //channel 4
-	buf[13] = pos4 >> 8;
-	buf[14] = pos5;               //channel 5
-	buf[15] = pos5 >> 8;
-	buf[16] = pos6;
-	buf[17] = pos6 >> 8;
-	buf[18] = time;				//time
-	buf[19] = time >> 8;
-	buf[20] = crc(buf);                       //Checksum
-	buf[21] = PMS5005.ETX0;
-	buf[22] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.ALL_POSITION_CTRL_DID; // DID
+	buf.data[5] = 14;                            // LEN
+	buf.data[6] = pos1;               //channel 1
+	buf.data[7] = pos1 >> 8;
+	buf.data[8] = pos2;               //channel 2
+	buf.data[9] = pos2 >> 8;
+	buf.data[10] = pos3;               //channel 3
+	buf.data[11] = pos3 >> 8;
+	buf.data[12] = pos4;               //channel 4
+	buf.data[13] = pos4 >> 8;
+	buf.data[14] = pos5;               //channel 5
+	buf.data[15] = pos5 >> 8;
+	buf.data[16] = pos6;
+	buf.data[17] = pos6 >> 8;
+	buf.data[18] = time;				//time
+	buf.data[19] = time >> 8;
+	buf.data[20] = crc(buf);                       //Checksum
+	buf.data[21] = PMS5005.ETX0;
+	buf.data[22] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1514,33 +1611,33 @@ static byte* dcMotorPositionTimeCtrlAll(short pos1, short pos2, short pos3, shor
  * @see getSensorPot
  * @see dcMotorPositionNonTimeCtrl
  */
-static byte* dcMotorPositionNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+static Buffer* dcMotorPositionNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 {
-    byte* buf = calloc(21, sizeof(byte));
+    Buffer* buf = new_Buffer(21);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = ALL_POSITION_CTRL;                 //DID
-	buf[5] = 12;                                //LEN
-	buf[6] = pos1;               //channel 1
-	buf[7] = pos1 >> 8;
-	buf[8] = pos2;               //channel 2
-	buf[9] = pos2 >> 8;
-	buf[10] = pos3;               //channel 3
-	buf[11] = pos3 >> 8;
-	buf[12] = pos4;               //channel 4
-	buf[13] = pos4 >> 8;
-	buf[14] = pos5;               //channel 5
-	buf[15] = pos5 >> 8;
-	buf[16] = pos6;               //channel 6
-	buf[17] = pos6 >> 8;
-	buf[18] = crc(buf);                       //Checksum
-	buf[19] = PMS5005.ETX0;
-	buf[20] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.ALL_POSITION_CTRL_DID;                 //DID
+	buf.data[5] = 12;                                //LEN
+	buf.data[6] = pos1;               //channel 1
+	buf.data[7] = pos1 >> 8;
+	buf.data[8] = pos2;               //channel 2
+	buf.data[9] = pos2 >> 8;
+	buf.data[10] = pos3;               //channel 3
+	buf.data[11] = pos3 >> 8;
+	buf.data[12] = pos4;               //channel 4
+	buf.data[13] = pos4 >> 8;
+	buf.data[14] = pos5;               //channel 5
+	buf.data[15] = pos5 >> 8;
+	buf.data[16] = pos6;               //channel 6
+	buf.data[17] = pos6 >> 8;
+	buf.data[18] = crc(buf);                       //Checksum
+	buf.data[19] = PMS5005.ETX0;
+	buf.data[20] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1574,35 +1671,35 @@ static byte* dcMotorPositionNonTimeCtrlAll(short pos1, short pos2, short pos3, s
  * 
  * @see dcMotorVelocityTimeCtrl
  */
-static byte* dcMotorVelocityTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+static Buffer* dcMotorVelocityTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 {
-    byte* buf = calloc(23, sizeof(byte));
+    Buffer* buf = new_Buffer(23);
 
     if (packet != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = ALL_VELOCITY_CTRL;			//DID
-	buf[5] = 14;						//LEN
-	buf[6] = pos1;		//MOTOR 1
-	buf[7] = pos1 >> 8;
-	buf[8] = pos2;		//MOTOR 2
-	buf[9] = pos2 >> 8;
-	buf[10] = pos3;		//MOTOR 3
-	buf[11] = pos3 >> 8;
-	buf[12] = pos4;		//MOTOR 4
-	buf[13] = pos4 >> 8;
-	buf[14] = pos5;		//MOTOR 5
-	buf[15] = pos5 >> 8;
-	buf[16] = pos6;		//MOTOR 6
-	buf[17] = pos6 >> 8;
-	buf[18] = time;		//time
-	buf[19] = time >> 8;
-	buf[20] = crc(buf);				//Checksum
-	buf[21] = PMS5005.ETX0;
-	buf[22] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.ALL_VELOCITY_CTRL_DID;			//DID
+	buf.data[5] = 14;						//LEN
+	buf.data[6] = pos1;		//MOTOR 1
+	buf.data[7] = pos1 >> 8;
+	buf.data[8] = pos2;		//MOTOR 2
+	buf.data[9] = pos2 >> 8;
+	buf.data[10] = pos3;		//MOTOR 3
+	buf.data[11] = pos3 >> 8;
+	buf.data[12] = pos4;		//MOTOR 4
+	buf.data[13] = pos4 >> 8;
+	buf.data[14] = pos5;		//MOTOR 5
+	buf.data[15] = pos5 >> 8;
+	buf.data[16] = pos6;		//MOTOR 6
+	buf.data[17] = pos6 >> 8;
+	buf.data[18] = time;		//time
+	buf.data[19] = time >> 8;
+	buf.data[20] = crc(buf);				//Checksum
+	buf.data[21] = PMS5005.ETX0;
+	buf.data[22] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1636,33 +1733,33 @@ static byte* dcMotorVelocityTimeCtrlAll(short pos1, short pos2, short pos3, shor
  * 
  * @see dcMotorVelocityNonTimeCtrl
  */
-static byte* dcMotorVelocityNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+static Buffer* dcMotorVelocityNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 {
-    byte packet = calloc(21, sizeof(byte));
+    Buffer* buf = new_Buffer(21);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = ALL_VELOCITY_CTRL;			//DID
-	buf[5] = 12;						//LEN
-	buf[6] = pos1;		//MOTOR 1
-	buf[7] = pos1 >> 8;
-	buf[8] = pos2;		//MOTOR 2
-	buf[9] = pos2 >> 8;
-	buf[10] = pos3;		//MOTOR 3
-	buf[11] = pos3 >> 8;
-	buf[12] = pos4;		//MOTOR 4
-	buf[13] = pos4 >> 8;
-	buf[14] = pos5;		//MOTOR 5
-	buf[15] = pos5 >> 8;
-	buf[16] = pos6;		//MOTOR 6
-	buf[17] = pos6 >> 8;
-	buf[18] = crc(buf);				//Checksum
-	buf[19] = PMS5005.ETX0;
-	buf[20] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.ALL_VELOCITY_CTRL_DID;			//DID
+	buf.data[5] = 12;						//LEN
+	buf.data[6] = pos1;		//MOTOR 1
+	buf.data[7] = pos1 >> 8;
+	buf.data[8] = pos2;		//MOTOR 2
+	buf.data[9] = pos2 >> 8;
+	buf.data[10] = pos3;		//MOTOR 3
+	buf.data[11] = pos3 >> 8;
+	buf.data[12] = pos4;		//MOTOR 4
+	buf.data[13] = pos4 >> 8;
+	buf.data[14] = pos5;		//MOTOR 5
+	buf.data[15] = pos5 >> 8;
+	buf.data[16] = pos6;		//MOTOR 6
+	buf.data[17] = pos6 >> 8;
+	buf.data[18] = crc(buf);				//Checksum
+	buf.data[19] = PMS5005.ETX0;
+	buf.data[20] = PMS5005.ETX1;
     }
 
     return buf;	
@@ -1694,35 +1791,35 @@ static byte* dcMotorVelocityNonTimeCtrlAll(short pos1, short pos2, short pos3, s
  * 4) When omitting motors from control, the command value of -32768
  *    (0x8000), should be sent.  This implies NO_CTRL.
  */
-static byte* dcMotorPwmTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+static Buffer* dcMotorPwmTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 {
-    byte packet = calloc(23, sizeof(byte));
+    Buffer* buf = new_Buffer(23);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = ALL_PWM_CTRL;				//DID
-	buf[5] = 14;						//LEN
-	buf[6] = pos1;		//MOTOR 1
-	buf[7] = pos1 >> 8;
-	buf[8] = pos2;		//MOTOR 2
-	buf[9] = pos2 >> 8;
-	buf[10] = pos3;		//MOTOR 3
-	buf[11] = pos3 >> 8;
-	buf[12] = pos4;		//MOTOR 4
-	buf[13] = pos4 >> 8;
-	buf[14] = pos5;		//MOTOR 5
-	buf[15] = pos5 >> 8;
-	buf[16] = pos6;		//MOTOR 6
-	buf[17] = pos6 >> 8;
-	buf[18] = time;		//time
-	buf[19] = time >> 8;
-	buf[20] = crc(buf);				//Checksum
-	buf[21] = PMS5005.ETX0;
-	buf[22] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.ALL_PWM_CTRL_DID;				//DID
+	buf.data[5] = 14;						//LEN
+	buf.data[6] = pos1;		//MOTOR 1
+	buf.data[7] = pos1 >> 8;
+	buf.data[8] = pos2;		//MOTOR 2
+	buf.data[9] = pos2 >> 8;
+	buf.data[10] = pos3;		//MOTOR 3
+	buf.data[11] = pos3 >> 8;
+	buf.data[12] = pos4;		//MOTOR 4
+	buf.data[13] = pos4 >> 8;
+	buf.data[14] = pos5;		//MOTOR 5
+	buf.data[15] = pos5 >> 8;
+	buf.data[16] = pos6;		//MOTOR 6
+	buf.data[17] = pos6 >> 8;
+	buf.data[18] = time;		//time
+	buf.data[19] = time >> 8;
+	buf.data[20] = crc(buf);				//Checksum
+	buf.data[21] = PMS5005.ETX0;
+	buf.data[22] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1754,33 +1851,33 @@ static byte* dcMotorPwmTimeCtrlAll(short pos1, short pos2, short pos3, short pos
  * 4) When omitting motors from control, the command value of -32768
  *    (0x8000), should be sent.  This implies NO_CTRL.
  */
-static byte* dcMotorPwmNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+static Buffer* dcMotorPwmNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 {
-    byte* buf = calloc(21, sizeof(byte));
+    Buffer* buf = new_Buffer(21);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = ALL_PWM_CTRL;				//DID
-	buf[5] = 12;						//LEN
-	buf[6] = pos1;		//MOTOR 1
-	buf[7] = pos1 >> 8;
-	buf[8] = pos2;		//MOTOR 2
-	buf[9] = pos2 >> 8;
-	buf[10] = pos3;		//MOTOR 3
-	buf[11] = pos3 >> 8;
-	buf[12] = pos4;		//MOTOR 4
-	buf[13] = pos4 >> 8;
-	buf[14] = pos5;		//MOTOR 5
-	buf[15] = pos5 >> 8;
-	buf[16] = pos6;		//MOTOR 6
-	buf[17] = pos6 >> 8;
-	buf[18] = crc(buf);				//Checksum
-	buf[19] = PMS5005.ETX0;
-	buf[20] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.ALL_PWM_CTRL_DID;				//DID
+	buf.data[5] = 12;						//LEN
+	buf.data[6] = pos1;		//MOTOR 1
+	buf.data[7] = pos1 >> 8;
+	buf.data[8] = pos2;		//MOTOR 2
+	buf.data[9] = pos2 >> 8;
+	buf.data[10] = pos3;		//MOTOR 3
+	buf.data[11] = pos3 >> 8;
+	buf.data[12] = pos4;		//MOTOR 4
+	buf.data[13] = pos4 >> 8;
+	buf.data[14] = pos5;		//MOTOR 5
+	buf.data[15] = pos5 >> 8;
+	buf.data[16] = pos6;		//MOTOR 6
+	buf.data[17] = pos6 >> 8;
+	buf.data[18] = crc(buf);				//Checksum
+	buf.data[19] = PMS5005.ETX0;
+	buf.data[20] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1796,23 +1893,23 @@ static byte* dcMotorPwmNonTimeCtrlAll(short pos1, short pos2, short pos3, short 
  * 
  * @see disableServo
  */
-static byte* enableServo(byte channel)
+static Buffer* enableServo(byte channel)
 {
-    byte* buf = calloc(11, sizeof(byte));
+    Buffer* buf = new_Buffer(11);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = TOGGLE_DC_MOTORS;         //DID
-	buf[5] = 2;                        //LEN
-	buf[6] = 0;                        //0 = Enable
-	buf[7] = channel;                  //6-11 SERVO
-	buf[8] = crc(buf);              //Checksum
-	buf[9] = PMS5005.ETX0;
-	buf[10] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.TOGGLE_DC_MOTORS_DID;         //DID
+	buf.data[5] = 2;                        //LEN
+	buf.data[6] = 0;                        //0 = Enable
+	buf.data[7] = channel;                  //6-11 SERVO
+	buf.data[8] = crc(buf);              //Checksum
+	buf.data[9] = PMS5005.ETX0;
+	buf.data[10] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1828,23 +1925,23 @@ static byte* enableServo(byte channel)
  * 
  * @see enableServo
  */
-static byte* disableServo(byte channel)
+static Buffer* disableServo(byte channel)
 {
-    byte* buf = calloc(11, sizeof(byte));
+    Buffer* buf = new_Buffer(11);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = TOGGLE_DC_MOTORS;         //DID
-	buf[5] = 2;                        //LEN
-	buf[6] = 0;                        //0 = Disable
-	buf[7] = channel;                  //6-11 = SERVO
-	buf[8] = crc(buf);              //Checksum
-	buf[9] = PMS5005.ETX0;
-	buf[10] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.TOGGLE_DC_MOTORS_DID;         //DID
+	buf.data[5] = 2;                        //LEN
+	buf.data[6] = 0;                        //0 = Disable
+	buf.data[7] = channel;                  //6-11 = SERVO
+	buf.data[8] = crc(buf);              //Checksum
+	buf.data[9] = PMS5005.ETX0;
+	buf.data[10] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1871,27 +1968,27 @@ static byte* disableServo(byte channel)
  * 
  * @see servoNonTimeCtrl
  */
-static byte* servoTimeCtrl(byte channel, short packetValue, short time)
+static Buffer* servoTimeCtrl(byte channel, short packetValue, short time)
 {
-    byte packet = calloc(15, sizeof(byte));
+    Buffer* buf = new_Buffer(15);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = SERVO_CTRL;                        //DID
-	buf[5] = 6;                                 //LEN
-	buf[6] = channel;                           //channel
-	buf[7] = packetValue;           //command value low 8 bit
-	buf[8] = packetValue >> 8;   //high 8 bit
-	buf[9] = 6;                                 //flag
-	buf[10] = time;               //time low 8 bit
-	buf[11] = time >> 8;       //high 8 bit    
-	buf[12] = crc(buf);                       //Checksum
-	buf[13] = PMS5005.ETX0;
-	buf[14] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.SERVO_CTRL_DID;                        //DID
+	buf.data[5] = 6;                                 //LEN
+	buf.data[6] = channel;                           //channel
+	buf.data[7] = packetValue;           //command value low 8 bit
+	buf.data[8] = packetValue >> 8;   //high 8 bit
+	buf.data[9] = 6;                                 //flag
+	buf.data[10] = time;               //time low 8 bit
+	buf.data[11] = time >> 8;       //high 8 bit    
+	buf.data[12] = crc(buf);                       //Checksum
+	buf.data[13] = PMS5005.ETX0;
+	buf.data[14] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1909,25 +2006,25 @@ static byte* servoTimeCtrl(byte channel, short packetValue, short time)
  * 
  * @see servoTimeCtrl
  */
-static byte* servoNonTimeCtrl(byte channel, short packetValue)
+static Buffer* servoNonTimeCtrl(byte channel, short packetValue)
 {
-    byte* buf = calloc(13, sizeof(byte));
+    Buffer* buf = new_Buffer(13);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = SERVO_CTRL;                        //DID
-	buf[5] = 4;                                 //LEN
-	buf[6] = channel;                           //channel
-	buf[7] = packetValue;           //command value low 8 bit
-	buf[8] = packetValue >> 8;   //high 8 bit
-	buf[9] = 6;                                 //flag
-	buf[10] = crc(buf);                       //Checksum
-	buf[11] = PMS5005.ETX0;
-	buf[12] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.SERVO_CTRL_DID;                        //DID
+	buf.data[5] = 4;                                 //LEN
+	buf.data[6] = channel;                           //channel
+	buf.data[7] = packetValue;           //command value low 8 bit
+	buf.data[8] = packetValue >> 8;   //high 8 bit
+	buf.data[9] = 6;                                 //flag
+	buf.data[10] = crc(buf);                       //Checksum
+	buf.data[11] = PMS5005.ETX0;
+	buf.data[12] = PMS5005.ETX1;
     }
 
     return buf;
@@ -1955,35 +2052,35 @@ static byte* servoNonTimeCtrl(byte channel, short packetValue)
  * 
  * @see servoTimeCtrl
  */
-static byte* servoTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+static Buffer* servoTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 {
-    byte* buf = calloc(23, sizeof(byte));
+    Buffer* buf = new_Buffer(23);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = ALL_SERVO_CTRL;                        //DID
-	buf[5] = 14;                                    //LEN
-	buf[6] = pos1;				    //channel 1
-	buf[7] = pos1 >> 8;			
-	buf[8] = pos2;					//channel 2
-	buf[9] = pos2 >> 8;		
-	buf[10] = pos3;					//channel 3
-	buf[11] = pos3 >> 8;
-	buf[12] = pos4;					//channel 4
-	buf[13] = pos4 >> 8;
-	buf[14] = pos5;					//channel 5
-	buf[15] = pos5 >> 8;
-	buf[16] = pos6;					//channel 6
-	buf[17] = pos6 >> 8;
-	buf[18] = time;					//time
-	buf[19] = time >> 8;
-	buf[20] = crc(buf);							//Checksum
-	buf[21] = PMS5005.ETX0;
-	buf[22] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.ALL_SERVO_CTRL_DID;                        //DID
+	buf.data[5] = 14;                                    //LEN
+	buf.data[6] = pos1;				    //channel 1
+	buf.data[7] = pos1 >> 8;			
+	buf.data[8] = pos2;					//channel 2
+	buf.data[9] = pos2 >> 8;		
+	buf.data[10] = pos3;					//channel 3
+	buf.data[11] = pos3 >> 8;
+	buf.data[12] = pos4;					//channel 4
+	buf.data[13] = pos4 >> 8;
+	buf.data[14] = pos5;					//channel 5
+	buf.data[15] = pos5 >> 8;
+	buf.data[16] = pos6;					//channel 6
+	buf.data[17] = pos6 >> 8;
+	buf.data[18] = time;					//time
+	buf.data[19] = time >> 8;
+	buf.data[20] = crc(buf);							//Checksum
+	buf.data[21] = PMS5005.ETX0;
+	buf.data[22] = PMS5005.ETX1;
     }
 
     return buf;
@@ -2010,33 +2107,33 @@ static byte* servoTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, sh
  * 
  * @see servoNonTimeCtrl
  */
-static byte* servoNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+static Buffer* servoNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 {
-    byte* buf = calloc(21, sizeof(byte));
+    Buffer* buf = new_Buffer(21);
 
-    if (packet != NULL)
+    if (buf != NULL)
     {
-	buf[0] = PMS5005.STX0;
-	buf[1] = PMS5005.STX1;
-	buf[2] = 1;
-	buf[3] = 0;
-	buf[4] = ALL_SERVO_CTRL;                //DID
-	buf[5] = 12;                            //LEN
-	buf[6] = pos1;           //motor 1
-	buf[7] = pos1 >> 8;             
-	buf[8] = pos2;           //motor 2
-	buf[9] = pos2 >> 8;
-	buf[10] = pos3;           //motor 3
-	buf[11] = pos3 >> 8;
-	buf[12] = pos4;           //motor 4
-	buf[13] = pos4 >> 8;
-	buf[14] = pos5;           //motor 5
-	buf[15] = pos5 >> 8;           
-	buf[16] = pos6;           //motor 6
-	buf[17] = pos6 >> 8;            
-	buf[18] = crc(buf);                   //Checksum
-	buf[19] = PMS5005.ETX0;
-	buf[20] = PMS5005.ETX1;
+	buf.data[0] = PMS5005.STX0;
+	buf.data[1] = PMS5005.STX1;
+	buf.data[2] = 1;
+	buf.data[3] = 0;
+	buf.data[4] = PMS5005.ALL_SERVO_CTRL_DID;                //DID
+	buf.data[5] = 12;                            //LEN
+	buf.data[6] = pos1;           //motor 1
+	buf.data[7] = pos1 >> 8;             
+	buf.data[8] = pos2;           //motor 2
+	buf.data[9] = pos2 >> 8;
+	buf.data[10] = pos3;           //motor 3
+	buf.data[11] = pos3 >> 8;
+	buf.data[12] = pos4;           //motor 4
+	buf.data[13] = pos4 >> 8;
+	buf.data[14] = pos5;           //motor 5
+	buf.data[15] = pos5 >> 8;           
+	buf.data[16] = pos6;           //motor 6
+	buf.data[17] = pos6 >> 8;            
+	buf.data[18] = crc(buf);                   //Checksum
+	buf.data[19] = PMS5005.ETX0;
+	buf.data[20] = PMS5005.ETX1;
     }
 
     return buf;
@@ -2051,7 +2148,7 @@ static byte* servoNonTimeCtrlAll(short pos1, short pos2, short pos3, short pos4,
  * The graphic LCD display is monochrome with dimensions 128 by 64 pixels.  
  * The bmp image must be 128x64 pixels in mono.
  */
-static byte lcdDisplayPMS(String bmpFileName)
+static Buffer* lcdDisplayPms(char* bmpFileName)
 {
     return NULL;
     // TODO Auto-generated method stub
