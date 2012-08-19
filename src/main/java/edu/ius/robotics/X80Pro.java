@@ -27,13 +27,13 @@ public class X80Pro implements IX80Pro
 	// private BufferedReader reader;
 	// private String command;
 	/** wheel distance */
-	final double WheelDis = 0.265;
+	final double WHEEL_CIR = 0.265;
 	
 	/** wheel radius */
-	final double WheelR = 0.0825;
+	final double WHEEL_RADIUS = 0.0825;
 	
 	/** encoder one circle count */
-	final int CircleCnt = 1200;
+	final int CIRCLE_CNT = 1200;
 	
 	private X80ProUdpSocket socket;
 	
