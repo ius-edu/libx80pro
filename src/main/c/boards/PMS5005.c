@@ -17,85 +17,6 @@
  * 94 (always) ETX1 = 13 (always)
  */
 
-PMS5005* new_PMS5005()
-{
-    PMS5005->crc = crc;
-    PMS5005->motorSensorRequest = motorSensorRequest;
-    PMS5005->standardSensorRequest = standardSensorRequest;
-    PMS5005->customSensorRequest = customSensorRequest;
-    PMS5005->allSensorRequest = allSensorRequest;
-    PMS5005->enableMotorSensorSending = enableMotorSensorSending;
-    PMS5005->enableStandardSensorSending = enableStandardSensorSending;
-    PMS5005->enableCustomSensorSending = enableCustomSensorSending;
-    PMS5005->enableAllSensorSending = enableAllSensorSending;
-    PMS5005->disableMotorSensorSending = disableMotorSensorSending;
-    PMS5005->disableStandardSensorSending = disableStandardSensorSending;
-    PMS5005->disableCustomSensorSending = disableCustomSensorSending;
-    PMS5005->disableAllSensorSending = disableAllSensorSending;
-    PMS5005->setMotorSensorPeriod = setMotorSensorPeriod;
-    PMS5005->setStandardSensorPeriod = setStandardSensorPeriod;
-    PMS5005->setCustomSensorPeriod = setCustomSensorPeriod;
-    PMS5005->setAllSensorPeriod = setAllSensorPeriod;
-    PMS5005->getSensorSonar = setSensorSonar;
-    PMS5005->getSensorIrRange = getSensorIrRange;
-    PMS5005->getSensorHumanAlarm = getSensorHumanAlarm;
-    PMS5005->getSensorHumanMotion = getSensorHumanMotion;
-    PMS5005->getSensorTiltingX = getSensorTiltingX;
-    PMS5005->getSensorTiltingY = getSensorTiltingY;
-    PMS5005->getSensorOverHeat = getSensorOverHeat;
-    PMS5005->getSensorTemperature = getSensorTemperature;
-    PMS5005->getSensorIrCode = getSensorIrCode;
-    PMS5005->setIrCtrlOutput = setIrCtrlOutput;
-    PMS5005->getSensorBatteryAd = getSensorBatteryAd;
-    PMS5005->getSensorRefVoltage = getSensorRefVoltage;
-    PMS5005->getSensorPotVoltage = getSensorPotVoltage;
-    PMS5005->getSensorPot = getSensorPot;
-    PMS5005->getMotorCurrent = getMotorCurrent;
-    PMS5005->getEncoderDirection = getEncoderDirection;
-    PMS5005->getEncoderPulse = getEncoderPulse;
-    PMS5005->getEncoderSpeed = getEncoderSpeed;
-    PMS5005->getCustomAd = getCustomAd;
-    PMS5005->getCustomDIn = getCustomDIn;
-    PMS5005->getCustomDOut = getCustomDOut;
-    PMS5005->setMotorPolarity = setMotorPolarity;
-    PMS5005->enableDcMotor = enableDcMotor;
-    PMS5005->disableDcMotor = disableDcMotor;
-    PMS5005->resumeDcMotor = resumeDcMotor;
-    PMS5005->suspendDcMotor = suspendDcMotor;
-    PMS5005->setDcMotorPositionCtrlPid = setDcMotorPositionCtrlPid;
-    PMS5005->setDcMotorVelocityPid = setDcMotorVelocityPid;
-    PMS5005->setDcMotorSensorFilter = setDcMotorSensorFilter;
-    PMS5005->setDcMotorSensorUsage = setDcMotorSensorUsage;
-    PMS5005->setDcMotorCtrlMode = setDcMotorCtrlMode;
-    PMS5005->dcMotorPositionTimeCtrl = dcMotorPositionTimeCtrl;
-    PMS5005->dcMotorPositionNonTimeCtrl = dcMotorPositionNonTimeCtrl;
-    PMS5005->dcMotorPwmTimeCtrl = dcMotorPwmTimeCtrl;
-    PMS5005->dcMotorPwmNonTimeCtrl = dcMotorPwmNonTimeCtrl;
-    PMS5005->dcMotorPositionTimeCtrlAll = dcMotorPositionTimeCtrlAll;
-    PMS5005->dcMotorPositionNonTimeCtrlAll = dcMotorPositionNonTimeCtrlAll;
-    PMS5005->dcMotorVelocityTimeCtrlAll = dcMotorVelocityTimeCtrlAll;
-    PMS5005->dcMotorVelocityNonTimeCtrlAll = dcMotorVelocityNonTimeCtrlAll;
-    PMS5005->dcMotorPwmTimeCtrlAll = dcMotorPwmTimeCtrlAll;
-    PMS5005->dcMotorPwmNonTimeCtrlAll = dcMotorPwmNonTimeCtrlAll;
-    PMS5005->dcMotorPositionTimeCtrlBoth = dcMotorPositionTimeCtrlBoth;
-    PMS5005->dcMotorPositionNonTimeCtrlBoth = dcMotorPositionNonTimeCtrlBoth;
-    PMS5005->dcMotorVelocityTimeCtrlBoth = dcMotorVelocityTimeCtrlBoth;
-    PMS5005->dcMotorVelocityNonTimeCtrlBoth = dcMotorVelocityNonTimeCtrlBoth;
-    PMS5005->dcMotorPwmTimeCtrlBoth = dcMotorPwmTimeCtrlBoth;
-    PMS5005->dcMotorPwmNonTimeCtrlBoth = dcMotorPwmNonTimeCtrlBoth;
-    PMS5005->enableServo = enableServo;
-    PMS5005->disableServo = disableServo;
-    PMS5005->servoTimeCtrl = servoTimeCtrl;
-    PMS5005->servoNonTimeCtrl = servoNonTimeCtrl;
-    PMS5005->servoTimeCtrlAll = servoTimeCtrlAll;
-    PMS5005->servoNonTimeCtrlAll = servoNonTimeCtrlAll;
-    PMS5005->servoTimeCtrlBoth = servoTimeCtrlBoth;
-    PMS5005->servoNonTimeCtrlBoth = servoNonTimeCtrlBoth;
-    PMS5005->lcdDisplayPms = lcdDisplayPms;
-
-    reutrn PMS5005;
-}
-
 /**
  * Calculates a valid crc value to be used in order to check the integrity 
  * of the contents of a request packet.
@@ -2154,3 +2075,81 @@ static Buffer* lcdDisplayPms(char* bmpFileName)
     // TODO Auto-generated method stub
 }
 
+PMS5005* new_PMS5005()
+{
+    PMS5005->crc = crc;
+    PMS5005->motorSensorRequest = motorSensorRequest;
+    PMS5005->standardSensorRequest = standardSensorRequest;
+    PMS5005->customSensorRequest = customSensorRequest;
+    PMS5005->allSensorRequest = allSensorRequest;
+    PMS5005->enableMotorSensorSending = enableMotorSensorSending;
+    PMS5005->enableStandardSensorSending = enableStandardSensorSending;
+    PMS5005->enableCustomSensorSending = enableCustomSensorSending;
+    PMS5005->enableAllSensorSending = enableAllSensorSending;
+    PMS5005->disableMotorSensorSending = disableMotorSensorSending;
+    PMS5005->disableStandardSensorSending = disableStandardSensorSending;
+    PMS5005->disableCustomSensorSending = disableCustomSensorSending;
+    PMS5005->disableAllSensorSending = disableAllSensorSending;
+    PMS5005->setMotorSensorPeriod = setMotorSensorPeriod;
+    PMS5005->setStandardSensorPeriod = setStandardSensorPeriod;
+    PMS5005->setCustomSensorPeriod = setCustomSensorPeriod;
+    PMS5005->setAllSensorPeriod = setAllSensorPeriod;
+    PMS5005->getSensorSonar = setSensorSonar;
+    PMS5005->getSensorIrRange = getSensorIrRange;
+    PMS5005->getSensorHumanAlarm = getSensorHumanAlarm;
+    PMS5005->getSensorHumanMotion = getSensorHumanMotion;
+    PMS5005->getSensorTiltingX = getSensorTiltingX;
+    PMS5005->getSensorTiltingY = getSensorTiltingY;
+    PMS5005->getSensorOverHeat = getSensorOverHeat;
+    PMS5005->getSensorTemperature = getSensorTemperature;
+    PMS5005->getSensorIrCode = getSensorIrCode;
+    PMS5005->setIrCtrlOutput = setIrCtrlOutput;
+    PMS5005->getSensorBatteryAd = getSensorBatteryAd;
+    PMS5005->getSensorRefVoltage = getSensorRefVoltage;
+    PMS5005->getSensorPotVoltage = getSensorPotVoltage;
+    PMS5005->getSensorPot = getSensorPot;
+    PMS5005->getMotorCurrent = getMotorCurrent;
+    PMS5005->getEncoderDirection = getEncoderDirection;
+    PMS5005->getEncoderPulse = getEncoderPulse;
+    PMS5005->getEncoderSpeed = getEncoderSpeed;
+    PMS5005->getCustomAd = getCustomAd;
+    PMS5005->getCustomDIn = getCustomDIn;
+    PMS5005->getCustomDOut = getCustomDOut;
+    PMS5005->setMotorPolarity = setMotorPolarity;
+    PMS5005->enableDcMotor = enableDcMotor;
+    PMS5005->disableDcMotor = disableDcMotor;
+    PMS5005->resumeDcMotor = resumeDcMotor;
+    PMS5005->suspendDcMotor = suspendDcMotor;
+    PMS5005->setDcMotorPositionCtrlPid = setDcMotorPositionCtrlPid;
+    PMS5005->setDcMotorVelocityPid = setDcMotorVelocityPid;
+    PMS5005->setDcMotorSensorFilter = setDcMotorSensorFilter;
+    PMS5005->setDcMotorSensorUsage = setDcMotorSensorUsage;
+    PMS5005->setDcMotorCtrlMode = setDcMotorCtrlMode;
+    PMS5005->dcMotorPositionTimeCtrl = dcMotorPositionTimeCtrl;
+    PMS5005->dcMotorPositionNonTimeCtrl = dcMotorPositionNonTimeCtrl;
+    PMS5005->dcMotorPwmTimeCtrl = dcMotorPwmTimeCtrl;
+    PMS5005->dcMotorPwmNonTimeCtrl = dcMotorPwmNonTimeCtrl;
+    PMS5005->dcMotorPositionTimeCtrlAll = dcMotorPositionTimeCtrlAll;
+    PMS5005->dcMotorPositionNonTimeCtrlAll = dcMotorPositionNonTimeCtrlAll;
+    PMS5005->dcMotorVelocityTimeCtrlAll = dcMotorVelocityTimeCtrlAll;
+    PMS5005->dcMotorVelocityNonTimeCtrlAll = dcMotorVelocityNonTimeCtrlAll;
+    PMS5005->dcMotorPwmTimeCtrlAll = dcMotorPwmTimeCtrlAll;
+    PMS5005->dcMotorPwmNonTimeCtrlAll = dcMotorPwmNonTimeCtrlAll;
+    PMS5005->dcMotorPositionTimeCtrlBoth = dcMotorPositionTimeCtrlBoth;
+    PMS5005->dcMotorPositionNonTimeCtrlBoth = dcMotorPositionNonTimeCtrlBoth;
+    PMS5005->dcMotorVelocityTimeCtrlBoth = dcMotorVelocityTimeCtrlBoth;
+    PMS5005->dcMotorVelocityNonTimeCtrlBoth = dcMotorVelocityNonTimeCtrlBoth;
+    PMS5005->dcMotorPwmTimeCtrlBoth = dcMotorPwmTimeCtrlBoth;
+    PMS5005->dcMotorPwmNonTimeCtrlBoth = dcMotorPwmNonTimeCtrlBoth;
+    PMS5005->enableServo = enableServo;
+    PMS5005->disableServo = disableServo;
+    PMS5005->servoTimeCtrl = servoTimeCtrl;
+    PMS5005->servoNonTimeCtrl = servoNonTimeCtrl;
+    PMS5005->servoTimeCtrlAll = servoTimeCtrlAll;
+    PMS5005->servoNonTimeCtrlAll = servoNonTimeCtrlAll;
+    PMS5005->servoTimeCtrlBoth = servoTimeCtrlBoth;
+    PMS5005->servoNonTimeCtrlBoth = servoNonTimeCtrlBoth;
+    PMS5005->lcdDisplayPms = lcdDisplayPms;
+
+    reutrn PMS5005;
+}
