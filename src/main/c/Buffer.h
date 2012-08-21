@@ -4,10 +4,10 @@
 
 typedef struct Buffer
 {
-    byte* data;
+    unsigned char* data;
     int length;
 
-    int *(size)(Buffer*);
+    int (*size)(struct Buffer*);
 } Buffer;
 
 Buffer* new_Buffer(int);

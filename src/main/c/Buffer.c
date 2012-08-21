@@ -1,4 +1,10 @@
+#include <stdlib.h>
 #include "Buffer.h"
+
+static int size(Buffer* buf)
+{
+    return buf->length;
+}
 
 void delete_Buffer(Buffer* buf)
 {
@@ -6,15 +12,10 @@ void delete_Buffer(Buffer* buf)
     free(buf);
 }
 
-static int size(Buffer* buf)
-{
-    return buf->length;
-}
-
-Buffer* new_Buffer(int size)
+Buffer* new_Buffer(int len)
 {
     Buffer* buf = (Buffer*)malloc(sizeof(Buffer));
-    buf->data = (byte*)calloc(size, sizeof(byte));
+    buf->data = (unsigned char*)calloc(len, sizeof(unsigned char));
 
     buf->size = size;
 
