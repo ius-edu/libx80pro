@@ -1018,7 +1018,7 @@ public class PMS5005
 	 */
 	public static byte[] setMotorPolarity(byte channel, byte polarity)
 	{
-		byte[] packet = new byte[6];
+		byte[] packet = new byte[12];
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
@@ -1031,8 +1031,8 @@ public class PMS5005
 		packet[8] = polarity; // polarity 1 | -1
 		packet[9] = crc(packet); // Checksum
 		
-		packet[4] = ETX0;
-		packet[5] = ETX0;
+		packet[10] = ETX0;
+		packet[11] = ETX0;
 		return packet;
 	}
 	
@@ -1260,7 +1260,7 @@ public class PMS5005
 	 */
 	public static byte[] setDcMotorSensorUsage(byte channel, byte sensorType)
 	{
-		byte[] packet = new byte[6];
+		byte[] packet = new byte[12];
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
@@ -1269,14 +1269,12 @@ public class PMS5005
 		packet[4] = PARAM_SET; // DID
 		packet[5] = 5; // LEN
 		packet[6] = DC_SENSOR_USAGE; // Subcommand
-		packet[7] = channel; // 0-5 = Single Potentiometer, 0-2 = Dual
-								// Potentiometer, 0-1 = Encoder
-		packet[8] = sensorType; // 0x00 = Single Potentiometer, 0x01 = Dual
-								// Potentiometer, 0x02 = Encoder
+		packet[7] = channel; // 0-5 = Single Potentiometer, 0-2 = Dual Potentiometer, 0-1 = Encoder
+		packet[8] = sensorType; // 0x00 = Single Potentiometer, 0x01 = Dual Potentiometer, 0x02 = Encoder
 		packet[9] = crc(packet); // Checksum
 		
-		packet[4] = ETX0;
-		packet[5] = ETX0;
+		packet[10] = ETX0;
+		packet[11] = ETX0;
 		return packet;
 	}
 	
@@ -1297,7 +1295,7 @@ public class PMS5005
 	 */
 	public static byte[] setDcMotorControlMode(byte channel, byte controlMode)
 	{
-		byte[] packet = new byte[6];
+		byte[] packet = new byte[12];
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
@@ -1311,8 +1309,8 @@ public class PMS5005
 									// velocity
 		packet[9] = crc(packet); // Checksum
 		
-		packet[4] = ETX0;
-		packet[5] = ETX0;
+		packet[10] = ETX0;
+		packet[11] = ETX1;
 		return packet;
 	}
 	
@@ -1880,7 +1878,7 @@ public class PMS5005
 	 */
 	public static byte[] enableServo(byte channel)
 	{
-		byte[] packet = new byte[10];
+		byte[] packet = new byte[11];
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
@@ -1890,10 +1888,10 @@ public class PMS5005
 		packet[5] = 2; // LEN
 		packet[6] = 0; // 0 = Enable
 		packet[7] = channel; // 6-11 SERVO
-		packet[7] = crc(packet); // Checksum
+		packet[8] = crc(packet); // Checksum
 		
-		packet[8] = ETX0;
-		packet[9] = ETX1;
+		packet[9] = ETX0;
+		packet[10] = ETX1;
 		return packet;
 	}
 	
@@ -1910,7 +1908,7 @@ public class PMS5005
 	 */
 	public static byte[] disableServo(byte channel)
 	{
-		byte[] packet = new byte[10];
+		byte[] packet = new byte[11];
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
@@ -1920,10 +1918,10 @@ public class PMS5005
 		packet[5] = 2; // LEN
 		packet[6] = 0; // 0 = Disable
 		packet[7] = channel; // 6-11 = SERVO
-		packet[7] = crc(packet); // Checksum
+		packet[8] = crc(packet); // Checksum
 		
-		packet[8] = ETX0;
-		packet[9] = ETX1;
+		packet[9] = ETX0;
+		packet[10] = ETX1;
 		return packet;
 	}
 	

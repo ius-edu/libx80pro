@@ -28,11 +28,11 @@ public class X80ProUdpSocket implements Runnable
 	public int customIo;
 	// standard sensor data
 	public double[] usDis;
-	public int[] humanAlarm;
-	public int[] humanMotion;
-	public int irRange;
-	public double boardVol;
-	public double dcMotorVol;
+	public int[]    humanAlarm;
+	public int[]    humanMotion;
+	public int      irRange;
+	public double   boardVol;
+	public double   dcMotorVol;
 	
 	private int[] motorSensorAry;
 	private int[] standardSensorAry;

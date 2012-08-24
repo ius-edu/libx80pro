@@ -23,9 +23,9 @@ struct PMS5005
 	
 	/* Start transmission, End transmission */
 	const byte STX0 = 94;
-        const byte STX1 = 2;
-        const byte ETX0 = 94;
-        const byte ETX1 = 13;
+	const byte STX1 = 2;
+	const byte ETX0 = 94;
+	const byte ETX1 = 13;
 	
 	/* Data ID (DID) descriptor listing */
 	const byte POSITION_CTRL = 3;
