@@ -11,12 +11,12 @@ public class X80Test
 	public static void main(String[] args)
 	{
 		X80Pro robot = new X80Pro("192.168.0.203");
-
+		
 		robot.resetHead();
 		
 		System.err.println("resuming motor 0");
 		robot.enableDcMotor(0);
-				
+		
 		System.err.println("resuming motor 1");
 		robot.enableDcMotor(1);
 		
