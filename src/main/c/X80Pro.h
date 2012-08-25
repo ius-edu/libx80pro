@@ -4,8 +4,8 @@
 
 typedef struct X80Pro
 {
-    PMS5005* pms5005;
+    PMS5005 pms5005;
     
-} X80Pro;
+} *X80Pro;
 
 #endif

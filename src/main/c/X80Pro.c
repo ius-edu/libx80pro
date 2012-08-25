@@ -8,9 +8,9 @@ void delete_X80Pro(X80Pro* self)
     free(self);
 }
 
-X80Pro* new_X80Pro()
+X80Pro new_X80Pro()
 {
-    X80Pro* self = (X80Pro*)malloc(sizeof(X80Pro));
+    X80Pro self = (X80Pro)malloc(sizeof(X80Pro));
     
     self->pms5005 = new_PMS5005();
     self->socket = new_X80ProUdpSocket();

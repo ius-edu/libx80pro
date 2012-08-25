@@ -28,7 +28,7 @@
  *
  * @return The crc value calculated from the given packetfer.
  */
-static unsigned char crc(Buffer* buf)
+static unsigned char crc(Buffer buf)
 {
     unsigned char shift_reg, sr_lsb, data_bit, v;
     int i, j, z;
@@ -77,9 +77,9 @@ static unsigned char crc(Buffer* buf)
  *
  * See Also: setMotorSensorPeriod
  */
-static Buffer* motorSensorRequest(PMS5005* self, short packetNumber)
+static Buffer motorSensorRequest(PMS5005 self, short packetNumber)
 {
-    Buffer* buf = new_Buffer(10);
+    Buffer buf = new_Buffer(10);
     
     if (buf != NULL)
     {
@@ -116,9 +116,9 @@ static Buffer* motorSensorRequest(PMS5005* self, short packetNumber)
  *
  * See Also: setStandardSensorPeriod
  */
-static Buffer* standardSensorRequest(PMS5005* self, short packetNumber)
+static Buffer standardSensorRequest(PMS5005 self, short packetNumber)
 {
-    Buffer* buf = new_Buffer(10);
+    Buffer buf = new_Buffer(10);
     
     if (buf != NULL)
     {
@@ -155,9 +155,9 @@ static Buffer* standardSensorRequest(PMS5005* self, short packetNumber)
  *
  * See Also: setCustomSensorPeriod
  */
-static Buffer* customSensorRequest(PMS5005* self, short packetNumber)
+static Buffer customSensorRequest(PMS5005 self, short packetNumber)
 {
-    Buffer* buf = new_Buffer(10);
+    Buffer buf = new_Buffer(10);
     
     if (buf != NULL)
     {
@@ -194,9 +194,9 @@ static Buffer* customSensorRequest(PMS5005* self, short packetNumber)
  *
  * See Also: setAllSensorPeriod
  */
-static Buffer* allSensorRequest(PMS5005* self, short packetNumber)
+static Buffer allSensorRequest(PMS5005 self, short packetNumber)
 {
-    Buffer* buf = new_Buffer(10);
+    Buffer buf = new_Buffer(10);
     
     if (buf != NULL)
     {
@@ -225,9 +225,9 @@ static Buffer* allSensorRequest(PMS5005* self, short packetNumber)
  *
  * @see motorSensorRequest
  */
-static Buffer* enableMotorSensorSending(PMS5005* self)
+static Buffer enableMotorSensorSending(PMS5005 self)
 {
-    Buffer* buf = new_Buffer(9);
+    Buffer buf = new_Buffer(9);
     
     if (buf != NULL)
     {
@@ -255,9 +255,9 @@ static Buffer* enableMotorSensorSending(PMS5005* self)
  *
  * @see disableMotorSensorSending
  */
-static Buffer* enableStandardSensorSending(PMS5005* self)
+static Buffer enableStandardSensorSending(PMS5005 self)
 {
-    Buffer* buf = new_Buffer(9);
+    Buffer buf = new_Buffer(9);
     
     if (buf != NULL)
     {
@@ -285,9 +285,9 @@ static Buffer* enableStandardSensorSending(PMS5005* self)
  *
  * @see disableStandardSensorSending
  */
-static Buffer* enableCustomSensorSending(PMS5005* self)
+static Buffer enableCustomSensorSending(PMS5005 self)
 {
-    Buffer* buf = new_Buffer(9);
+    Buffer buf = new_Buffer(9);
     
     if (buf != NULL)
     {
@@ -315,9 +315,9 @@ static Buffer* enableCustomSensorSending(PMS5005* self)
  *
  * @see disableCustomSensorSending
  */
-static Buffer* enableAllSensorSending(PMS5005* self)
+static Buffer enableAllSensorSending(PMS5005 self)
 {
-    Buffer* buf = new_Buffer(9);
+    Buffer buf = new_Buffer(9);
     
     if (buf != NULL)
     {
@@ -340,9 +340,9 @@ static Buffer* enableAllSensorSending(PMS5005* self)
  *
  * @see enableMotorSensorSending
  */
-static Buffer* disableMotorSensorSending(PMS5005* self)
+static Buffer disableMotorSensorSending(PMS5005 self)
 {
-    Buffer* buf = new_Buffer(10);
+    Buffer buf = new_Buffer(10);
     
     if (buf != NULL)
     {
@@ -366,9 +366,9 @@ static Buffer* disableMotorSensorSending(PMS5005* self)
  *
  * @see enableStandardSensorSending
  */
-static Buffer* disableStandardSensorSending(PMS5005* self)
+static Buffer disableStandardSensorSending(PMS5005 self)
 {
-    Buffer* buf = new_Buffer(10);
+    Buffer buf = new_Buffer(10);
     
     if (buf != NULL)
     {
@@ -392,9 +392,9 @@ static Buffer* disableStandardSensorSending(PMS5005* self)
  *
  * @see enableCustomSensorSending
  */
-static Buffer* disableCustomSensorSending(PMS5005* self)
+static Buffer disableCustomSensorSending(PMS5005 self)
 {
-    Buffer* buf = new_Buffer(10);
+    Buffer buf = new_Buffer(10);
     
     if (buf != NULL)
     {
@@ -418,9 +418,9 @@ static Buffer* disableCustomSensorSending(PMS5005* self)
  *
  * @see enableAllSensorSending
  */
-static Buffer* disableAllSensorSending(PMS5005* self)
+static Buffer disableAllSensorSending(PMS5005 self)
 {
-    Buffer* buf = new_Buffer(10);
+    Buffer buf = new_Buffer(10);
     
     if (buf != NULL)
     {
@@ -450,7 +450,7 @@ static Buffer* disableAllSensorSending(PMS5005* self)
  *
  * @see motorSensorRequest
  */
-static Buffer* setMotorSensorPeriod(PMS5005* self, short timePeriod)
+static Buffer setMotorSensorPeriod(PMS5005 self, short timePeriod)
 {
     // TODO stub
     return NULL;
@@ -467,7 +467,7 @@ static Buffer* setMotorSensorPeriod(PMS5005* self, short timePeriod)
  *
  * @see standardSensorRequest
  */
-static Buffer* setStandardSensorPeriod(PMS5005* self, short timePeriod)
+static Buffer setStandardSensorPeriod(PMS5005 self, short timePeriod)
 {
     // TODO stub
     return NULL;
@@ -484,7 +484,7 @@ static Buffer* setStandardSensorPeriod(PMS5005* self, short timePeriod)
  *
  * @see customSensorRequest
  */
-static Buffer* setCustomSensorPeriod(PMS5005* self, short timePeriod)
+static Buffer setCustomSensorPeriod(PMS5005 self, short timePeriod)
 {
     // TODO stub
     return NULL;
@@ -501,7 +501,7 @@ static Buffer* setCustomSensorPeriod(PMS5005* self, short timePeriod)
  *
  * @see allSensorRequest
  */
-static Buffer* setAllSensorPeriod(PMS5005* self, short timePeriod)
+static Buffer setAllSensorPeriod(PMS5005 self, short timePeriod)
 {
     // TODO stub
     return NULL;
@@ -521,7 +521,7 @@ static Buffer* setAllSensorPeriod(PMS5005* self, short timePeriod)
  * with the left-front sensor (robot first person perspective) at Sonar #1
  * (channel 0).
  */
-static short getSensorSonar(PMS5005* self, short channel, const int standardSensorAry[])
+static short getSensorSonar(PMS5005 self, short channel, const int standardSensorAry[])
 {
     return standardSensorAry[channel + self->ULTRASONIC_OFFSET];
 }
@@ -542,7 +542,7 @@ static short getSensorSonar(PMS5005* self, short channel, const int standardSens
  * digital converter.  The output voltage of the sensor can be calculated
  * from the following equation: sensorOutputVoltage = (ival)*3.0/4095(v)
  */
-static short getSensorIrRange(PMS5005* self, short channel, const int standardSensorAry[], const int customSensorAry[])
+static short getSensorIrRange(PMS5005 self, short channel, const int standardSensorAry[], const int customSensorAry[])
 {
     short result = -1;
     
@@ -577,7 +577,7 @@ static short getSensorIrRange(PMS5005* self, short channel, const int standardSe
  * threshold determines the sensitivity of the sensor.  The higher the
  * threshold, the lower the sensitivity will be.
  */
-static short getSensorHumanAlarm(PMS5005* self, short channel, const int standardSensorAry[])
+static short getSensorHumanAlarm(PMS5005 self, short channel, const int standardSensorAry[])
 {
     int offset = 2*channel + self->HUMAN_ALARM_OFFSET;
     return standardSensorAry[offset + 1] << 8 | standardSensorAry[offset];
@@ -601,7 +601,7 @@ static short getSensorHumanAlarm(PMS5005* self, short channel, const int standar
  * human motion, the different patterns of the two sensor modules manifest
  * the direction of motion.  The relationship can be obtained empirically.
  */
-static short getSensorHumanMotion(PMS5005* self, short channel, const int standardSensorAry[])
+static short getSensorHumanMotion(PMS5005 self, short channel, const int standardSensorAry[])
 {
     int offset = 2*channel + self->HUMAN_MOTION_OFFSET;
     return standardSensorAry[offset + 1] << 8 | standardSensorAry[offset];
@@ -625,7 +625,7 @@ static short getSensorHumanMotion(PMS5005* self, short channel, const int standa
  * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue -
  * ZeroGValue) is about 1250.
  */
-static short getSensorTiltingX(PMS5005* self, const int standardSensorAry[])
+static short getSensorTiltingX(PMS5005 self, const int standardSensorAry[])
 {
     return standardSensorAry[self->TILTING_X_OFFSET + 1] << 8 | standardSensorAry[self->TILTING_X_OFFSET];
 }
@@ -648,7 +648,7 @@ static short getSensorTiltingX(PMS5005* self, const int standardSensorAry[])
  * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue -
  * ZeroGValue) is about 1250.
  */
-static short getSensorTiltingY(PMS5005* self, const int standardSensorAry[])
+static short getSensorTiltingY(PMS5005 self, const int standardSensorAry[])
 {
     return standardSensorAry[self->TILTING_Y_OFFSET + 1] << 8 | standardSensorAry[self->TILTING_Y_OFFSET];
 }
@@ -673,7 +673,7 @@ static short getSensorTiltingY(PMS5005* self, const int standardSensorAry[])
  * from the following equation: Temperature = 100 - (ival - 980)/11.6
  * where Temperature is in degrees Celsius.
  */
-static short getSensorOverheat(PMS5005* self, short channel, const int standardSensorAry[])
+static short getSensorOverheat(PMS5005 self, short channel, const int standardSensorAry[])
 {
     int offset = 2*channel + self->OVERHEAT_SENSOR_OFFSET;
     return standardSensorAry[offset + 1] << 8 | standardSensorAry[offset];
@@ -686,7 +686,7 @@ static short getSensorOverheat(PMS5005* self, short channel, const int standardS
  * @return Temperature = (ival - 1256) / 34.8, where Temperature is in
  * degrees Celsius.
  */
-static short getSensorTemperature(PMS5005* self, const int standardSensorAry[])
+static short getSensorTemperature(PMS5005 self, const int standardSensorAry[])
 {
     return standardSensorAry[self->TEMPERATURE_AD_OFFSET + 1] << 8 | standardSensorAry[self->TEMPERATURE_AD_OFFSET];
 }
@@ -703,7 +703,7 @@ static short getSensorTemperature(PMS5005* self, const int standardSensorAry[])
  * Repeat Code: unsigned char[3]
  * Where the repeat unsigned char would be 255 if the button is pressed continuously
  */
-static short getSensorIrCode(PMS5005* self, short index, const int standardSensorAry[])
+static short getSensorIrCode(PMS5005 self, short index, const int standardSensorAry[])
 {
     return standardSensorAry[self->IR_COMMAND_OFFSET + index];
 }
@@ -726,7 +726,7 @@ static short getSensorIrCode(PMS5005* self, short index, const int standardSenso
  *    the command is sent.
  * 3) This API method is under development and will be available soon.
  */
-static Buffer* setIrCtrlOutput(PMS5005* self, short loWord, short hiWord)
+static Buffer setIrCtrlOutput(PMS5005 self, short loWord, short hiWord)
 {
     // TODO Auto-generated method stub
     return NULL;
@@ -757,7 +757,7 @@ static Buffer* setIrCtrlOutput(PMS5005* self, short loWord, short hiWord)
  * 2) Power supply voltage of DC motors = 24v*(ival/4095)
  * 3) Power supply voltage of servo motors = 9v*(ival/4095)
  */
-static short getSensorBatteryAd(PMS5005* self, short channel, const int standardSensorAry[])
+static short getSensorBatteryAd(PMS5005 self, short channel, const int standardSensorAry[])
 {
     return standardSensorAry[2*channel + self->BATTERY_SENSOR_OFFSET + 1] << 8 | standardSensorAry[2*channel + self->BATTERY_SENSOR_OFFSET];
 }
@@ -771,7 +771,7 @@ static short getSensorBatteryAd(PMS5005* self, short channel, const int standard
  * The following equation can be used to calculate the actual voltage
  * values: Voltage = 6v*(ival/4095)
  */
-static short getSensorRefVoltage(PMS5005* self, const int standardSensorAry[])
+static short getSensorRefVoltage(PMS5005 self, const int standardSensorAry[])
 {
     return standardSensorAry[self->REFERENCE_VOLTAGE_OFFSET + 1] << 8 | standardSensorAry[self->REFERENCE_VOLTAGE_OFFSET];
 }
@@ -785,7 +785,7 @@ static short getSensorRefVoltage(PMS5005* self, const int standardSensorAry[])
  * The following equation can be used to calculate the actual voltage
  * values: Voltage = 6v*(ival/4095)
  */
-static short getSensorPotVoltage(PMS5005* self, const int standardSensorAry[])
+static short getSensorPotVoltage(PMS5005 self, const int standardSensorAry[])
 {
     return standardSensorAry[self->POTENTIOMETER_POWER_OFFSET + 1] << 8 | standardSensorAry[self->POTENTIOMETER_POWER_OFFSET];
 }
@@ -820,7 +820,7 @@ static short getSensorPotVoltage(PMS5005* self, const int standardSensorAry[])
  *
  * @see setDcMotorSensorUsage
  */
-static short getSensorPot(PMS5005* self, short channel, const int motorSensorAry[])
+static short getSensorPot(PMS5005 self, short channel, const int motorSensorAry[])
 {
     return motorSensorAry[2*channel + self->POTENTIOMETER_SENSOR_OFFSET] + 1 << 8 | motorSensorAry[2*channel + self->POTENTIOMETER_SENSOR_OFFSET];
 }
@@ -835,7 +835,7 @@ static short getSensorPot(PMS5005* self, short channel, const int motorSensorAry
  * current value can be calculated with the following formula:
  * Motor Current (amperes) = ival/728 ( = ival*3*375/200/4095)
  */
-static short getMotorCurrent(PMS5005* self, short channel, const int motorSensorAry[])
+static short getMotorCurrent(PMS5005 self, short channel, const int motorSensorAry[])
 {
     return (motorSensorAry[2*channel + self->MOTOR_CURRENT_SENSOR_OFFSET + 1] << 8 | motorSensorAry[2*channel + self->MOTOR_CURRENT_SENSOR_OFFSET]) / 728.0;
 }
@@ -849,7 +849,7 @@ static short getMotorCurrent(PMS5005* self, short channel, const int motorSensor
  * @return 1 to indicate positive direction, 0 to indicate no movement,
  * and -1 to indicate negative direction.
  */
-static short getEncoderDirection(PMS5005* self, short channel, const int motorSensorAry[])
+static short getEncoderDirection(PMS5005 self, short channel, const int motorSensorAry[])
 {
     int offset = channel + self->ENCODER_DIRECTION_OFFSET;
     short result = -1;
@@ -876,7 +876,7 @@ static short getEncoderDirection(PMS5005* self, short channel, const int motorSe
  * @return Pulse counter, an short integral value to rotation with range of
  * 0 to 32767 in cycles.
  */
-static short getEncoderPulse(PMS5005* self, short channel, const int motorSensorAry[])
+static short getEncoderPulse(PMS5005 self, short channel, const int motorSensorAry[])
 {
     int offset = 4*channel + self->ENCODER_PULSE_OFFSET;
     return motorSensorAry[offset + 1] << 8 | motorSensorAry[offset];
@@ -891,7 +891,7 @@ static short getEncoderPulse(PMS5005* self, short channel, const int motorSensor
  *
  * @see setDcMotorSensorUsage
  */
-static short getEncoderSpeed(PMS5005* self, short channel, const int motorSensorAry[])
+static short getEncoderSpeed(PMS5005 self, short channel, const int motorSensorAry[])
 {
     int offset = 4*channel + self->MOTOR_SPEED_OFFSET;
     return motorSensorAry[offset + 1] << 8 | motorSensorAry[offset];
@@ -915,7 +915,7 @@ static short getEncoderSpeed(PMS5005* self, short channel, const int motorSensor
  *
  * @see getSensorBatteryAd
  */
-static short getCustomAd(PMS5005* self, short channel, const int customSensorAry[])
+static short getCustomAd(PMS5005 self, short channel, const int customSensorAry[])
 {
     int offset = 2*channel + self->CUSTOM_AD_OFFSET;
     return customSensorAry[offset + 1] << 8 | customSensorAry[offset];
@@ -927,7 +927,7 @@ static short getCustomAd(PMS5005* self, short channel, const int customSensorAry
  *
  * @param channel 0, 1, 2, 3, 4, 5, 6, or 7 for channel #1 through #8.
  */
-static short getCustomDIn(PMS5005* self, unsigned char channel, const int customSensorAry[])
+static short getCustomDIn(PMS5005 self, unsigned char channel, const int customSensorAry[])
 {
     // TODO Auto-generated method stub
     return 0;
@@ -940,7 +940,7 @@ static short getCustomDIn(PMS5005* self, unsigned char channel, const int custom
  * corresponding outputs of the 8 channels.  The MSB of the lower unsigned char
  * represents channel #8 and LSB of the lower unsigned char represents channel #1.
  */
-static Buffer* setCustomDOut(PMS5005* self, unsigned char ival)
+static Buffer setCustomDOut(PMS5005 self, unsigned char ival)
 {
     return NULL;
     // TODO Auto-generated method stub
@@ -959,9 +959,9 @@ static Buffer* setCustomDOut(PMS5005* self, unsigned char ival)
  *
  * @param polarity 1 or -1
  */
-static Buffer* setMotorPolarity(PMS5005* self, unsigned char channel, unsigned char polarity)
+static Buffer setMotorPolarity(PMS5005 self, unsigned char channel, unsigned char polarity)
 {
-    Buffer* buf = new_Buffer(12);
+    Buffer buf = new_Buffer(12);
     
     if (buf != NULL)
     {
@@ -991,9 +991,9 @@ static Buffer* setMotorPolarity(PMS5005* self, unsigned char channel, unsigned c
  *
  * @see resumeDcMotor
  */
-static Buffer* enableDcMotor(PMS5005* self, unsigned char channel)
+static Buffer enableDcMotor(PMS5005 self, unsigned char channel)
 {
-    Buffer* buf = new_Buffer(11);
+    Buffer buf = new_Buffer(11);
     
     if (buf != NULL)
     {
@@ -1022,9 +1022,9 @@ static Buffer* enableDcMotor(PMS5005* self, unsigned char channel)
  *
  * @see suspendDcMotor
  */
-static Buffer* disableDcMotor(PMS5005* self, unsigned char channel)
+static Buffer disableDcMotor(PMS5005 self, unsigned char channel)
 {
-    Buffer* buf = new_Buffer(11);
+    Buffer buf = new_Buffer(11);
     
     if (buf != NULL)
     {
@@ -1049,9 +1049,9 @@ static Buffer* disableDcMotor(PMS5005* self, unsigned char channel)
  *
  * @param channel 0 for left, 1 for right (robot first person perspective)
  */
-static Buffer* resumeDcMotor(PMS5005* self, unsigned char channel)
+static Buffer resumeDcMotor(PMS5005 self, unsigned char channel)
 {
-    Buffer* buf = new_Buffer(11);
+    Buffer buf = new_Buffer(11);
     
     if (buf != NULL)
     {
@@ -1078,9 +1078,9 @@ static Buffer* resumeDcMotor(PMS5005* self, unsigned char channel)
  *
  * All motor control channels are initially suspended at boot-up.
  */
-static Buffer* suspendDcMotor(PMS5005* self, unsigned char channel)
+static Buffer suspendDcMotor(PMS5005 self, unsigned char channel)
 {
-    Buffer* buf = new_Buffer(11);
+    Buffer buf = new_Buffer(11);
     
     if (buf != NULL)
     {
@@ -1113,9 +1113,9 @@ static Buffer* suspendDcMotor(PMS5005* self, unsigned char channel)
  *
  * @see setDcMotorControlMode
  */
-static Buffer* setDcMotorPositionCtrlPid(PMS5005* self, unsigned char channel, short Kp, short Kd, short Ki)
+static Buffer setDcMotorPositionCtrlPid(PMS5005 self, unsigned char channel, short Kp, short Kd, short Ki)
 {
-    Buffer* buf = new_Buffer(20);
+    Buffer buf = new_Buffer(20);
     
     if (buf != NULL)
     {
@@ -1144,9 +1144,9 @@ static Buffer* setDcMotorPositionCtrlPid(PMS5005* self, unsigned char channel, s
     return buf;
 }
 
-static Buffer* setDcMotorVelocityCtrlPid(PMS5005* self, unsigned char channel, short Kp, short Kd, short Ki)
+static Buffer setDcMotorVelocityCtrlPid(PMS5005 self, unsigned char channel, short Kp, short Kd, short Ki)
 {
-    Buffer* buf = new_Buffer(20);
+    Buffer buf = new_Buffer(20);
     
     if (buf != NULL)
     {
@@ -1179,7 +1179,7 @@ static Buffer* setDcMotorVelocityCtrlPid(PMS5005* self, unsigned char channel, s
  * This filtering feature is still under development. All data will be
  * treated as raw data.
  */
-static Buffer* setDcMotorSensorFilter(PMS5005* self, unsigned char channel, short filterMethod)
+static Buffer setDcMotorSensorFilter(PMS5005 self, unsigned char channel, short filterMethod)
 {
     return NULL;
 }
@@ -1212,9 +1212,9 @@ static Buffer* setDcMotorSensorFilter(PMS5005* self, unsigned char channel, shor
  *
  * @see getSensorPot
  */
-static Buffer* setDcMotorSensorUsage(PMS5005* self, unsigned char channel, unsigned char sensorType)
+static Buffer setDcMotorSensorUsage(PMS5005 self, unsigned char channel, unsigned char sensorType)
 {
-    Buffer* buf = new_Buffer(12);
+    Buffer buf = new_Buffer(12);
     
     if (buf != NULL)
     {
@@ -1248,9 +1248,9 @@ static Buffer* setDcMotorSensorUsage(PMS5005* self, unsigned char channel, unsig
  * @see setDcMotorPositionControlPid
  * @see setDcMotorVelocityControlPid
  */
-static Buffer* setDcMotorCtrlMode(PMS5005* self, unsigned char channel, unsigned char controlMode)
+static Buffer setDcMotorCtrlMode(PMS5005 self, unsigned char channel, unsigned char controlMode)
 {
-    Buffer* buf = new_Buffer(12);
+    Buffer buf = new_Buffer(12);
     
     if (buf != NULL)
     {
@@ -1282,9 +1282,9 @@ static Buffer* setDcMotorCtrlMode(PMS5005* self, unsigned char channel, unsigned
  * @param packetValue Target position value
  * @param timePeriod Executing time in milliseconds
  */
-static Buffer* dcMotorPositionTimeCtrl(PMS5005* self, unsigned char channel, short packetValue, short time)
+static Buffer dcMotorPositionTimeCtrl(PMS5005 self, unsigned char channel, short packetValue, short time)
 {
-    Buffer* buf = new_Buffer(14);
+    Buffer buf = new_Buffer(14);
     
     if (buf != NULL)
     {
@@ -1328,9 +1328,9 @@ static Buffer* dcMotorPositionTimeCtrl(PMS5005* self, unsigned char channel, sho
  * @see dcMotorVelocityTimeCtrl
  * @see getSensorPot
  */
-static Buffer* dcMotorPositionNonTimeCtrl(PMS5005* self, unsigned char channel, short packetValue)
+static Buffer dcMotorPositionNonTimeCtrl(PMS5005 self, unsigned char channel, short packetValue)
 {
-    Buffer* buf = new_Buffer(12);
+    Buffer buf = new_Buffer(12);
     
     if (buf != NULL)
     {
@@ -1373,9 +1373,9 @@ static Buffer* dcMotorPositionNonTimeCtrl(PMS5005* self, unsigned char channel, 
  *
  * @see dcMotorPwmNonTimeCtrl
  */
-static Buffer* dcMotorPwmTimeCtrl(PMS5005* self, unsigned char channel, short packetValue, short time)
+static Buffer dcMotorPwmTimeCtrl(PMS5005 self, unsigned char channel, short packetValue, short time)
 {
-    Buffer* buf = new_Buffer(14);
+    Buffer buf = new_Buffer(14);
     
     if (buf != NULL)
     {
@@ -1420,9 +1420,9 @@ static Buffer* dcMotorPwmTimeCtrl(PMS5005* self, unsigned char channel, short pa
  *
  * @see dcMotorPwmTimeCtrl
  */
-static Buffer* dcMotorPwmNonTimeCtrl(PMS5005* self, unsigned char channel, short packetValue)
+static Buffer dcMotorPwmNonTimeCtrl(PMS5005 self, unsigned char channel, short packetValue)
 {
-    Buffer* buf = new_Buffer(12);
+    Buffer buf = new_Buffer(12);
     
     if (buf != NULL)
     {
@@ -1472,9 +1472,9 @@ static Buffer* dcMotorPwmNonTimeCtrl(PMS5005* self, unsigned char channel, short
  * @see getSensorPot
  * @see dcMotorPositionTimeCtrl
  */
-static Buffer* dcMotorPositionTimeCtrlAll(PMS5005* self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+static Buffer dcMotorPositionTimeCtrlAll(PMS5005 self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 {
-    Buffer* buf = new_Buffer(23);
+    Buffer buf = new_Buffer(23);
     
     if (buf != NULL)
     {
@@ -1534,9 +1534,9 @@ static Buffer* dcMotorPositionTimeCtrlAll(PMS5005* self, short pos1, short pos2,
  * @see getSensorPot
  * @see dcMotorPositionNonTimeCtrl
  */
-static Buffer* dcMotorPositionNonTimeCtrlAll(PMS5005* self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+static Buffer dcMotorPositionNonTimeCtrlAll(PMS5005 self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 {
-    Buffer* buf = new_Buffer(21);
+    Buffer buf = new_Buffer(21);
     
     if (buf != NULL)
     {
@@ -1591,9 +1591,9 @@ static Buffer* dcMotorPositionNonTimeCtrlAll(PMS5005* self, short pos1, short po
  * @see getSensorPot
  * @see dcMotorPositionTimeCtrl
  */
-static Buffer* dcMotorPositionTimeCtrlBoth(PMS5005* self, short pos1, short pos2, short time)
+static Buffer dcMotorPositionTimeCtrlBoth(PMS5005 self, short pos1, short pos2, short time)
 {
-    Buffer* buf = new_Buffer(23);
+    Buffer buf = new_Buffer(23);
     
     if (buf != NULL)
     {
@@ -1650,9 +1650,9 @@ static Buffer* dcMotorPositionTimeCtrlBoth(PMS5005* self, short pos1, short pos2
  * @see getSensorPot
  * @see dcMotorPositionNonTimeCtrl
  */
-static Buffer* dcMotorPositionNonTimeCtrlBoth(PMS5005* self, short pos1, short pos2)
+static Buffer dcMotorPositionNonTimeCtrlBoth(PMS5005 self, short pos1, short pos2)
 {
-    Buffer* buf = new_Buffer(21);
+    Buffer buf = new_Buffer(21);
     
     if (buf != NULL)
     {
@@ -1710,9 +1710,9 @@ static Buffer* dcMotorPositionNonTimeCtrlBoth(PMS5005* self, short pos1, short p
  *
  * @see dcMotorVelocityTimeCtrl
  */
-static Buffer* dcMotorVelocityTimeCtrlAll(PMS5005* self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+static Buffer dcMotorVelocityTimeCtrlAll(PMS5005 self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 {
-    Buffer* buf = new_Buffer(23);
+    Buffer buf = new_Buffer(23);
     
     if (buf != NULL)
     {
@@ -1772,9 +1772,9 @@ static Buffer* dcMotorVelocityTimeCtrlAll(PMS5005* self, short pos1, short pos2,
  *
  * @see dcMotorVelocityNonTimeCtrl
  */
-static Buffer* dcMotorVelocityNonTimeCtrlAll(PMS5005* self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+static Buffer dcMotorVelocityNonTimeCtrlAll(PMS5005 self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 {
-    Buffer* buf = new_Buffer(21);
+    Buffer buf = new_Buffer(21);
     
     if (buf != NULL)
     {
@@ -1828,9 +1828,9 @@ static Buffer* dcMotorVelocityNonTimeCtrlAll(PMS5005* self, short pos1, short po
  *
  * @see dcMotorVelocityTimeCtrl
  */
-static Buffer* dcMotorVelocityTimeCtrlBoth(PMS5005* self, short pos1, short pos2, short time)
+static Buffer dcMotorVelocityTimeCtrlBoth(PMS5005 self, short pos1, short pos2, short time)
 {
-    Buffer* buf = new_Buffer(23);
+    Buffer buf = new_Buffer(23);
     
     if (buf != NULL)
     {
@@ -1885,9 +1885,9 @@ static Buffer* dcMotorVelocityTimeCtrlBoth(PMS5005* self, short pos1, short pos2
  *
  * @see dcMotorVelocityTimeCtrl
  */
-static Buffer* dcMotorVelocityNonTimeCtrlBoth(PMS5005* self, short pos1, short pos2)
+static Buffer dcMotorVelocityNonTimeCtrlBoth(PMS5005 self, short pos1, short pos2)
 {
-    Buffer* buf = new_Buffer(21);
+    Buffer buf = new_Buffer(21);
     
     if (buf != NULL)
     {
@@ -1943,9 +1943,9 @@ static Buffer* dcMotorVelocityNonTimeCtrlBoth(PMS5005* self, short pos1, short p
  * 4) When omitting motors from control, the command value of -32768
  *    (0x8000), should be sent.  This implies NO_CTRL.
  */
-static Buffer* dcMotorPwmTimeCtrlAll(PMS5005* self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+static Buffer dcMotorPwmTimeCtrlAll(PMS5005 self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 {
-    Buffer* buf = new_Buffer(23);
+    Buffer buf = new_Buffer(23);
     
     if (buf != NULL)
     {
@@ -2003,9 +2003,9 @@ static Buffer* dcMotorPwmTimeCtrlAll(PMS5005* self, short pos1, short pos2, shor
  * 4) When omitting motors from control, the command value of -32768
  *    (0x8000), should be sent.  This implies NO_CTRL.
  */
-static Buffer* dcMotorPwmNonTimeCtrlAll(PMS5005* self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+static Buffer dcMotorPwmNonTimeCtrlAll(PMS5005 self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 {
-    Buffer* buf = new_Buffer(21);
+    Buffer buf = new_Buffer(21);
     
     if (buf != NULL)
     {
@@ -2057,9 +2057,9 @@ static Buffer* dcMotorPwmNonTimeCtrlAll(PMS5005* self, short pos1, short pos2, s
  * 4) When omitting motors from control, the command value of -32768
  *    (0x8000), should be sent.  This implies NO_CTRL.
  */
-static Buffer* dcMotorPwmTimeCtrlBoth(PMS5005* self, short pos1, short pos2, short time)
+static Buffer dcMotorPwmTimeCtrlBoth(PMS5005 self, short pos1, short pos2, short time)
 {
-    Buffer* buf = new_Buffer(23);
+    Buffer buf = new_Buffer(23);
     
     if (buf != NULL)
     {
@@ -2112,9 +2112,9 @@ static Buffer* dcMotorPwmTimeCtrlBoth(PMS5005* self, short pos1, short pos2, sho
  * 4) When omitting motors from control, the command value of -32768
  *    (0x8000), should be sent.  This implies NO_CTRL.
  */
-static Buffer* dcMotorPwmNonTimeCtrlBoth(PMS5005* self, short pos1, short pos2)
+static Buffer dcMotorPwmNonTimeCtrlBoth(PMS5005 self, short pos1, short pos2)
 {
-    Buffer* buf = new_Buffer(23);
+    Buffer buf = new_Buffer(23);
     
     if (buf != NULL)
     {
@@ -2154,9 +2154,9 @@ static Buffer* dcMotorPwmNonTimeCtrlBoth(PMS5005* self, short pos1, short pos2)
  *
  * @see disableServo
  */
-static Buffer* enableServo(PMS5005* self, unsigned char channel)
+static Buffer enableServo(PMS5005 self, unsigned char channel)
 {
-    Buffer* buf = new_Buffer(11);
+    Buffer buf = new_Buffer(11);
     
     if (buf != NULL)
     {
@@ -2186,9 +2186,9 @@ static Buffer* enableServo(PMS5005* self, unsigned char channel)
  *
  * @see enableServo
  */
-static Buffer* disableServo(PMS5005* self, unsigned char channel)
+static Buffer disableServo(PMS5005 self, unsigned char channel)
 {
-    Buffer* buf = new_Buffer(11);
+    Buffer buf = new_Buffer(11);
     
     if (buf != NULL)
     {
@@ -2229,9 +2229,9 @@ static Buffer* disableServo(PMS5005* self, unsigned char channel)
  *
  * @see servoNonTimeCtrl
  */
-static Buffer* servoTimeCtrl(PMS5005* self, unsigned char channel, short packetValue, short time)
+static Buffer servoTimeCtrl(PMS5005 self, unsigned char channel, short packetValue, short time)
 {
-    Buffer* buf = new_Buffer(15);
+    Buffer buf = new_Buffer(15);
     
     if (buf != NULL)
     {
@@ -2267,9 +2267,9 @@ static Buffer* servoTimeCtrl(PMS5005* self, unsigned char channel, short packetV
  *
  * @see servoTimeCtrl
  */
-static Buffer* servoNonTimeCtrl(PMS5005* self, unsigned char channel, short packetValue)
+static Buffer servoNonTimeCtrl(PMS5005 self, unsigned char channel, short packetValue)
 {
-    Buffer* buf = new_Buffer(13);
+    Buffer buf = new_Buffer(13);
     
     if (buf != NULL)
     {
@@ -2313,9 +2313,9 @@ static Buffer* servoNonTimeCtrl(PMS5005* self, unsigned char channel, short pack
  *
  * @see servoTimeCtrl
  */
-static Buffer* servoTimeCtrlAll(PMS5005* self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
+static Buffer servoTimeCtrlAll(PMS5005 self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short time)
 {
-    Buffer* buf = new_Buffer(23);
+    Buffer buf = new_Buffer(23);
     
     if (buf != NULL)
     {
@@ -2368,9 +2368,9 @@ static Buffer* servoTimeCtrlAll(PMS5005* self, short pos1, short pos2, short pos
  *
  * @see servoNonTimeCtrl
  */
-static Buffer* servoNonTimeCtrlAll(PMS5005* self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+static Buffer servoNonTimeCtrlAll(PMS5005 self, short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 {
-    Buffer* buf = new_Buffer(21);
+    Buffer buf = new_Buffer(21);
     
     if (buf != NULL)
     {
@@ -2422,22 +2422,22 @@ static Buffer* servoNonTimeCtrlAll(PMS5005* self, short pos1, short pos2, short 
  *
  * @see servoTimeCtrl
  */
-static Buffer* servoTimeCtrlBoth(PMS5005* self, short pos1, short pos2, short time)
+static Buffer servoTimeCtrlBoth(PMS5005 self, short pos1, short pos2, short time)
 {
-    Buffer* buf = new_Buffer(23);
+    Buffer buf = new_Buffer(23);
     
     if (buf != NULL)
     {
-        buf->data[0] = self->STX0;
-        buf->data[1] = self->STX1;
-        buf->data[2] = 1;
-        buf->data[3] = 0;
-        buf->data[4] = self->ALL_SERVO_CTRL_DID;                        //DID
-        buf->data[5] = 14;                                    //LEN
-        buf->data[6] = pos1;				    //channel 1
-        buf->data[7] = pos1 >> 8;
-        buf->data[8] = pos2;					//channel 2
-        buf->data[9] = pos2 >> 8;
+        buf->data[0]  = self->STX0;
+        buf->data[1]  = self->STX1;
+        buf->data[2]  = 1;
+        buf->data[3]  = 0;
+        buf->data[4]  = self->ALL_SERVO_CTRL_DID;                        //DID
+        buf->data[5]  = 14;                                    //LEN
+        buf->data[6]  = pos1;				    //channel 1
+        buf->data[7]  = pos1 >> 8;
+        buf->data[8]  = pos2;					//channel 2
+        buf->data[9]  = pos2 >> 8;
         buf->data[10] = self->NO_CTRL;					//channel 3
         buf->data[11] = self->NO_CTRL >> 8;
         buf->data[12] = self->NO_CTRL;					//channel 4
@@ -2473,9 +2473,9 @@ static Buffer* servoTimeCtrlBoth(PMS5005* self, short pos1, short pos2, short ti
  *
  * @see servoNonTimeCtrl
  */
-static Buffer* servoNonTimeCtrlBoth(PMS5005* self, short pos1, short pos2)
+static Buffer servoNonTimeCtrlBoth(PMS5005 self, short pos1, short pos2)
 {
-    Buffer* buf = new_Buffer(21);
+    Buffer buf = new_Buffer(21);
     
     if (buf != NULL)
     {
@@ -2514,15 +2514,15 @@ static Buffer* servoNonTimeCtrlBoth(PMS5005* self, short pos1, short pos2)
  * The graphic LCD display is monochrome with dimensions 128 by 64 pixels.
  * The bmp image must be 128x64 pixels in mono.
  */
-static Buffer* lcdDisplayPms(PMS5005* self, char* bmpFileName)
+static Buffer lcdDisplayPms(PMS5005 self, char* bmpFileName)
 {
     return NULL;
     // TODO Auto-generated method stub
 }
 
-PMS5005* new_PMS5005()
+PMS5005 new_PMS5005()
 {
-    PMS5005* self = (PMS5005*)malloc(sizeof(PMS5005));
+    PMS5005 self = (PMS5005)malloc(sizeof(PMS5005));
     self->HEADER_LENGTH = 7;
     self->PAYLOAD_OFFSET = 6;
     self->DID_OFFSET = 4;
@@ -2694,7 +2694,7 @@ PMS5005* new_PMS5005()
     return self;
 }
 
-void delete_PMS5005(PMS5005* self)
+void delete_PMS5005(PMS5005 self)
 {
     free(self);
 }

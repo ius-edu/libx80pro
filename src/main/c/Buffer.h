@@ -7,10 +7,10 @@ typedef struct Buffer
     unsigned char* data;
     int length;
 
-    int (*size)(struct Buffer*);
-} Buffer;
+    int (*size)(struct Buffer);
+} *Buffer;
 
-Buffer* new_Buffer(int);
-void delete_Buffer(Buffer*);
+Buffer new_Buffer(int);
+void delete_Buffer(Buffer);
 
 #endif
