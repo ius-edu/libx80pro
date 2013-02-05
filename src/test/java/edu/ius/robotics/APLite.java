@@ -1,6 +1,6 @@
 package edu.ius.robotics;
 
-import edu.ius.robotics.X80Pro.X80Pro;
+import edu.ius.robotics.X80Pro;
 import java.lang.Math;
 
 public class APLite implements Runnable
@@ -65,9 +65,9 @@ public class APLite implements Runnable
 	private double step;
 	private boolean isFullStop;
 	
-	private class sensors 
+	private static class Sensors 
 	{
-		public static Double[] thetaIr = new Double[4]; 
+		public static Double[] thetaIR = new Double[4]; 
 	}
 	
 	X80Pro robot;
@@ -79,71 +79,134 @@ public class APLite implements Runnable
 		velocity = 0.70; // 70%
 		heading = 0.0; // radians
 		step = 1.0;
-		sensors.thetaIr[0] = 0.785;
-		sensors.thetaIr[1] = 0.35;
-		sensors.thetaIr[2] = -0.35;
-		sensors.thetaIr[3] = -0.785;
+		Sensors.thetaIR[0] = 0.785;
+		Sensors.thetaIR[1] = 0.35;
+		Sensors.thetaIR[2] = -0.35;
+		Sensors.thetaIR[3] = -0.785;
 		isFullStop = true;
-	}
-	
-	public void resetHead()
-	{
-		robot.servoNonTimeCtrlAll(SERVO0_INI, SERVO1_INI, NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL);
-	}
-	
-	public void suspendMotors()
-	{
-		robot.disableDcMotor(L);
-		robot.disableDcMotor(R);		
 	}
 	
 	void turn(double theta, int seconds)
 	{
 		//@ post: Robot has turned an angle theta in radians
 
-	    int diffEncoder;
-		int leftCmd;
-		int rightCmd;
+	    int diffEncoder = (int)((WHEEL_ENCODER_2PI_X80PRO*WHEEL_DISPLACEMENT*theta)/(4*PI*WHEEL_RADIUS));
 
-		diffEncoder = (int)((WHEEL_ENCODER_2PI_X80PRO*WHEEL_DISPLACEMENT*theta)/(4*PI*WHEEL_RADIUS));
-		leftCmd = robot.getEncoderPulse(0) - diffEncoder;
+	    int leftPulseWidth = robot.getEncoderPulse(0) - diffEncoder;
+		if (leftPulseWidth < 0)
+		{
+			leftPulseWidth = 32767 + leftPulseWidth;
+		}
+		else if (32767 < leftPulseWidth)
+		{
+			leftPulseWidth = leftPulseWidth - 32767;
+		}
 		
-		if (leftCmd < 0) leftCmd = 32767 + leftCmd;
-		else if (leftCmd > 32767) leftCmd = leftCmd - 32767;
-		rightCmd = robot.getEncoderPulse(1) - diffEncoder;
+		int rightPulseWidth = robot.getEncoderPulse(1) - diffEncoder;
+		if (rightPulseWidth < 0) 
+		{
+			rightPulseWidth = 32767 + rightPulseWidth;
+		}
+		else if (32767 < rightPulseWidth)
+		{
+			rightPulseWidth = rightPulseWidth - 32767;
+		}
 		
-		if (rightCmd < 0) rightCmd = 32767 + rightCmd;
-		else if (rightCmd > 32767) rightCmd = rightCmd - 32767;
+		robot.setDCMotorPositionControlPID(L, 1000, 5, 10000);
+		robot.setDCMotorPositionControlPID(R, 1000, 5, 10000);
 		
-		robot.setDcMotorPositionControlPid(L, 1000, 5, 10000);
-		robot.setDcMotorPositionControlPid(R, 1000, 5, 10000);
-		robot.dcMotorPositionNonTimeCtrlAll(leftCmd, rightCmd, NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL);
+		robot.setBothDCMotorPulses(leftPulseWidth, rightPulseWidth);
+	}
+	
+	public void setPulseLevels(double leftPulseWidth, double rightPulseWidth)
+	{
+		// if > 100% power output requested, cap the motor power.
+		if (1 < leftPulseWidth || 1 < rightPulseWidth)
+		{
+			if (leftPulseWidth <= rightPulseWidth) 
+			{ 
+				leftPulseWidth = leftPulseWidth/rightPulseWidth; 
+				rightPulseWidth = 1.0; 
+			}
+			else
+			{
+				rightPulseWidth = rightPulseWidth/leftPulseWidth; 
+				leftPulseWidth = 1.0;
+			}
+		}
+		
+		
+		if (0 < leftPulseWidth)
+		{
+			// 16384 + 8000 + (scaled) power[L]: increase left motor velocity.
+			leftPulseWidth = N_PWM + O_PWM + (DUTY_CYCLE_UNIT/3)*leftPulseWidth;
+		}
+		else if (leftPulseWidth < 0)
+		{
+			// 16384 - 8000 + (scaled) power[L]: reduce left motor velocity.
+			leftPulseWidth = N_PWM - O_PWM + (DUTY_CYCLE_UNIT/3)*leftPulseWidth; 
+		}
+		else
+		{
+			// neutral PWM setting, 0% duty cycle, let left motor sit idle
+			leftPulseWidth = N_PWM;
+		}
+		
+		//if (power[L] > L_MAX_PWM)
+		//{
+		// L_MAX_PWM = 32767, +100% duty cycle
+		//	power[L] = L_MAX_PWM;
+		//}
+		//else if (power[L] < N_PWM)
+		//{
+		// stand still, 0% duty cycle
+		//	power[L] = N_PWM; 
+		//}
+		
+		if (0 < rightPulseWidth)
+		{
+			rightPulseWidth = N_PWM - O_PWM - (DUTY_CYCLE_UNIT/3)*rightPulseWidth; // reverse: 16384 - 8000 - power[R]
+		}
+		else if (rightPulseWidth < 0)
+		{
+			rightPulseWidth = N_PWM + O_PWM - (DUTY_CYCLE_UNIT/3)*rightPulseWidth; // reverse: 16384 + 8000 + rightPulseWidth
+		}
+		else
+		{
+			rightPulseWidth = N_PWM; // neutral PWM setting, 0% duty cycle
+		}
+		//if (power[R] < R_MAX_PWM) power[R] = R_MAX_PWM; // yes, < .. negative threshold @ -100% duty cycle
+		//else if (power[R] > N_PWM) power[R] = N_PWM; // stand still, 0% duty cycle
+		//robot.dcMotorPwmNonTimeCtrlAll((int)power[L], (int)power[R], NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL);
+		robot.setBothDCMotorPulses((int)leftPulseWidth, (int)rightPulseWidth);
+	//} else Robot.DcMotorPwmNonTimeCtrAll((short)N_PWM, (short)N_PWM, NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL); Sleep(MICRO_DELAY);
 	}
 	
 	public void run()
 	{
-		double v, w, F, kmid, kside, Fx, Fy, theta, FR, mass, alpha, heading, power[2];
+		double v, w, F, kmid, kside, Fx, Fy, theta, friction, mass, alpha, heading;
+		double[] power = new double[2];
 		int i, x;
 
 		step = mass = 1.0; // mass?  1 robot, maybe.
 		kmid = 5.0; // hooke's law constant for two middle sensors
 		kside = 4.0; // hooke's law constant two outside sensors
-		FR = 1.0; // friction, nearly perfect?
+		friction = 1.0; // friction, nearly perfect?
 		alpha = 1.0; // decides the amount to turn
 		Fx = 100.0; // attractive goal force in x direction (forward)
 		Fy = 0.0; // robot does not move sideways (without turning)
 		v = velocity; // initial value is at 70%
-		heading = heading; // current heading
+		//heading = heading; // current heading
 		
 		int count = 0;
 		for (i = 0; i < NUM_IR_SENSORS_FRONT; ++i) 
 		{
-			if (robot.SensorIrRange(i) <= RANGE) { x = sensors.Ir[i]; ++count; } // object detected
+			if (robot.getSensorIRRange(i) <= RANGE) { x = Sensors.thetaIR[i]; ++count; } // object detected
 			else x = 0; // nothing seen
 			if (i == 1 || i == 2) F = kmid*x; // compute force from two inside sensors
 			else F = kside*x; // compute force from two outside sensors
-			Fx = Fx - (F*Math.cos(sensors.thetaIr[i])); // Repulsive x component
-			Fy = Fy - (F*Math.sin(sensors.thetaIr[i])); // Repulsive y component
+			Fx = Fx - (F*Math.cos(Sensors.thetaIR[i])); // Repulsive x component
+			Fy = Fy - (F*Math.sin(Sensors.thetaIR[i])); // Repulsive y component
 		}
 		
 		//if(count > 0){
@@ -159,21 +222,10 @@ public class APLite implements Runnable
 		//if ((-PI/2.0 <= theta) && (theta <= PI/2.0)) { // if theta is in 1st or 4th quadrant
 			power[L] = (int)(v - v*alpha*theta); // power to left motor (v - v*alpha*w)
 			power[R] = (int)(v + v*alpha*theta); // power to right motor (v + v*alpha*w)
-			power[L] /= 100*PI/2; power[R] /= 100*PI/2; // need precentages.
-			if (power[L] > 1 || power[R] > 1) // if > 100% power output requested, cap the motor power.
-				if (power[R] >= power[L]) { power[L] = power[L]/power[R]; power[R] = 1.0; }
-				else { power[R] = power[R]/power[L]; power[L] = 1.0; }
-			if (power[L] > 0) power[L] = N_PWM + O_PWM + (DUTY_CYCLE_UNIT/3)*power[L]; // 16384 + 8000 + (scaled) power[L]: faster!
-			else if (power[L] < 0) power[L] = N_PWM - O_PWM + (DUTY_CYCLE_UNIT/3)*power[L]; // 16384 - 8000 + (scaled) power[L]: slower!
-			else power[L] = N_PWM; // neutral PWM setting, 0% duty cycle
-			//if (power[L] > L_MAX_PWM) power[L] = L_MAX_PWM; // L_MAX_PWM = 32767, +100% duty cycle
-			//else if (power[L] < N_PWM) power[L] = N_PWM; // stand still, 0% duty cycle
-			if (power[R] > 0) power[R] = N_PWM - O_PWM - (DUTY_CYCLE_UNIT/3)*power[R]; // reverse: 16384 - 8000 - power[R]
-			else if (power[R] < 0) power[R] = N_PWM + O_PWM - (DUTY_CYCLE_UNIT/3)*power[R]; // reverse: 16384 + 8000 + power[R]
-			else power[R] = N_PWM; // neutral PWM setting, 0% duty cycle
-			//if (power[R] < R_MAX_PWM) power[R] = R_MAX_PWM; // yes, < .. negative threshold @ -100% duty cycle
-			//else if (power[R] > N_PWM) power[R] = N_PWM; // stand still, 0% duty cycle
-			robot.dcMotorPwmNonTimeCtrlAll((int)power[L], (int)power[R], NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL);
-		//} else Robot.DcMotorPwmNonTimeCtrAll((short)N_PWM, (short)N_PWM, NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL); Sleep(MICRO_DELAY);
+			
+			power[L] /= 100*PI/2; // get percentage output.
+			power[R] /= 100*PI/2; // get percentage output.
+			
+		setPulseLevels(power[L], power[R]);
 	}
 }

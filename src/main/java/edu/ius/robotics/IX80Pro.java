@@ -249,7 +249,7 @@ interface IX80Pro
      * digital converter.  The output voltage of the sensor can be calculated 
      * from the following equation: sensorOutputVoltage = (ival)*3.0/4095(v)
      */
-    int getSensorIrRange(int channel);
+    int getSensorIRRange(int channel);
 
     /**
      * Returns the current human alarm data from the DHM5150 Human Motion 
@@ -379,7 +379,7 @@ interface IX80Pro
      * Repeat Code: byte[3]
      * Where the repeat byte would be 255 if the button is pressed continuously
      */
-    int getSensorIrCode(int index);
+    int getSensorIRCode(int index);
 
     /**
      * Sends two 16-bit words of infrared communication output data to the 
@@ -426,7 +426,7 @@ interface IX80Pro
      * 2) Power supply voltage of DC motors = 24v*(ival/4095)
      * 3) Power supply voltage of servo motors = 9v*(ival/4095)
      */
-    int getSensorBatteryAd(int channel);
+    int getSensorBatteryAD(int channel);
 
     /**
      * Returns the current value of the reference voltage of the A/D converter 
@@ -545,7 +545,7 @@ interface IX80Pro
      *
      * @see getSensorBatteryAd
      */
-    int getCustomAd(int channel);
+    int getCustomAD(int channel);
 
     /**
      * Returns a value with the lower 8 bits corresponding to the 8 channel 
@@ -590,7 +590,7 @@ interface IX80Pro
      *
      * @see resumeDcMotor
      */
-    void enableDcMotor(int channel);
+    void enableDCMotor(int channel);
 
     /**
      * Disables the specified DC motor control channel.
@@ -601,15 +601,29 @@ interface IX80Pro
      *
      * @see suspendDcMotor
      */
-    void disableDcMotor(int channel);
+    void disableDCMotor(int channel);
 
     /**
      * Resumes the specified DC motor control channel.
      *
      * @param channel 0 for left, 1 for right (robot first person perspective)
      */
-    void resumeDcMotor(int channel);
+    void resumeDCMotor(int channel);
 
+    /**
+     * Resumes the DC motor control channels.
+     *
+     * All motor control channels are initially suspended at boot-up.
+     */
+    void resumeAllDCMotors();
+    
+    /**
+     * Resumes the DC motor control channels.
+     *
+     * All motor control channels are initially suspended at boot-up.
+     */
+    void resumeBothDCMotors();
+    
     /**
      * Suspends the specified DC motor control channel.
      *
@@ -617,30 +631,57 @@ interface IX80Pro
      *
      * All motor control channels are initially suspended at boot-up.
      */
-    void suspendDcMotor(int channel);
+    void suspendDCMotor(int channel);
 
+    /**
+     * Suspends the DC motor control channels.
+     *
+     * All motor control channels are initially suspended at boot-up.
+     */
+    void suspendAllDCMotors();
+    
+    /**
+     * Suspends the DC motor control channels.
+     *
+     * All motor control channels are initially suspended at boot-up.
+     */
+    void suspendBothDCMotors();
+    
     /**
      * Sets up the PID control parameters of the specified DC motor channel 
      * for position control.
      *
      * @param channel 0 for left, 1 for right (robot first person perspective)
-     * @param Kp proportional gain (default is 50)
-     * @param Kd derivative gain (default is 5)
-     * @param Ki_x100 the desired integral gain * 100.  when Ki_100 = 100, 
-     * the actual integral control term is Ki = 1.  Ki_x100 has a range of 
+     * @param kp proportional gain (default is 50)
+     * @param kd derivative gain (default is 5)
+     * @param ki_x100 the desired integral gain * 100.  when ki_100 = 100, 
+     * the actual integral control term is ki = 1.  ki_x100 has a range of 
      * 0 to 25599, where 0 means no integral control (default).
      *
-     * @see setDcMotorControlMode
+     * @see setDCMotorControlMode
      */
-    void setDcMotorPositionControlPid(int channel, int Kp, int Kd, int Ki_x100);
+    void setDCMotorPositionControlPID(int channel, int kp, int kd, int ki_x100);
 
-    void setDcMotorVelocityControlPID(byte channel, int Kp, int Kd, int Ki);
+    /**
+     * Sets up the PID control parameters of the specified DC motor channel 
+     * for velocity control.
+     *
+     * @param channel 0 for left, 1 for right (robot first person perspective)
+     * @param kp proportional gain (default is 50)
+     * @param kd derivative gain (default is 5)
+     * @param ki_x100 the desired integral gain * 100.  when ki_100 = 100, 
+     * the actual integral control term is ki = 1.  ki_x100 has a range of 
+     * 0 to 25599, where 0 means no integral control (default).
+     *
+     * @see setDCMotorControlMode
+     */
+    void setDCMotorVelocityControlPID(byte channel, int kp, int kd, int ki);
     
     /**
      * This filtering feature is still under development. All data will be 
      * treated as raw data.
      */
-    void setDcMotorSensorFilter(int channel, int filterMethod);
+    void setDCMotorSensorFilter(int channel, int filterMethod);
 
     /**
      * Set the sensor type for the specified DC motor control channel on the 
@@ -670,7 +711,7 @@ interface IX80Pro
      *
      * @see getSensorPot
      */
-    void setDcMotorSensorUsage(int channel, int sensorType);
+    void setDCMotorSensorUsage(int channel, int sensorType);
 
     /**
      * Sets the control mode of the specified DC motor control channel on the 
@@ -685,7 +726,7 @@ interface IX80Pro
      * @see setDcMotorPositionControlPid
      * @see setDcMotorVelocityControlPid
      */
-    void setDcMotorControlMode(int channel, int controlMode);
+    void setDCMotorControlMode(int channel, int controlMode);
 
     /**
      * Sends the position control command to the specified motion control 
@@ -695,10 +736,10 @@ interface IX80Pro
      * with time control is linear.
      * 
      * @param channel 0, 1, 2, 3, 4, or 5
-     * @param cmdValue Target position value
+     * @param pos Target position value
      * @param timePeriod Executing time in milliseconds
      */
-    void dcMotorPositionTimeCtrl(int channel, int cmdValue, int timePeriod);
+    void setDCMotorPosition(int channel, int pos, int timePeriod);
     
     /**
      * Sends the position control command to the specified motion control 
@@ -718,10 +759,9 @@ interface IX80Pro
      *    second when using dual potentiometer sensor for rotational postion 
      *    measurement and pulse/second when using quadrature encoder.
      * 
-     * @see dcMotorVelocityTimeCtrl
      * @see getSensorPot
      */
-    void dcMotorPositionNonTimeCtrl(int channel, int cmdValue);
+    void setDCMotorPosition(int channel, int pos);
     
     /**
      * Sends the PWM control command to the specified motion control channel on 
@@ -730,7 +770,7 @@ interface IX80Pro
      * The current trajectory planning method for time control is linear.
      * 
      * @param channel 0, 1, 2, 3, 4, or 5
-     * @param cmdValue Target pulse width value
+     * @param pulseWidth Target pulse width value
      * @param timePeriod Executing time in milliseconds
      * 
      * 1) The specified channel (motor) will be enabled automatically by the 
@@ -743,10 +783,9 @@ interface IX80Pro
      *    motor) and any value in between 0 - 16362 will cause the motor to 
      *    turn counter-clockwise.
      * 
-     * @see dcMotorPwmNonTimeCtrl
      */
-    void dcMotorPwmTimeCtrl(int channel, int cmdValue, int timePeriod);
-
+    void setDCMotorPulse(int channel, int pulseWidth, int timePeriod);
+    
     /**
      * Sends the PWM control command to the specified motion control channel on 
      * the Sensing and Motion Controller (PMS5005).  The command includes the 
@@ -755,7 +794,7 @@ interface IX80Pro
      * target value immediately.
      * 
      * @param channel 0, 1, 2, 3, 4, or 5
-     * @param cmdValue Target pulse width value
+     * @param pulseWidth Target pulse width value
      * 
      * 1) The specified channel (motor) will be enabled automatically by the 
      *    system when this command is received.
@@ -767,9 +806,8 @@ interface IX80Pro
      *    value in between 0 - 16362 will cause the motor to turn 
      *    counter-clockwise.
      * 
-     * @see dcMotorPwmTimeCtrl
      */
-    void dcMotorPwmNonTimeCtrl(int channel, int cmdValue);
+    void setDCMotorPulse(int channel, int pulseWidth);
     
     /**
      * Sends the position control command to all 6 DC motor control channels on 
@@ -778,12 +816,12 @@ interface IX80Pro
      * command.  The current trajectory planning method for time control is 
      * linear.
      * 
-     * @param pos1 Target position for channel #1
-     * @param pos2 Target position for channel #2
-     * @param pos3 Target position for channel #3
-     * @param pos4 Target position for channel #4
-     * @param pos5 Target position for channel #5
-     * @param pos6 Target position for channel #6
+     * @param pos0 Target position for channel #1
+     * @param pos1 Target position for channel #2
+     * @param pos2 Target position for channel #3
+     * @param pos3 Target position for channel #4
+     * @param pos4 Target position for channel #5
+     * @param pos5 Target position for channel #6
      * @param timePeriod Execution time in milliseconds
      * 
      * 1) All DC Motors will be enabled automatically by the system when this 
@@ -798,10 +836,9 @@ interface IX80Pro
      *    be set to -32768 (0x8000), which implies NO_CONTROL.
      * 
      * @see getSensorPot
-     * @see dcMotorPositionTimeCtrl
      */
-    void dcMotorPositionTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
-                                   int pos5, int pos6, int timePeriod);
+    void setAllDCMotorPositions(int pos0, int pos1, int pos2, int pos3, 
+                                   int pos4, int pos5, int timePeriod);
     
     /**
      * Sends the position control command to all 6 DC motor control channels on 
@@ -810,12 +847,12 @@ interface IX80Pro
      * for execution.  The motion controller will drive the motor to reach the 
      * target position with maximum effort.
      * 
-     * @param pos1 Target position for channel #1
-     * @param pos2 Target position for channel #2
-     * @param pos3 Target position for channel #3
-     * @param pos4 Target position for channel #4
-     * @param pos5 Target position for channel #5
-     * @param pos6 Target position for channel #6
+     * @param pos0 Target position for channel #1
+     * @param pos1 Target position for channel #2
+     * @param pos2 Target position for channel #3
+     * @param pos3 Target position for channel #4
+     * @param pos4 Target position for channel #5
+     * @param pos5 Target position for channel #6
      * 
      * 1) All DC Motors will be enabled automatically by the system when this 
      *    command is received.
@@ -829,10 +866,60 @@ interface IX80Pro
      *    be set to -32768 (0x8000), which implies NO_CONTROL.
      * 
      * @see getSensorPot
-     * @see dcMotorPositionNonTimeCtrl
      */
-    void dcMotorPositionNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
-                                       int pos5, int pos6);
+    void setAllDCMotorPositions(int pos0, int pos1, int pos2, int pos3, 
+    							int pos4, int pos5);
+    
+    /**
+     * Sends the position control command to both (the first two) DC motor control 
+     * channels on the sensing and motion controller (PMS5005) at the same time.  
+     * The command includes the target positions and the time period to execute 
+     * the command.  The current trajectory planning method for time control is 
+     * linear.
+     * 
+     * @param pos0 Target position for channel #1
+     * @param pos1 Target position for channel #2
+     * @param timePeriod Execution time in milliseconds
+     * 
+     * 1) All DC Motors will be enabled automatically by the system when this 
+     *    command is received.
+     * 2) Target position value is the A/D sampling data range 0 to 4095 when 
+     *    using single potentiometer, 0-4428 when using dual potentiometers.
+     * 3) Please refer to the description of getSensorPot for data conversion 
+     *    between angular values and the A/D sampling data values.
+     * 4) When using the encoder as sensor input, the target position value is 
+     *    the pulse count in the range of 0-32767.
+     * 5) When omitting motor channels from control, the command value should 
+     *    be set to -32768 (0x8000), which implies NO_CONTROL.
+     * 
+     * @see getSensorPot
+     */
+    void setBothDCMotorPositions(int pos0, int pos1, int timePeriod);
+    
+    /**
+     * Sends the position control command to both (the first two) DC motor control 
+     * channels on the sensing and motion controller (PMS5005) at the same time.  
+     * The command includes the target positions and the time period to execute 
+     * the command.  The current trajectory planning method for time control is 
+     * linear.
+     * 
+     * @param pos0 Target position for channel #1
+     * @param pos1 Target position for channel #2
+     * 
+     * 1) All DC Motors will be enabled automatically by the system when this 
+     *    command is received.
+     * 2) Target position value is the A/D sampling data range 0 to 4095 when 
+     *    using single potentiometer, 0-4428 when using dual potentiometers.
+     * 3) Please refer to the description of getSensorPot for data conversion 
+     *    between angular values and the A/D sampling data values.
+     * 4) When using the encoder as sensor input, the target position value is 
+     *    the pulse count in the range of 0-32767.
+     * 5) When omitting motor channels from control, the command value should 
+     *    be set to -32768 (0x8000), which implies NO_CONTROL.
+     * 
+     * @see getSensorPot
+     */
+    void setBothDCMotorPositions(int pos0, int pos1);
     
     /**
      * Sends the velocity control command to all 6 DC motor control channels on 
@@ -840,12 +927,12 @@ interface IX80Pro
      * command includes the target velocities and the time period to execute 
      * the command.  The trajectory planning method for time control is linear.
      * 
-     * @param pos1 Target velocity for channel #1
-     * @param pos2 Target velocity for channel #2
-     * @param pos3 Target velocity for channel #3
-     * @param pos4 Target velocity for channel #4
-     * @param pos5 Target velocity for channel #5
-     * @param pos6 Target velocity for channel #6
+     * @param v0 Target velocity for channel #1
+     * @param v1 Target velocity for channel #2
+     * @param v2 Target velocity for channel #3
+     * @param v3 Target velocity for channel #4
+     * @param v4 Target velocity for channel #5
+     * @param v5 Target velocity for channel #6
      * @param timePeriod Execution time in milliseconds
      * 
      * 1) Motor will be enabled automatically by the system when this command 
@@ -860,24 +947,23 @@ interface IX80Pro
      * 5) When omitting motors from control, send the command value -32768
      *    (0x8000), which implies NO_CONTROL.
      * 
-     * @see dcMotorVelocityTimeCtrl
      */
-    void dcMotorVelocityTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
-                                    int pos5, int pos6, int timePeriod);
+    void setAllDCMotorVelocities(int v0, int v1, int v2, int v3, 
+    							 int v4, int v5, int timePeriod);
 
-        /**
+    /**
      * Sends the velocity control command to all 6 DC motor control channels on 
      * the Sensing and Motion Controller (PMS5005) at the same time.  The 
      * command includes the target velocities without specifying an execution 
      * time period.  The motion controller will drive the motor to achieve 
      * the target velocity with maximum effort.
      * 
-     * @param pos1 Target velocity for channel #1
-     * @param pos2 Target velocity for channel #2
-     * @param pos3 Target velocity for channel #3
-     * @param pos4 Target velocity for channel #4
-     * @param pos5 Target velocity for channel #5
-     * @param pos6 Target velocity for channel #6
+     * @param v0 Target velocity for channel #1
+     * @param v1 Target velocity for channel #2
+     * @param v2 Target velocity for channel #3
+     * @param v3 Target velocity for channel #4
+     * @param v4 Target velocity for channel #5
+     * @param v5 Target velocity for channel #6
      * 
      * 1) Motor will be enabled automatically by the system when this command 
      *    is received.
@@ -891,10 +977,59 @@ interface IX80Pro
      * 5) When omitting motors from control, send the command value -32768
      *    (0x8000), which implies NO_CONTROL.
      * 
-     * @see dcMotorVelocityNonTimeCtrl
      */
-    void dcMotorVelocityNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
-                                      int pos5, int pos6);
+    void setAllDCMotorVelocities(int v0, int v1, int v2, int v3, int v4, int v5);
+    
+    /**
+     * Sends the velocity control command to all both (the first two) DC motor 
+     * control channels on the Sensing and Motion Controller (PMS5005) at the same 
+     * time.  The command includes the target velocities and the time period to 
+     * execute the command.  The trajectory planning method for time control is 
+     * linear.
+     * 
+     * @param v0 Target velocity for channel #1
+     * @param v1 Target velocity for channel #2
+     * @param timePeriod Execution time in milliseconds
+     * 
+     * 1) Motor will be enabled automatically by the system when this command 
+     *    is received.
+     * 2) No velocity control is available for a motor channel operating in 
+     *    single potentiometer mode.
+     * 3) The unit of the velocity is (Position change in A/D sampling data) / 
+     *    second when using dual potentiometer sensors for rotational position 
+     *    measurements and pulse/second when using quadrature encoder.
+     * 4) Please refer to the description of getSensorPot for data conversion 
+     *    between angular values and the A/D sampling data values.
+     * 5) When omitting motors from control, send the command value -32768
+     *    (0x8000), which implies NO_CONTROL.
+     * 
+     */
+    void setBothDCMotorVelocities(int v0, int v1, int timePeriod);
+    
+    /**
+     * Sends the velocity control command to both (the first two) DC motor control 
+     * channels on the Sensing and Motion Controller (PMS5005) at the same time.  
+     * The command includes the target velocities without specifying an execution 
+     * time period.  The motion controller will drive the motor to achieve 
+     * the target velocity with maximum effort.
+     * 
+     * @param v0 Target velocity for channel #1
+     * @param v1 Target velocity for channel #2
+     * 
+     * 1) Motor will be enabled automatically by the system when this command 
+     *    is received.
+     * 2) No velocity control is available for a motor channel operating in 
+     *    single potentiometer mode.
+     * 3) The unit of the velocity is (Position change in A/D sampling data) / 
+     *    second when using dual potentiometer sensors for rotational position 
+     *    measurements and pulse/second when using quadrature encoder.
+     * 4) Please refer to the description of getSensorPot for data conversion 
+     *    between angular values and the A/D sampling data values.
+     * 5) When omitting motors from control, send the command value -32768
+     *    (0x8000), which implies NO_CONTROL.
+     * 
+     */
+    void setBothDCMotorVelocities(int v0, int v1);
     
     /**
      * Sends the PWM control command to all 6 DC motor control channels on the 
@@ -902,12 +1037,12 @@ interface IX80Pro
      * includes the target PWM values and the time period for execution.  The 
      * current trajectory planning method for time control is linear.
      * 
-     * @param pos1 Target PWM value for channel #1
-     * @param pos2 Target PWM value for channel #2
-     * @param pos3 Target PWM value for channel #3
-     * @param pos4 Target PWM value for channel #4
-     * @param pos5 Target PWM value for channel #5
-     * @param pos6 Target PWM value for channel #6
+     * @param p0 Target PWM value for channel #1
+     * @param p1 Target PWM value for channel #2
+     * @param p2 Target PWM value for channel #3
+     * @param p3 Target PWM value for channel #4
+     * @param p4 Target PWM value for channel #5
+     * @param p5 Target PWM value for channel #6
      * @param timePeriod Execution time in milliseconds
      * 
      * 1) All channels (motors) will be enable automatically by the system when 
@@ -922,21 +1057,21 @@ interface IX80Pro
      * 4) When omitting motors from control, the command value of -32768
      *    (0x8000), should be sent.  This implies NO_CONTROL.
      */
-    void dcMotorPwmTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, 
-                              int pos6, int timePeriod);
+    void setAllDCMotorPulses(int p0, int p1, int p2, int p3, int p4, int p5, 
+    						 int timePeriod);
     
-        /**
+    /**
      * Sends the PWM control command to all 6 DC motor control channels on the 
      * Sensing and Motion Controller (PMS5005) at the same time.  The command 
      * includes the target PWM values without a specified time period for 
      * execution.  The motion controller will adjust the pulse width right away.
      * 
-     * @param pos1 Target PWM value for channel #1
-     * @param pos2 Target PWM value for channel #2
-     * @param pos3 Target PWM value for channel #3
-     * @param pos4 Target PWM value for channel #4
-     * @param pos5 Target PWM value for channel #5
-     * @param pos6 Target PWM value for channel #6
+     * @param p0 Target PWM value for channel #1
+     * @param p1 Target PWM value for channel #2
+     * @param p2 Target PWM value for channel #3
+     * @param p3 Target PWM value for channel #4
+     * @param p4 Target PWM value for channel #5
+     * @param p5 Target PWM value for channel #6
      * 
      * 1) All channels (motors) will be enable automatically by the system when 
      *    this command is received.
@@ -950,8 +1085,56 @@ interface IX80Pro
      * 4) When omitting motors from control, the command value of -32768
      *    (0x8000), should be sent.  This implies NO_CONTROL.
      */
-    void dcMotorPwmNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
-                                 int pos5, int pos6);
+    void setAllDCMotorPulses(int p0, int p1, int p2, int p3, int p4, int p5);
+    
+    /**
+     * Sends the PWM control command to both (the first two) DC motor control 
+     * channels on the Sensing and Motion Controller (PMS5005) at the same time.  
+     * The command includes the target PWM values and the time period for 
+     * execution.  The current trajectory planning method for time control is 
+     * linear.
+     * 
+     * @param p0 Target PWM value for channel #1
+     * @param p1 Target PWM value for channel #2
+     * @param timePeriod Execution time in milliseconds
+     * 
+     * 1) All channels (motors) will be enable automatically by the system when 
+     *    this command is received.
+     * 2) Target pulse width value range is 0 to 32767 (0x7FFF), corresponding 
+     *    to the duty cycle of 0 to 100% linearly.
+     * 3) A pulse width value of 16383 means 50% duty cycle, putting the motor 
+     *    in the stop (neutral) stage.  Any value in between 16384 - 32767 will 
+     *    cause the motor to turn clockwise (facing the front side of the 
+     *    motor) and any value in between 0 - 16362 will cause the motor to 
+     *    turn counter-clockwise.
+     * 4) When omitting motors from control, the command value of -32768
+     *    (0x8000), should be sent.  This implies NO_CONTROL.
+     */
+    void setBothDCMotorPulses(int p0, int p1, int timePeriod);
+    
+    /**
+     * Sends the PWM control command to both (the first two) DC motor control 
+     * channels on the Sensing and Motion Controller (PMS5005) at the same time.  
+     * The command includes the target PWM values without a specified time period 
+     * for execution.  The motion controller will adjust the pulse width right 
+     * away.
+     * 
+     * @param p0 Target PWM value for channel #1
+     * @param p1 Target PWM value for channel #2
+     * 
+     * 1) All channels (motors) will be enable automatically by the system when 
+     *    this command is received.
+     * 2) Target pulse width value range is 0 to 32767 (0x7FFF), corresponding 
+     *    to the duty cycle of 0 to 100% linearly.
+     * 3) A pulse width value of 16383 means 50% duty cycle, putting the motor 
+     *    in the stop (neutral) stage.  Any value in between 16384 - 32767 will 
+     *    cause the motor to turn clockwise (facing the front side of the 
+     *    motor) and any value in between 0 - 16362 will cause the motor to 
+     *    turn counter-clockwise.
+     * 4) When omitting motors from control, the command value of -32768
+     *    (0x8000), should be sent.  This implies NO_CONTROL.
+     */
+    void setBothDCMotorPulses(int p0, int p1);
     
     /**
      * Enables the specified servo motor control channel.
@@ -978,14 +1161,14 @@ interface IX80Pro
     void disableServo(int channel);
     
     /**
-     * Sends the position control command to the specified servo motor control 
+     * Sends the PWM control command to the specified servo motor control 
      * channel on the Sensing and Motion Controller (PMS5005).  The command 
      * includes the target position command and the time period to execute the 
      * command.  The current trajectory planning method for time control is 
      * linear.
      * 
      * @param channel 0, 1, 2, 3, 4, or 5
-     * @param cmdValue Target Pulse Width (in milliseconds) * 2250
+     * @param pulseWidth Target Pulse Width (in milliseconds) * 2250
      * @param timePeriod Executing time in milliseconds
      * 
      * Usually, a standard remote control servo motor expects to get the 
@@ -996,26 +1179,24 @@ interface IX80Pro
      * most common servos.  Experiments are required to obtain the exact value 
      * for a specific servo motor.
      * 
-     * @see servoNonTimeCtrl
      */
-    void servoTimeCtrl(int channel, int cmdValue, int timePeriod);
+    void setServoPulse(int channel, int pulseWidth, int timePeriod);
     
     /**
-     * Sends the position control command to the specified servo motor control 
+     * Sends the PWM control command to the specified servo motor control 
      * channel on the Sensing and Motion Controller (PMS5005).  The command 
      * includes the target position command without a specific time period for 
      * execution.  The motion controller will send the desired pulse width to 
      * the servo motor right away.
      * 
      * @param channel 0, 1, 2, 3, 4, or 5
-     * @param cmdValue Target pulse width (ms) * 2250
+     * @param pulseWidth Target pulse width (ms) * 2250
      * 
-     * @see servoTimeCtrl
      */
-    void servoNonTimeCtrl(int channel, int cmdValue);
+    void setServoPulse(int channel, int pulseWidth);
     
     /**
-     * Sends the position control command to all 6 servo motor 
+     * Sends the PWM control command to all 6 servo motor 
      * control channels on the Sensing and Motion Controller (PMS5005) at the 
      * same time.
      *
@@ -1023,45 +1204,77 @@ interface IX80Pro
      * time period to execute the command.  The current trajectory planning 
      * method for time control is linear.
      *
-     * @param pos1 Target position for channel #1 (Left Motor on X80Pro)
-     * @param pos2 Target position for channel #2 (-Right Motor on X80Pro)
-     * @param pos3 Target position for channel #3 (NO_CONTROL on X80Pro)
-     * @param pos4 Target position for channel #4 (NO_CONTROL on X80Pro)
-     * @param pos5 Target position for channel #5 (NO_CONTROL on X80Pro)
-     * @param pos6 Target position for channel #6 (NO_CONTROL on X80Pro)
+     * @param p0 Target pulse width for channel #1 (Left Motor on X80Pro)
+     * @param p1 Target pulse width for channel #2 (-Right Motor on X80Pro)
+     * @param p2 Target pulse width for channel #3 (NO_CONTROL on X80Pro)
+     * @param p3 Target pulse width for channel #4 (NO_CONTROL on X80Pro)
+     * @param p4 Target pulse width for channel #5 (NO_CONTROL on X80Pro)
+     * @param p5 Target pulse width for channel #6 (NO_CONTROL on X80Pro)
      * @param timePeriod Executing time in milliseconds
      * 
      * When omitting servo motors from control, please send the command value 
      * -32768 (0x8000), which implies NO_CONTROL.
      * 
-     * @see servoTimeCtrl
      */
-    void servoTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, 
-			 int pos5, int pos6, int timePeriod);
+    void setAllServoPulses(int p0, int p1, int p2, int p3, int p4, int p5, 
+    					   int timePeriod);
 
     /**
-     * Sends the position control command to all 6 servo motor 
-     * control channels on the Sensing and Motion Controller (PMS5005) at the 
-     * same time.
+     * Sends PWM control commands to all 6 servo motor 
+     * control channels on the Sensing and Motion Controller (PMS5005) at once. 
      *
      * The command includes the target position commands without specifying a 
      * time period in which to execute the command.  The motion controller 
      * sends the desired pulse width to the servo motor right away.
      *
-     * @param pos1 Target position for channel #1 (Left Motor on X80Pro)
-     * @param pos2 Target position for channel #2 (-Right Motor on X80Pro)
-     * @param pos3 Target position for channel #3 (NO_CONTROL on X80Pro)
-     * @param pos4 Target position for channel #4 (NO_CONTROL on X80Pro)
-     * @param pos5 Target position for channel #5 (NO_CONTROL on X80Pro)
-     * @param pos6 Target position for channel #6 (NO_CONTROL on X80Pro)
+     * @param p0 Target position for channel #1 (Left Motor on X80Pro)
+     * @param p1 Target position for channel #2 (-Right Motor on X80Pro)
+     * @param p2 Target position for channel #3 (NO_CONTROL on X80Pro)
+     * @param p3 Target position for channel #4 (NO_CONTROL on X80Pro)
+     * @param p4 Target position for channel #5 (NO_CONTROL on X80Pro)
+     * @param p5 Target position for channel #6 (NO_CONTROL on X80Pro)
      * 
      * When omitting servo motors from control, please send the command value 
      * -32768 (0x8000), which implies NO_CONTROL.
      * 
-     * @see servoNonTimeCtrl
      */
-    void servoNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, 
-                            int pos6);
+    void setAllServoPulses(int p0, int p1, int p2, int p3, int p4, int p5);
+    
+    /**
+     * Sends the PWM control command to both (the first two) servo motor 
+     * control channels on the Sensing and Motion Controller (PMS5005) at the 
+     * same time.
+     *
+     * The command includes the target position commands and the 
+     * time period to execute the command.  The current trajectory planning 
+     * method for time control is linear.
+     *
+     * @param p0 Target pulse width for channel #1 (Left Motor on X80Pro)
+     * @param p1 Target pulse width for channel #2 (-Right Motor on X80Pro)
+     * @param timePeriod Executing time in milliseconds
+     * 
+     * When omitting servo motors from control, please send the command value 
+     * -32768 (0x8000), which implies NO_CONTROL.
+     * 
+     */
+    void setBothServoPulses(int p0, int p1, int timePeriod);
+    
+    /**
+     * Sends PWM control commands to both (the first two) servo motor 
+     * control channels on the Sensing and Motion Controller (PMS5005) at once. 
+     *
+     * The command includes the target position commands without specifying a 
+     * time period in which to execute the command.  The motion controller 
+     * sends the desired pulse width to the servo motor right away.
+     *
+     * @param p0 Target position for channel #1 (Left Motor on X80Pro)
+     * @param p1 Target position for channel #2 (-Right Motor on X80Pro)
+     * 
+     * When omitting servo motors from control, please send the command value 
+     * -32768 (0x8000), which implies NO_CONTROL.
+     * 
+     */
+    void setBothServoPulses(int p0, int p1);
     
     /**
      * Displays the image data in the file bmpFileName (BMP format) on the 
@@ -1072,7 +1285,7 @@ interface IX80Pro
      * The graphic LCD display is monochrome with dimensions 128 by 64 pixels.  
      * The bmp image must be 128x64 pixels in mono.
      */
-    void lcdDisplayPMS(String bmpFileName);
+    void setLCDDisplayPMS(String bmpFileName);
     
     /*
     void standardSensorEvent();

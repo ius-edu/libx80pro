@@ -108,7 +108,7 @@ public class X80Pro implements IX80Pro
 	
 	public void resetHead()
 	{
-		servoNonTimeCtrlAll(SERVO0_INI, SERVO1_INI, NO_CTRL, NO_CTRL, NO_CTRL, NO_CTRL);
+		setAllServoPulses(SERVO0_INI, SERVO1_INI, NO_CTRL, NO_CTRL, NO_CTRL, NO_CTRL);
 	}
 	
 	public void motorSensorRequest(int packetNumber)
@@ -196,9 +196,9 @@ public class X80Pro implements IX80Pro
 		return PMS5005.getSensorSonar((byte) channel, socket.getStandardSensorAry());
 	}
 	
-	public int getSensorIrRange(int channel)
+	public int getSensorIRRange(int channel)
 	{
-		return PMS5005.getSensorIrRange((byte) channel, socket.getStandardSensorAry(), socket.getCustomSensorAry());
+		return PMS5005.getSensorIRRange((byte) channel, socket.getStandardSensorAry(), socket.getCustomSensorAry());
 	}
 	
 	public int getSensorHumanAlarm(int channel)
@@ -231,9 +231,9 @@ public class X80Pro implements IX80Pro
 		return PMS5005.getSensorTemperature(socket.getStandardSensorAry());
 	}
 	
-	public int getSensorIrCode(int index)
+	public int getSensorIRCode(int index)
 	{
-		return PMS5005.getSensorIrCode((byte) index, socket.getStandardSensorAry());
+		return PMS5005.getSensorIRCode((byte) index, socket.getStandardSensorAry());
 	}
 	
 	public void setInfraredControlOutput(int lowWord, int highWord)
@@ -241,9 +241,9 @@ public class X80Pro implements IX80Pro
 		PMS5005.setInfraredControlOutput((short) lowWord, (short) highWord);
 	}
 	
-	public int getSensorBatteryAd(int channel)
+	public int getSensorBatteryAD(int channel)
 	{
-		return PMS5005.getSensorBatteryAd((short) channel, socket.getStandardSensorAry());
+		return PMS5005.getSensorBatteryAD((short) channel, socket.getStandardSensorAry());
 	}
 	
 	public int getSensorRefVoltage()
@@ -281,9 +281,9 @@ public class X80Pro implements IX80Pro
 		return PMS5005.getEncoderSpeed((byte) channel, socket.getMotorSensorAry());
 	}
 	
-	public int getCustomAd(int channel)
+	public int getCustomAD(int channel)
 	{
-		return PMS5005.getCustomAd((byte) channel, socket.getCustomSensorAry());
+		return PMS5005.getCustomAD((byte) channel, socket.getCustomSensorAry());
 	}
 	
 	public int getCustomDIn(int channel)
@@ -302,98 +302,130 @@ public class X80Pro implements IX80Pro
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void enableDcMotor(int channel)
+	public void enableDCMotor(int channel)
 	{
-		socket.send(PMS5005.enableDcMotor((byte) channel));
+		socket.send(PMS5005.enableDCMotor((byte) channel));
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void disableDcMotor(int channel)
+	public void disableDCMotor(int channel)
 	{
-		socket.send(PMS5005.disableDcMotor((byte) channel));
+		socket.send(PMS5005.disableDCMotor((byte) channel));
 	}
 	
-	public void resumeDcMotor(int channel)
+	public void resumeDCMotor(int channel)
 	{
-		socket.send(PMS5005.resumeDcMotor((byte) channel));
+		socket.send(PMS5005.resumeDCMotor((byte) channel));
+	}
+
+	public void resumeAllDCMotors()
+	{
+		socket.send(PMS5005.resumeDCMotor((byte) 0));
+		socket.send(PMS5005.resumeDCMotor((byte) 1));
+		socket.send(PMS5005.resumeDCMotor((byte) 2));
+		socket.send(PMS5005.resumeDCMotor((byte) 3));
+		socket.send(PMS5005.resumeDCMotor((byte) 4));
+		socket.send(PMS5005.resumeDCMotor((byte) 5));
+	}
+
+	public void resumeBothDCMotors()
+	{
+		socket.send(PMS5005.resumeDCMotor((byte) 0));
+		socket.send(PMS5005.resumeDCMotor((byte) 1));
 	}
 	
-	public void suspendDcMotor(int channel)
+	public void suspendDCMotor(int channel)
 	{
-		socket.send(PMS5005.suspendDcMotor((byte) channel));
+		socket.send(PMS5005.suspendDCMotor((byte) channel));
 	}
 	
-	public void setDcMotorPositionControlPid(int channel, int Kp, int Kd, int Ki_x100)
+	public void suspendAllDCMotors()
 	{
-		socket.send(PMS5005.setDcMotorPositionControlPid((byte) channel, (short) Kp, (short) Kd, (short) Ki_x100));
+		socket.send(PMS5005.suspendDCMotor((byte) 0));
+		socket.send(PMS5005.suspendDCMotor((byte) 1));
+		socket.send(PMS5005.suspendDCMotor((byte) 2));
+		socket.send(PMS5005.suspendDCMotor((byte) 3));
+		socket.send(PMS5005.suspendDCMotor((byte) 4));
+		socket.send(PMS5005.suspendDCMotor((byte) 5));
 	}
 	
-	public void setDcMotorSensorFilter(int channel, int filterMethod)
+	public void suspendBothDCMotors()
 	{
-		socket.send(PMS5005.setDcMotorSensorFilter((byte) channel, (short) filterMethod));
+		socket.send(PMS5005.suspendDCMotor((byte) 0));
+		socket.send(PMS5005.suspendDCMotor((byte) 1));
 	}
 	
-	public void setDcMotorSensorUsage(int channel, int sensorType)
+	public void setDCMotorPositionControlPID(int channel, int kp, int kd, int ki_x100)
 	{
-		socket.send(PMS5005.setDcMotorSensorUsage((byte) channel, (byte) sensorType));
+		socket.send(PMS5005.setDCMotorPositionControlPID((byte) channel, (short) kp, (short) kd, (short) ki_x100));
 	}
 	
-	public void setDcMotorControlMode(int channel, int controlMode)
+	public void setDCMotorSensorFilter(int channel, int filterMethod)
 	{
-		socket.send(PMS5005.setDcMotorControlMode((byte) channel, (byte) controlMode));
+		socket.send(PMS5005.setDCMotorSensorFilter((byte) channel, (short) filterMethod));
 	}
 	
-	public void dcMotorPositionTimeCtrl(int channel, int cmdValue, int timePeriod)
+	public void setDCMotorSensorUsage(int channel, int sensorType)
 	{
-		socket.send(PMS5005.dcMotorPositionTimeCtrl((byte) channel, (short) cmdValue, (short) timePeriod));
+		socket.send(PMS5005.setDCMotorSensorUsage((byte) channel, (byte) sensorType));
 	}
 	
-	public void dcMotorPositionNonTimeCtrl(int channel, int cmdValue)
+	public void setDCMotorControlMode(int channel, int controlMode)
 	{
-		socket.send(PMS5005.dcMotorPositionNonTimeCtrl((byte) channel, (short) cmdValue));
+		socket.send(PMS5005.setDCMotorControlMode((byte) channel, (byte) controlMode));
 	}
 	
-	public void dcMotorPwmTimeCtrl(int channel, int cmdValue, int timePeriod)
+	public void setDCMotorPosition(int channel, int pos, int timePeriod)
 	{
-		socket.send(PMS5005.dcMotorPwmTimeCtrl((byte) channel, (short) cmdValue, (short) timePeriod));
+		socket.send(PMS5005.setDCMotorPosition((byte) channel, (short) pos, (short) timePeriod));
 	}
 	
-	public void dcMotorPwmNonTimeCtrl(int channel, int cmdValue)
+	public void setDCMotorPosition(int channel, int pos)
 	{
-		socket.send(PMS5005.dcMotorPwmNonTimeCtrl((byte) channel, (short) cmdValue));
+		socket.send(PMS5005.setDCMotorPosition((byte) channel, (short) pos));
 	}
 	
-	public void dcMotorPositionTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	public void setDCMotorPulse(int channel, int pulseWidth, int timePeriod)
 	{
-		socket.send(PMS5005.dcMotorPositionTimeCtrlAll((short) pos1, (short) pos2, (short) pos3, (short) pos4, (short) pos5, (short) pos6,
+		socket.send(PMS5005.setDCMotorPulse((byte) channel, (short) pulseWidth, (short) timePeriod));
+	}
+	
+	public void setDCMotorPulse(int channel, int pulseWidth)
+	{
+		socket.send(PMS5005.setDCMotorPulse((byte) channel, (short) pulseWidth));
+	}
+	
+	public void setAllDCMotorPositions(int pos0, int pos1, int pos2, int pos3, int pos4, int pos5, int timePeriod)
+	{
+		socket.send(PMS5005.setAllDCMotorPositions((short) pos0, (short) pos1, (short) pos2, (short) pos3, (short) pos4, (short) pos5,
 				(short) timePeriod));
 	}
 	
-	public void dcMotorPositionNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	public void setAllDCMotorPositions(int pos0, int pos1, int pos2, int pos3, int pos4, int pos5)
 	{
-		socket.send(PMS5005.dcMotorPositionNonTimeCtrlAll((short) pos1, (short) pos2, (short) pos3, (short) pos4, (short) pos5, (short) pos6));
+		socket.send(PMS5005.setAllDCMotorPositions((short) pos0, (short) pos1, (short) pos2, (short) pos3, (short) pos4, (short) pos5));
 	}
 	
-	public void dcMotorVelocityTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	public void setAllDCMotorVelocities(int v0, int v1, int v2, int v3, int v4, int v5, int timePeriod)
 	{
-		socket.send(PMS5005.dcMotorVelocityTimeCtrlAll((short) pos1, (short) pos2, (short) pos3, (short) pos4, (short) pos5, (short) pos6,
+		socket.send(PMS5005.setAllDCMotorVelocities((short) v0, (short) v1, (short) v2, (short) v3, (short) v4, (short) v5,
 				(short) timePeriod));
 	}
 	
-	public void dcMotorVelocityNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	public void setAllDCMotorVelocities(int v0, int v1, int v2, int v3, int v4, int v5)
 	{
-		socket.send(PMS5005.dcMotorVelocityNonTimeCtrlAll((short) pos1, (short) pos2, (short) pos3, (short) pos4, (short) pos5, (short) pos6));
+		socket.send(PMS5005.setAllDCMotorVelocities((short) v0, (short) v1, (short) v2, (short) v3, (short) v4, (short) v5));
 	}
 	
-	public void dcMotorPwmTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	public void setAllDCMotorPulses(int p0, int p1, int p2, int p3, int p4, int p5, int timePeriod)
 	{
-		socket.send(PMS5005.dcMotorPwmTimeCtrlAll((short) pos1, (short) pos2, (short) pos3, (short) pos4, (short) pos5, (short) pos6,
+		socket.send(PMS5005.setAllDCMotorPulses((short) p0, (short) p1, (short) p2, (short) p3, (short) p4, (short) p5,
 				(short) timePeriod));
 	}
 	
-	public void dcMotorPwmNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	public void setAllDCMotorPulses(int p0, int p1, int p2, int p3, int p4, int p5)
 	{
-		socket.send(PMS5005.dcMotorPwmNonTimeCtrlAll((short) pos1, (short) pos2, (short) pos3, (short) pos4, (short) pos5, (short) pos6));
+		socket.send(PMS5005.setAllDCMotorPulses((short) p0, (short) p1, (short) p2, (short) p3, (short) p4, (short) p5));
 	}
 	
 	public void enableServo(int channel)
@@ -406,33 +438,73 @@ public class X80Pro implements IX80Pro
 		socket.send(PMS5005.disableServo((byte) channel));
 	}
 	
-	public void servoTimeCtrl(int channel, int cmdValue, int timePeriod)
+	public void setServoPulse(int channel, int pos, int timePeriod)
 	{
-		socket.send(PMS5005.servoTimeCtrl((byte) channel, (short) cmdValue, (short) timePeriod));
+		socket.send(PMS5005.setServoPulse((byte) channel, (short) pos, (short) timePeriod));
 	}
 	
-	public void servoNonTimeCtrl(int channel, int cmdValue)
+	public void setServoPulse(int channel, int pulseWidth)
 	{
-		socket.send(PMS5005.servoNonTimeCtrl((byte) channel, (short) cmdValue));
+		socket.send(PMS5005.setServoPulse((byte) channel, (short) pulseWidth));
 	}
 	
-	public void servoTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6, int timePeriod)
+	public void setAllServoPulses(int p0, int p1, int p2, int p3, int p4, int p5, int timePeriod)
 	{
-		socket.send(PMS5005.servoTimeCtrlAll((short) pos1, (short) pos2, (short) pos3, (short) pos4, (short) pos5, (short) pos6, (short) timePeriod));
+		socket.send(PMS5005.setAllServoPulses((short) p0, (short) p1, (short) p2, (short) p3, (short) p4, (short) p5, (short) timePeriod));
 	}
 	
-	public void servoNonTimeCtrlAll(int pos1, int pos2, int pos3, int pos4, int pos5, int pos6)
+	public void setAllServoPulses(int p0, int p1, int p2, int p3, int p4, int p5)
 	{
-		socket.send(PMS5005.servoNonTimeCtrlAll((short) pos1, (short) pos2, (short) pos3, (short) pos4, (short) pos5, (short) pos6));
+		socket.send(PMS5005.setAllServoPulses((short) p0, (short) p1, (short) p2, (short) p3, (short) p4, (short) p5));
 	}
 	
-	public void lcdDisplayPMS(String bmpFileName)
+	public void setLCDDisplayPMS(String bmpFileName)
 	{
-		socket.send(PMS5005.lcdDisplayPMS(bmpFileName));
+		socket.send(PMS5005.setLCDDisplayPMS(bmpFileName));
 	}
 	
-	public void setDcMotorVelocityControlPID(byte channel, int Kp, int Kd, int Ki)
+	public void setDCMotorVelocityControlPID(byte channel, int kp, int kd, int ki)
 	{
-		socket.send(PMS5005.setDcMotorVelocityControlPID(channel, Kp, Kd, Ki));
+		socket.send(PMS5005.setDCMotorVelocityControlPID(channel, kp, kd, ki));
+	}
+
+	public void setBothDCMotorPositions(int pos0, int pos1, int timePeriod) 
+	{
+		socket.send(PMS5005.setAllDCMotorPositions((short) pos0, (short) pos1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) timePeriod));
+	}
+
+	public void setBothDCMotorPositions(int pos0, int pos1) 
+	{
+		socket.send(PMS5005.setAllDCMotorPositions((short) pos0, (short) pos1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
+	}
+
+	public void setBothDCMotorVelocities(int v0, int v1, int timePeriod) 
+	{
+		socket.send(PMS5005.setAllDCMotorVelocities((short) v0, (short) v1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) timePeriod));
+	}
+
+	public void setBothDCMotorVelocities(int v0, int v1) 
+	{
+		socket.send(PMS5005.setAllDCMotorVelocities((short) v0, (short) v1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
+	}
+
+	public void setBothDCMotorPulses(int p0, int p1, int timePeriod) 
+	{
+		socket.send(PMS5005.setAllDCMotorVelocities((short) p0, (short) p1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) timePeriod));
+	}
+
+	public void setBothDCMotorPulses(int p0, int p1) 
+	{
+		socket.send(PMS5005.setAllDCMotorPulses((short) p0, (short) p1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
+	}
+
+	public void setBothServoPulses(int p0, int p1, int timePeriod) 
+	{
+		socket.send(PMS5005.setAllDCMotorPulses((short) p0, (short) p1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) timePeriod));
+	}
+
+	public void setBothServoPulses(int p0, int p1) 
+	{
+		socket.send(PMS5005.setAllServoPulses((short) p0, (short) p1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
 	}
 }

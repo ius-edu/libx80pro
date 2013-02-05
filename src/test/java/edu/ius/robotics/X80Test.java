@@ -12,18 +12,16 @@ public class X80Test
 	{
 		X80Pro robot = new X80Pro("192.168.0.203");
 		
+		System.err.println("Reset Head");
 		robot.resetHead();
 		
-		System.err.println("resuming motor 0");
-		robot.enableDcMotor(0);
+		System.err.println("Resume Both DC Motors");
+		robot.resumeBothDCMotors();
 		
-		System.err.println("resuming motor 1");
-		robot.enableDcMotor(1);
+		System.err.println("Move robot");
+		robot.setBothDCMotorVelocities(3000, 3000);
 		
-		System.err.println("Move robot forward");
-		robot.dcMotorVelocityNonTimeCtrlAll(3000, 3000, NO_CTRL, NO_CTRL, NO_CTRL, NO_CTRL);
-		
-		System.err.println("Move for 3 seconds");
+		System.err.println("Hold the move for 3 seconds (Thread.sleep call)");
 		try
 		{
 			Thread.sleep(3000);
@@ -34,11 +32,8 @@ public class X80Test
 			e.printStackTrace();
 		}
 		
-		System.err.println("Suspend motor 0");
-		robot.suspendDcMotor(0);
-		
-		System.err.println("Suspend motor 1");
-		robot.suspendDcMotor(1);
+		System.err.println("Suspend Both DC Motors");
+		robot.suspendBothDCMotors();
 		
 		//APLite aplite = new APLite(robot);
 		
