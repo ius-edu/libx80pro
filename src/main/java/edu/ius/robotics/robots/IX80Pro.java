@@ -231,7 +231,8 @@ interface IX80Pro
      * with the left-front sensor (robot first person perspective) at Sonar #1 
      * (channel 0).
      */
-    int getSensorSonar(int channel);
+    //int getSensorSonar(int channel);
+    double getSensorSonarRange(int channel);
 
     /**
      * Returns the current distance measurement value between an infrared 
@@ -249,7 +250,8 @@ interface IX80Pro
      * digital converter.  The output voltage of the sensor can be calculated 
      * from the following equation: sensorOutputVoltage = (ival)*3.0/4095(v)
      */
-    int getSensorIRRange(int channel);
+    //int getSensorIRRange(int channel);
+    double getSensorIRRange(int channel);
 
     /**
      * Returns the current human alarm data from the DHM5150 Human Motion 

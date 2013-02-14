@@ -13,7 +13,8 @@ public class UDPSocket implements Runnable
 	private IRobot iRobot;
 	
 	public static final int DEFAULT_ROBOT_PORT = 10001;
-	public static final int DEFAULT_MIN_TIME_STEP_IN_MS = 50;
+	public static final int DEFAULT_MIN_TIME_STEP_IN_MS = 60;
+	public static final int CONNECT_WAIT = 5000;
 	
 	private DatagramSocket socket;
 	private String robotIP;
@@ -26,17 +27,17 @@ public class UDPSocket implements Runnable
 	
 	private int minTimeInMS;
 	
-	public UDPSocket(IRobot iRobot, String ipAddress)
+	public UDPSocket(IRobot iRobot, String ipAddress) throws IOException
 	{
 		connectRobot(iRobot, ipAddress, DEFAULT_ROBOT_PORT, DEFAULT_MIN_TIME_STEP_IN_MS);
 	}
 	
-	public UDPSocket(IRobot iRobot, String ipAddress, int port)
+	public UDPSocket(IRobot iRobot, String ipAddress, int port) throws IOException
 	{
 		connectRobot(iRobot, ipAddress, port, DEFAULT_MIN_TIME_STEP_IN_MS);
 	}
 	
-	public UDPSocket(IRobot robot, String ipAddress, int port, int minTimeInMS)
+	public UDPSocket(IRobot robot, String ipAddress, int port, int minTimeInMS) throws IOException
 	{
 		connectRobot(iRobot, ipAddress, port, minTimeInMS);
 	}
@@ -83,34 +84,35 @@ public class UDPSocket implements Runnable
 		return result;
 	}
 	
-	public boolean connectRobot(IRobot iRobot, String robotIP, int robotPort, int minTimeInMS)
+	//public boolean connectRobot(IRobot iRobot, String robotIP, int robotPort, int minTimeInMS) throws IOException
+	public void connectRobot(IRobot iRobot, String robotIP, int robotPort, int minTimeInMS) throws IOException
 	{
 		this.iRobot = iRobot;
 		this.minTimeInMS = minTimeInMS;
 		
-		boolean result;
+		//boolean result;
 		
 		System.err.println("robotIP = " + robotIP);
 		System.err.println("robotPort = " + robotPort);
 		System.err.println("minTimeInMS = " + minTimeInMS);
 		
-		try
+/*		try
 		{
+		*/
 			this.server = InetAddress.getByName(robotIP);
 			this.robotIP = robotIP; 
 			this.robotPort = robotPort;
 			
-			try
-			{
-				// socket connect
+//			try
+//			{
 				socket = new DatagramSocket();
 				socket.setSoTimeout(minTimeInMS);
-			}
-			catch (IOException ex)
-			{
-				ex.printStackTrace();
-				result = false;
-			}
+//			}
+//			catch (IOException ex)
+//			{
+//				ex.printStackTrace();
+//				//result = false;
+//			}
 			
 			rxBuf = new byte[1024];
 			rxPkt = new DatagramPacket(rxBuf, rxBuf.length);
@@ -118,27 +120,32 @@ public class UDPSocket implements Runnable
 			txBuf = new byte[256];
 			txPkt = new DatagramPacket(txBuf, txBuf.length, server, robotPort);
 			
-			try
-			{
+//			try
+//			{
 				socket.send(txPkt);
-			}
-			catch (IOException ex)
-			{
-				ex.printStackTrace();
-			}
+//			}
+//			catch (IOException ex)
+//			{
+//				ex.printStackTrace();
+//			}
 			
 			// wait synchronously for feedback from robot to be clear that we have established connection?
-			
-			result = true;
-		}
-		catch (IOException ex)
-		{
-			ex.printStackTrace();
-			result = false;
-		}
-		
+			socket.setSoTimeout(CONNECT_WAIT);
+			socket.receive(rxPkt);
+//			result = true;
+//		}
+//		catch (IOException ex)
+//		{
+//			ex.printStackTrace();
+//			result = false;
+//		}
+//
+//		if (result)
+//		{
+//			new Thread(this).start(); // receive packet thread
+//		}
+//		return result;
 		new Thread(this).start(); // receive packet thread
-		return result;
 	}
 	
 	public void send(byte[] cmd) 
@@ -177,6 +184,12 @@ public class UDPSocket implements Runnable
 		} // else: we are running behind
 	}
 	
+	public void close()
+	{
+		this.isFinished = isFinished;
+		this.socket.close();
+	}
+	
 	public void setFinished(boolean isFinished)
 	{
 		this.isFinished = isFinished;
@@ -199,6 +212,7 @@ public class UDPSocket implements Runnable
 			catch (IOException ex)
 			{
 				//ex.printStackTrace();
+				//System.err.println("did not receive sensor data");
 			}
 			
 			int z = rxPkt.getLength();

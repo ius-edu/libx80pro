@@ -383,27 +383,40 @@ static void setAllSensorPeriod(short timePeriod)
 
 static short getSensorSonar(X80Pro *self, const int *standardSensorData, short channel)
 {
-	return PMS5005.test();
+	return self->standardSensorData[channel + PMS5005.ULTRASONIC_OFFSET];
 }
 
 static short getSensorIRRange(X80Pro *self, const int *standardSensorData, const int *customSensorData, short channel)
 {
-	return 0;
+	short result = -1;
+	
+	if (0 <= channel && channel < 1)
+	{
+		result = (short) ((standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET + 1]  << 8) | standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET]);
+	}
+	else
+	{
+		result = (short) ((customSensorData[2 * (channel - 1) + PMS5005.CUSTOM_IR_RANGE_OFFSET + 1] << 8) | customSensorData[2 * (channel - 1) + PMS5005.CUSTOM_IR_RANGE_OFFSET]);
+	}
+	
+	return result;
 }
 
 static short getSensorHumanAlarm(X80Pro *self, const int *standardSensorData, short channel)
 {
-	return 0;
+	int offset = 2 * channel + PMS5005.HUMAN_ALARM_OFFSET;
+	return (short) ((standardSensorData[offset + 1] << 8) | standardSensorData[offset]);
 }
 
 static short getSensorHumanMotion(X80Pro *self, const int *standardSensorData, short channel)
 {
-	return 0;
+	int offset = 2 * channel + PMS5005.HUMAN_MOTION_OFFSET;
+	return (short) ((standardSensorData[offset + 1] << 8) | standardSensorData[offset]);
 }
 
 static short getSensorTiltingX(X80Pro *self, const int *standardSensorData)
 {
-	return 0;
+	return (short) ((standardSensorData[PMS5005.TILTING_X_OFFSET + 1] << 8) | standardSensorAry[PMS5005.TILTING_X_OFFSET]);
 }
 
 static short getSensorTiltingY(X80Pro *self, const int *standardSensorData)
@@ -479,7 +492,63 @@ static short getCustomDIn(X80Pro *self, const int *customSensorData, unsigned ch
 void X80Pro_init(X80Pro *self)
 {
 	PMS5005_init(&PMS5005);
+	
+	/* direct hardware (PMS5005) supported methods (1:1) */
+	self->motorSensorRequest = motorSensorRequest;
+    self->standardSensorRequest = standardSensorRequest;
+    self->customSensorRequest = customSensorRequest;
+    self->allSensorRequest = allSensorRequest;
+    self->enableMotorSensorSending = enableMotorSensorSending;
+    self->enableStandardSensorSending = enableStandardSensorSending;
+    self->enableCustomSensorSending = enableCustomSensorSending;
+    self->enableAllSensorSending = enableAllSensorSending;
+    self->disableMotorSensorSending = disableMotorSensorSending;
+    self->disableStandardSensorSending = disableStandardSensorSending;
+    self->disableCustomSensorSending = disableCustomSensorSending;
+    self->disableAllSensorSending = disableAllSensorSending;
+    self->setMotorSensorPeriod = setMotorSensorPeriod;
+    self->setStandardSensorPeriod = setStandardSensorPeriod;
+    self->setCustomSensorPeriod = setCustomSensorPeriod;
+    self->setAllSensorPeriod = setAllSensorPeriod;
+    self->setIRCtrlOutput = setIRCtrlOutput;
+    self->setCustomDOut = setCustomDOut;
+    self->setMotorPolarity = setMotorPolarity;
+    self->enableDCMotor = enableDCMotor;
+    self->disableDCMotor = disableDCMotor;
+    self->resumeDCMotor = resumeDCMotor;
+    self->suspendDCMotor = suspendDCMotor;
+    self->setDCMotorPositionPID = setDCMotorPositionPID;
+    self->setDCMotorVelocityPID = setDCMotorVelocityPID;
+    self->setDCMotorSensorFilter = setDCMotorSensorFilter;
+    self->setDCMotorSensorUsage = setDCMotorSensorUsage;
+    self->setDCMotorCtrlMode = setDCMotorCtrlMode;
+    self->setDCMotorPositionWithTime = setDCMotorPositionWithTime;
+    self->setDCMotorPosition = setDCMotorPosition;
+    self->setDCMotorPulseWithTime = setDCMotorPulseWithTime;
+    self->setDCMotorPulse = setDCMotorPulse;
+    self->setAllDCMotorPositionsWithTime = setAllDCMotorPositionsWithTime;
+    self->setAllDCMotorPositions = setAllDCMotorPositions;
+    self->setAllDCMotorVelocitiesWithTime = setAllDCMotorVelocitiesWithTime;
+    self->setAllDCMotorVelocities = setAllDCMotorVelocities;
+    self->setAllDCMotorPulsesWithTime = setAllDCMotorPulsesWithTime;
+    self->setAllDCMotorPulses = setAllDCMotorPulses;
+    self->setBothDCMotorPositionsWithTime = setBothDCMotorPositionsWithTime;
+    self->setBothDCMotorPositions = setBothDCMotorPositions;
+    self->setBothDCMotorVelocitiesWithTime = setBothDCMotorVelocitiesWithTime;
+    self->setBothDCMotorVelocities = setBothDCMotorVelocities;
+    self->setBothDCMotorPulsesWithTime = setBothDCMotorPulsesWithTime;
+    self->setBothDCMotorPulses = setBothDCMotorPulses;
+    self->enableServo = enableServo;
+    self->disableServo = disableServo;
+    self->setServoPulseWithTime = setServoPulseWithTime;
+    self->setServoPulse = setServoPulse;
+    self->setAllServoPulsesWithTime = setAllServoPulsesWithTime;
+    self->setAllServoPulses = setAllServoPulses;
+    self->setBothServoPulsesWithTime = setBothServoPulsesWithTime;
+    self->setBothServoPulses = setBothServoPulses;
+    self->setLCDDisplayPMS = setLCDDisplayPMS;
 
+	/* get robot data methods (not directly supported by hardware) */
     self->getSensorSonar = getSensorSonar;
     self->getSensorIRRange = getSensorIRRange;
     self->getSensorHumanAlarm = getSensorHumanAlarm;
@@ -499,4 +568,7 @@ void X80Pro_init(X80Pro *self)
     self->getEncoderSpeed = getEncoderSpeed;
     self->getCustomAD = getCustomAD;
     self->getCustomDIn = getCustomDIn;
+
+	/* custom robot data methods */
+	/* ... */
 }
