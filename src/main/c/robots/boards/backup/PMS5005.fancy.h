@@ -4,7 +4,7 @@
 
 #include "../Buffer.h"
 
-typedef struct PMS5005
+struct PMS5005_t
 {
     int HEADER_LENGTH;
     int PAYLOAD_OFFSET;
