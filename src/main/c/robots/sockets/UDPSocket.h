@@ -7,16 +7,30 @@
 
 typedef unsigned char BYTE;
 
-struct UDPSocket
+static DEFAULT_ROBOT_PORT = 10001;
+static DEFAULT_TIME_STEP_IN_MS = 60; /* milliseconds */
+static CONNECT_WAIT = 5; /* seconds */
+
+typedef struct
 {
-	struct addrinfo *addrinfo;
-    char ipaddr[16];
-    int udpport;
+	int DEFAULT_ROBOT_PORT;
+	int DEFAULT_TIME_STEP_IN_MS;
+	int CONNECT_WAIT;
+
+	struct addrinfo *addrInfo;
+    char robotIP[16];
+    int robotPort;
     int socket;
-    BYTE rxbuf[2048];
-    BYTE rxpkt[2048];
-    BYTE txbuf[2048];
-    BYTE txpkt[2048];
-};
+    BYTE rxBuf[1024];
+    BYTE rxPkt[2048];
+    BYTE txBuf[256];
+    BYTE txPkt[512];
+
+	/* methods */
+	int (*connectRobot)(struct UDPSocket *self, char *ipAddress, int port);
+	int (*send)(struct UDPSocket *self, Buffer *buf);
+} UDPSocket;
+
+extern UDPSocket_init(UDPSocket *self);
 
 #endif

@@ -80,7 +80,7 @@ public class UDPSocket implements Runnable
 			result = false;
 		}
 		
-		new Thread (this).start();
+		new Thread(this).start();
 		return result;
 	}
 	
@@ -186,13 +186,8 @@ public class UDPSocket implements Runnable
 	
 	public void close()
 	{
-		this.isFinished = isFinished;
+		this.isFinished = true;
 		this.socket.close();
-	}
-	
-	public void setFinished(boolean isFinished)
-	{
-		this.isFinished = isFinished;
 	}
 	
 	/**
@@ -220,12 +215,15 @@ public class UDPSocket implements Runnable
 			if (0 < z)
 			{
 				// decode here
-				int[] sensorData = new int[z];
+				byte[] sensorData = new byte[z];
 				
+				//System.err.println("DEBUG: raw packet: ");
 				for (int i = 0; i < z; ++i)
 				{
-					sensorData[i] = (int) (rxBuf[i] & 0xff);
+					sensorData[i] = (byte) (rxBuf[i] & 0xff);
+					//System.err.print("DEBUG: " + sensorData[i] + " ");
 				}
+				//System.err.println("DEBUG: ");
 				
 				// callback
 				iRobot.sensorEvent(sensorData);

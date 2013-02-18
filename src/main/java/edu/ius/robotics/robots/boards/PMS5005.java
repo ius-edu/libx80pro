@@ -19,13 +19,13 @@ public class PMS5005
 	 * 94 (always) ETX1 = 13 (always)
 	 */
 	
-	public static final int HEADER_LENGTH = 7;
-	public static final int PAYLOAD_OFFSET = 6;
+	public static final int HEADER_LENGTH = 6;
+	public static final int FOOTER_LENGTH = 3;
 	public static final int DID_OFFSET = 4;
 	
 	/* Start transmission, End transmission */
-	public static final byte STX0 = 94;
-	public static final byte STX1 = 2;
+	public static final byte STX0 = 94; // 0x5e
+	public static final byte STX1 = 2; // 0x02
 	public static final byte ETX0 = 94;
 	public static final byte ETX1 = 13;
 	
@@ -37,8 +37,8 @@ public class PMS5005
 	public static final byte PARAM_SET = 7;
 	
 	/* SubCommands under PARAM_SET */
-	public static final byte DC_POSITION_PID = 7; // position PID Control
-	public static final byte DC_VELOCITY_PID = 8; // velocity PID Control
+	public static final byte DC_POSITION_PID = 7; // Position PID Control
+	public static final byte DC_VELOCITY_PID = 8; // Velocity PID Control
 	public static final byte DC_SENSOR_USAGE = 13;
 	public static final byte DC_CTRL_MODE = 14;
 	
@@ -58,38 +58,59 @@ public class PMS5005
 	public static final short SETUP_COM = 255;
 	/* End Data ID (DID) descriptor listing */
 	
-	public static final byte PWM_CTRL_MODE = 0;
-	public static final byte POSITION_CTRL_MODE = 1;
-	public static final byte VELOCITY_CTRL_MODE = 2;
+	public static final byte PWM_CTRL_MODE = 0x00;
+	public static final byte POSITION_CTRL_MODE = 0x01;
+	public static final byte VELOCITY_CTRL_MODE = 0x02;
+	
+	public static final int SINGLE_POT_SENSOR_USAGE = 0x00;
+	public static final int DUAL_POT_SENSOR_USAGE = 0x01;
+	public static final int ENCODER_SENSOR_USAGE = 0x02;
 	
 	public static final byte KP_ID = 1; // progressive id
 	public static final byte KD_ID = 2; // derivative id
 	public static final byte KI_ID = 3; // integral id
 	
-	public static final short NON_CTRL_CMD = (short) 0xffff; // no ctrl command
-	public static final short NO_CTRL = (short) 0x8000;
+	public static final short NON_CTRL_CMD = (short) 0xffff; // No Control command
+	public static final short NO_CTRL = (short) 0x8000; // 32768
+	
+	public static final int MAX_PWM_L = 32767;
+	public static final int MAX_PWM_R = 0;
+	
+	public static final int PWM_N = 16383;
+	public static final int PWM_O = 8000;
+	public static final int DUTY_CYCLE_UNIT = 8383;
 	
 	/* Sensor Data Offsets */
-	public static final int ULTRASONIC_OFFSET = 0 + HEADER_LENGTH;
-	public static final int ENCODER_PULSE_OFFSET = 24 + HEADER_LENGTH;
-	public static final int ENCODER_SPEED_OFFSET = 32 + HEADER_LENGTH;
-	public static final int STANDARD_IR_RANGE_OFFSET = 24 + HEADER_LENGTH;
-	public static final int CUSTOM_IR_RANGE_OFFSET = 4 + HEADER_LENGTH; // CustomAD3
-	public static final int HUMAN_ALARM_OFFSET = 6 + HEADER_LENGTH;
-	public static final int HUMAN_MOTION_OFFSET = 8 + HEADER_LENGTH;
-	public static final int TILTING_X_OFFSET = 14 + HEADER_LENGTH;
-	public static final int TILTING_Y_OFFSET = 16 + HEADER_LENGTH;
-	public static final int ENCODER_DIRECTION_OFFSET = 32 + HEADER_LENGTH;
-	public static final int MOTOR_SPEED_OFFSET = 26 + HEADER_LENGTH;
-	public static final int CUSTOM_AD_OFFSET = 0 + HEADER_LENGTH;
-	public static final int TEMPERATURE_AD_OFFSET = 22 + HEADER_LENGTH;
-	public static final int OVERHEAT_SENSOR_OFFSET = 18 + HEADER_LENGTH;
-	public static final int INFRARED_COMMAND_OFFSET = 26 + HEADER_LENGTH;
-	public static final int BATTERY_SENSOR_OFFSET = 30 + HEADER_LENGTH;
-	public static final int REFERENCE_VOLTAGE_OFFSET = 36 + HEADER_LENGTH;
-	public static final int POTENTIOMETER_POWER_OFFSET = 38 + HEADER_LENGTH;
-	public static final int POTENTIOMETER_SENSOR_OFFSET = 0 + HEADER_LENGTH;
-	public static final int MOTOR_CURRENT_SENSOR_OFFSET = 12 + HEADER_LENGTH;
+	public static final int ULTRASONIC_OFFSET_WITH_HEADER = 0 + HEADER_LENGTH;
+	public static final int ENCODER_PULSE_OFFSET_WITH_HEADER = 24 + HEADER_LENGTH;
+	public static final int ENCODER_SPEED_OFFSET_WITH_HEADER = 32 + HEADER_LENGTH;
+	public static final int STANDARD_IR_RANGE_OFFSET_WITH_HEADER = 24 + HEADER_LENGTH;
+	public static final int CUSTOM_IR_RANGE_OFFSET_WITH_HEADER = 4 + HEADER_LENGTH; // CustomAD3
+	public static final int HUMAN_ALARM_OFFSET_WITH_HEADER = 6 + HEADER_LENGTH;
+	public static final int HUMAN_MOTION_OFFSET_WITH_HEADER = 8 + HEADER_LENGTH;
+	public static final int TILTING_X_OFFSET_WITH_HEADER = 14 + HEADER_LENGTH;
+	public static final int TILTING_Y_OFFSET_WITH_HEADER = 16 + HEADER_LENGTH;
+	public static final int ENCODER_DIRECTION_OFFSET_WITH_HEADER = 32 + HEADER_LENGTH;
+	public static final int MOTOR_SPEED_OFFSET_WITH_HEADER = 26 + HEADER_LENGTH;
+	public static final int CUSTOM_AD_OFFSET_WITH_HEADER = 0 + HEADER_LENGTH;
+	public static final int TEMPERATURE_AD_OFFSET_WITH_HEADER = 22 + HEADER_LENGTH;
+	public static final int OVERHEAT_SENSOR_OFFSET_WITH_HEADER = 18 + HEADER_LENGTH;
+	public static final int INFRARED_COMMAND_OFFSET_WITH_HEADER = 26 + HEADER_LENGTH;
+	public static final int BATTERY_SENSOR_OFFSET_WITH_HEADER = 30 + HEADER_LENGTH;
+	public static final int REFERENCE_VOLTAGE_OFFSET_WITH_HEADER = 36 + HEADER_LENGTH;
+	public static final int POTENTIOMETER_POWER_OFFSET_WITH_HEADER = 38 + HEADER_LENGTH;
+	public static final int POTENTIOMETER_SENSOR_OFFSET_WITH_HEADER = 0 + HEADER_LENGTH;
+	public static final int MOTOR_CURRENT_SENSOR_OFFSET_WITH_HEADER = 12 + HEADER_LENGTH;
+	
+	/* Sensor Data Size */
+	public static final int MOTOR_SENSOR_DATA_LENGTH = 1024; // 34
+	public static final int CUSTOM_SENSOR_DATA_LENGTH = 1024; // 37
+	public static final int STANDARD_SENSOR_DATA_LENGTH = 1024; // 33
+	
+	/* Magic numbers */
+	public static final int MAX_PULSE_WIDTH = 32767;
+	public static final int MIN_PULSE_WIDTH = -32768;
+	public static final int NEUTRAL_PULSE_WIDTH = 0;
 	
 	/**
 	 * Calculates a valid CRC value to be used in order to check the integrity
@@ -1458,23 +1479,24 @@ public class PMS5005
 	 */
 	public static byte[] setDCMotorPulse(byte channel, short pulseWidth, short timePeriod)
 	{
-		byte[] packet = new byte[14];
+		byte[] packet = new byte[15];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
 		packet[3] = 0;
-		
 		packet[4] = PWM_CTRL; // DID
-		packet[5] = 5; // LEN
+		packet[5] = 6; // LEN
 		packet[6] = channel; // Channel 0-5
-		packet[7] = (byte) (pulseWidth & 0xFF); // cmdValue
-		packet[8] = (byte) ((pulseWidth >>> 8) & 0xFF);
-		packet[9] = (byte) (pulseWidth & 0xFF); // time
-		packet[10] = (byte) ((pulseWidth >>> 8) & 0xFF);
-		packet[11] = calcCRC(packet); // Checksum
+		packet[7] = (byte) (pulseWidth & 0xff); // cmdValue
+		packet[8] = (byte) ((pulseWidth >> 8) & 0x0f);
+		packet[9] = (byte) 0x06; // we have a flag
+		packet[10] = (byte) (timePeriod & 0xff); // time
+		packet[11] = (byte) ((timePeriod >> 8) & 0x0f);
+		packet[12] = calcCRC(packet); // Checksum
+		packet[13] = ETX0;
+		packet[14] = ETX1;
 		
-		packet[12] = ETX0;
-		packet[13] = ETX1;
 		return packet;
 	}
 	
@@ -1505,20 +1527,20 @@ public class PMS5005
 	public static byte[] setDCMotorPulse(byte channel, short pulseWidth)
 	{
 		byte[] packet = new byte[12];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
 		packet[3] = 0;
-		
 		packet[4] = PWM_CTRL; // DID
 		packet[5] = 3; // LEN
 		packet[6] = channel; // Channel 0-5
-		packet[7] = (byte) (pulseWidth & 0xFF); // cmdValue
-		packet[8] = (byte) ((pulseWidth >>> 8) & 0xFF);
+		packet[7] = (byte) (pulseWidth & 0xff); // cmdValue
+		packet[8] = (byte) ((pulseWidth >> 8) & 0x0f);
 		packet[9] = calcCRC(packet); // Checksum
-		
 		packet[10] = ETX0;
 		packet[11] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1625,11 +1647,11 @@ public class PMS5005
 	public static byte[] setAllDCMotorPositions(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
 	{
 		byte[] packet = new byte[21];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
 		packet[3] = 0;
-		
 		packet[4] = ALL_POSITION_CTRL; // DID
 		packet[5] = 12; // LEN
 		packet[6] = (byte) (pos1 & 0xff); // channel 1
@@ -1645,7 +1667,6 @@ public class PMS5005
 		packet[16] = (byte) (pos6 & 0xff); // channel 6
 		packet[17] = (byte) ((pos6 >>> 8) & 0xff);
 		packet[18] = calcCRC(packet); // Checksum
-		
 		packet[19] = ETX0;
 		packet[20] = ETX1;
 		return packet;
@@ -1687,32 +1708,33 @@ public class PMS5005
 	 */
 	public static byte[] setAllDCMotorVelocities(short v0, short v1, short v2, short v3, short v4, short v5, short timePeriod)
 	{
-		byte[] packet = new byte[23];
+		byte[] packet = new byte[24];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
 		packet[3] = 0;
-		
 		packet[4] = ALL_VELOCITY_CTRL; // DID
-		packet[5] = 14; // LEN
-		packet[6] = (byte) (v0 & 0xFF); // MOTOR 1
-		packet[7] = (byte) ((v0 >>> 8) & 0xFF);
-		packet[8] = (byte) (v1 & 0xFF); // MOTOR 2
-		packet[9] = (byte) ((v1 >>> 8) & 0xFF);
-		packet[10] = (byte) (v2 & 0xFF); // MOTOR 3
-		packet[11] = (byte) ((v2 >>> 8) & 0xFF);
-		packet[12] = (byte) (v3 & 0xFF); // MOTOR 4
-		packet[13] = (byte) ((v3 >>> 8) & 0xFF);
-		packet[14] = (byte) (v4 & 0xFF); // MOTOR 5
-		packet[15] = (byte) ((v4 >>> 8) & 0xFF);
-		packet[16] = (byte) (v5 & 0xFF); // MOTOR 6
-		packet[17] = (byte) ((v5 >>> 8) & 0xFF);
-		packet[18] = (byte) (timePeriod & 0xFF); // time
-		packet[19] = (byte) ((timePeriod >>> 8) & 0xFF);
-		packet[20] = calcCRC(packet); // Checksum
+		packet[5] = 15; // LEN
+		packet[6] = (byte) (v0 & 0xff); // MOTOR 1
+		packet[7] = (byte) ((v0 >> 8) & 0xff);
+		packet[8] = (byte) (v1 & 0xff); // MOTOR 2
+		packet[9] = (byte) ((v1 >> 8) & 0xff);
+		packet[10] = (byte) (v2 & 0xff); // MOTOR 3
+		packet[11] = (byte) ((v2 >> 8) & 0xff);
+		packet[12] = (byte) (v3 & 0xff); // MOTOR 4
+		packet[13] = (byte) ((v3 >> 8) & 0xff);
+		packet[14] = (byte) (v4 & 0xff); // MOTOR 5
+		packet[15] = (byte) ((v4 >> 8) & 0xff);
+		packet[16] = (byte) (v5 & 0xff); // MOTOR 6
+		packet[17] = (byte) ((v5 >> 8) & 0xff);
+		packet[18] = (byte) 0x06; // we have a flag
+		packet[19] = (byte) (timePeriod & 0xff); // time
+		packet[20] = (byte) ((timePeriod >> 8) & 0xff);
+		packet[21] = calcCRC(packet); // Checksum
+		packet[22] = ETX0;
+		packet[23] = ETX1;
 		
-		packet[21] = ETX0;
-		packet[22] = ETX1;
 		return packet;
 	}
 	
@@ -1751,29 +1773,31 @@ public class PMS5005
 	public static byte[] setAllDCMotorVelocities(short v0, short v1, short v2, short v3, short v4, short v5)
 	{
 		byte[] packet = new byte[21];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
 		packet[3] = 0;
-		
 		packet[4] = ALL_VELOCITY_CTRL; // DID
 		packet[5] = 12; // LEN
-		packet[6] = (byte) (v0 & 0xFF); // MOTOR 1
-		packet[7] = (byte) ((v0 >>> 8) & 0xFF);
-		packet[8] = (byte) (v1 & 0xFF); // MOTOR 2
-		packet[9] = (byte) ((v1 >>> 8) & 0xFF);
-		packet[10] = (byte) (v2 & 0xFF); // MOTOR 3
-		packet[11] = (byte) ((v2 >>> 8) & 0xFF);
-		packet[12] = (byte) (v3 & 0xFF); // MOTOR 4
-		packet[13] = (byte) ((v3 >>> 8) & 0xFF);
-		packet[14] = (byte) (v4 & 0xFF); // MOTOR 5
-		packet[15] = (byte) ((v4 >>> 8) & 0xFF);
-		packet[16] = (byte) (v5 & 0xFF); // MOTOR 6
-		packet[17] = (byte) ((v5 >>> 8) & 0xFF);
+		packet[6] = (byte) (v0 & 0xff); // MOTOR 1
+		packet[7] = (byte) ((v0 >>> 8) & 0xff);
+		//System.err.println();
+		packet[8] = (byte) (v1 & 0xff); // MOTOR 2
+		packet[9] = (byte) ((v1 >>> 8) & 0xff);
+		packet[10] = (byte) (v2 & 0xff); // MOTOR 3
+		packet[11] = (byte) ((v2 >>> 8) & 0xff);
+		packet[12] = (byte) (v3 & 0xff); // MOTOR 4
+		packet[13] = (byte) ((v3 >>> 8) & 0xff);
+		packet[14] = (byte) (v4 & 0xff); // MOTOR 5
+		packet[15] = (byte) ((v4 >>> 8) & 0xff);
+		packet[16] = (byte) (v5 & 0xff); // MOTOR 6
+		packet[17] = (byte) ((v5 >>> 8) & 0xff);
+		//packet[18] = (byte) 0x06; // we have a flag?
 		packet[18] = calcCRC(packet); // Checksum
-		
 		packet[19] = ETX0;
 		packet[20] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1813,11 +1837,11 @@ public class PMS5005
 	public static byte[] setAllDCMotorPulses(short p0, short p1, short p2, short p3, short p4, short p5, short timePeriod)
 	{
 		byte[] packet = new byte[23];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
 		packet[3] = 0;
-		
 		packet[4] = ALL_PWM_CTRL; // DID
 		packet[5] = 14; // LEN
 		packet[6] = (byte) (p0 & 0xFF); // MOTOR 1
@@ -1835,9 +1859,9 @@ public class PMS5005
 		packet[18] = (byte) (timePeriod & 0xFF); // time
 		packet[19] = (byte) ((timePeriod >>> 8) & 0xFF);
 		packet[20] = calcCRC(packet); // Checksum
-		
 		packet[21] = ETX0;
 		packet[22] = ETX1;
+		
 		return packet;
 	}
 	

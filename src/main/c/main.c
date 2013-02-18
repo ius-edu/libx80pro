@@ -5,9 +5,12 @@
 int main()
 {
 	X80Pro robot;
-	
 	X80Pro_init(&robot);
-	robot.connect(&robot, "192.168.0.203");
+
+	if (TRUE == robot.connect(&robot, "192.168.0.203"))
+	{
+		
+	}
 
 	printf("reset head\n");
 	robot.resetHead();

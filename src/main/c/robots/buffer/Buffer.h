@@ -6,7 +6,7 @@
 typedef struct
 {
     /* unsigned char data[65527]; */
-	unsigned char data[32];
+	unsigned char data[128];
     int length;
 } Buffer;
 

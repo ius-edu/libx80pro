@@ -11,11 +11,6 @@ public class APLite implements Runnable
 //	private double step;
 //	private boolean isFullStop;
 	
-	private static class Sensors 
-	{
-		public static Double[] thetaIR = new Double[4]; 
-	}
-	
 	X80Pro robot;
 	
 	APLite(X80Pro robot)
@@ -26,10 +21,6 @@ public class APLite implements Runnable
 //		heading = 0.0; // radians
 //		step = 1.0;
 //		isFullStop = true;
-		Sensors.thetaIR[0] = 0.785;
-		Sensors.thetaIR[1] = 0.35;
-		Sensors.thetaIR[2] = -0.35;
-		Sensors.thetaIR[3] = -0.785;
 	}
 	
 	public void directRobot()
@@ -37,8 +28,7 @@ public class APLite implements Runnable
 		System.err.println("APLite.directRobot(): begin");
 		double v, F, kmid, kside, Fx, Fy, theta, alpha; //, w, friction, mass, heading;
 		double[] power = new double[2];
-		int i; // , x;
-		double x;
+		int i, x;
 		
 		//step = mass = 1.0; // mass?  1 robot, maybe.
 		//friction = 1.0; // friction, nearly perfect?
@@ -53,13 +43,13 @@ public class APLite implements Runnable
 		//int count = 0;
 		for (i = 0; i < X80Pro.NUM_IR_SENSORS_FRONT; ++i) 
 		{
-			double irr = robot.getSensorIRRange(i);
-			System.err.println("robot.getSensorIRRange: " + irr);
-			if (irr <= X80Pro.RANGE) 
+			int irr = (int)(100*robot.getSensorIRRange(i)); // range in CM
+			System.err.println("robot.getSensorIRRange(" + i + "): " + irr);
+			if (irr <= X80Pro.RANGE)
 			{
 				//x = Sensors.thetaIR[i];
-				x = robot.getSensorIRRange(i);
-				System.err.println("in if statement: robot.getSensorIRRange: " + irr);
+				x = (int)(100*robot.getSensorIRRange(i));
+				System.err.println("in if statement: robot.getSensorIRRange( " + i + "): " + irr); // range in CM
 				//++count;
 			} // object detected
 			else
@@ -76,8 +66,8 @@ public class APLite implements Runnable
 				F = kside*x; // compute force from two outside sensors
 			}
 			
-			Fx = Fx - (F*Math.cos(Sensors.thetaIR[i])); // Repulsive x component
-			Fy = Fy - (F*Math.sin(Sensors.thetaIR[i])); // Repulsive y component
+			Fx = Fx - (F*Math.cos(X80Pro.Sensors.thetaIR[i])); // Repulsive x component
+			Fy = Fy - (F*Math.sin(X80Pro.Sensors.thetaIR[i])); // Repulsive y component
 		}
 		
 		//if(count > 0){
@@ -94,10 +84,10 @@ public class APLite implements Runnable
 			power[X80Pro.L] = (int)(v - v*alpha*theta); // power to left motor (v - v*alpha*w)
 			power[X80Pro.R] = (int)(v + v*alpha*theta); // power to right motor (v + v*alpha*w)
 			
-			power[X80Pro.L] /= 100*Math.PI/2; // get percentage output.
-			power[X80Pro.R] /= 100*Math.PI/2; // get percentage output.
+			power[X80Pro.L] /= Math.PI/2; // get percentage output.
+			power[X80Pro.R] /= Math.PI/2; // get percentage output.
 		
-		robot.setBothDCMotorPulsePercentages(power[X80Pro.L], power[X80Pro.R]);
+		robot.setBothDCMotorPulsePercentages((int) power[X80Pro.L], (int) power[X80Pro.R]);
 		System.err.println("APLite.directRobot(): end");
 	}
 	

@@ -1,21 +1,24 @@
 #include <stdio.h>
+#include <pthread.h>
 #include "UDPSocket.h"
 
 UDPSocket sock;
 
-static void UDPSocket_connectRobot(char *ipaddr, int udpport)
+static int connectRobot(UDPSocket *self, char *ip, int port)
 {
-	socket.ipaddr = ipaddr;
-	socket.udpport = udpport;
+	int result = 0;
+	
+	self->ip = ip;
+	self->port = port;
 
-	fprintf(stderr, "ipaddr = %s", ipaddr);
-	fprintf(stderr, "udpport = %d", udpport);
+	fprintf(stderr, "robotIP: %s", ip);
+	fprintf(stderr, "robotPort: %d", port);
 	/* fprintf(stderr, "delay = %d", delay); */
 
 	struct addrinfo hints;
 	struct addrinfo *p;
 
-	memset(&hints, 0, sizeof(struct addrinfo));
+	memset(&hints, 0, sizeof(struct addrInfo));
 
 	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
 	hints.ai_socktype = SOCK_DGRAM;   /* Datagram socket */
@@ -23,9 +26,10 @@ static void UDPSocket_connectRobot(char *ipaddr, int udpport)
 	hints.ai_protocol = 0;            /* Any protocol */
 
 	int s;
-	if (0 != (s = getaddrinfo(ipaddr, udpport, &hints, &sock.addrInfo)))
+	if (0 != (s = getaddrinfo(ip, port, &hints, &sock.addrInfo)))
 	{
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+		result = -1;
 		exit(1);
 	}
 
@@ -34,21 +38,45 @@ static void UDPSocket_connectRobot(char *ipaddr, int udpport)
 		if (-1 == (sock.socket = socket(p->ai_family, p->ai_socktype, p->ai_protocol)))
 		{
 			perror("socket error");
+			result = -1;
 		}
 	}
-
+	
+	pthread_create();
 	return socket;
 }
 
-static int UDPSocket_send(Datagram* datagram)
+static int send(Buffer *buf)
 {
 	int result;
 
-	if (-1 == (result = sendto(sock->sock, datagram.data, datagram.size, 0, sock->ai_addr, sock->ai_addr->ai_addrlen)))
+	if (-1 == (result = sendto(sock->sock, buf.data, buf.length, 0, sock->ai_addr, sock->ai_addr->ai_addrlen)))
 	{
 		perror("talker: sendto");
 		exit(1);
 	}
 
 	return result;
+}
+
+void *recv()
+{
+	
+}
+
+void close(UDPSocket *self)
+{
+	self->isFinished = true;
+	//self->socket.close();
+}
+
+extern UDPSocket_init(UDPSocket *self)
+{
+	self->DEFAULT_ROBOT_PORT = DEFAULT_ROBOT_PORT;
+	self->DEFAULT_TIME_STEP_IN_MS = DEFAULT_TIME_STEP_IN_MS;
+	self->CONNECT_WAIT = CONNECT_WAIT;
+	
+	/* methods */
+	self->connectRobot = connectRobot;
+	self->send = send;
 }

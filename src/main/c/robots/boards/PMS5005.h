@@ -4,7 +4,7 @@
 
 #include "../buffer/Buffer.h"
 
-static int HEADER_LENGTH = 7;
+static int HEADER_LENGTH = 6;
 static int PAYLOAD_OFFSET = 6;
 static int DID_OFFSET = 4;
 static int MOTOR_SENSOR_REQUEST_SIZE = 10;
@@ -76,26 +76,29 @@ static unsigned char KD_ID = 2;
 static unsigned char KI_ID = 3;
 static short NON_CTRL_PACKET = (short)0xffff;
 static short NO_CTRL = (short)0x8000;
-static int ULTRASONIC_OFFSET = 7; /* 0 + HEADER_LENGTH */
-static int ENCODER_PULSE_OFFSET = 31; /* 24 + HEADER_LENGTH */
-static int ENCODER_SPEED_OFFSET = 39; /* 32 + HEADER_LENGTH */
-static int STANDARD_IR_RANGE_OFFSET = 31; /* 24 + HEADER_LENGTH */
-static int CUSTOM_IR_RANGE_OFFSET = 11; /* 4 + HEADER_LENGTH */
-static int HUMAN_ALARM_OFFSET = 13; /* 6 + HEADER_LENGTH */
-static int HUMAN_MOTION_OFFSET = 15; /* 8 + HEADER_LENGTH */
-static int TILTING_X_OFFSET = 21; /* 14 + HEADER_LENGTH */
-static int TILTING_Y_OFFSET = 23; /* 16 + HEADER_LENGTH */
-static int ENCODER_DIRECTION_OFFSET = 39; /* 32 + HEADER_LENGTH */
-static int MOTOR_SPEED_OFFSET = 33; /* 26 + HEADER_LENGTH */
-static int CUSTOM_AD_OFFSET = 7; /* 0 + HEADER_LENGTH */
-static int TEMPERATURE_AD_OFFSET = 29; /* 22 + HEADER_LENGTH */
-static int OVERHEAT_SENSOR_OFFSET = 25; /* 18 + HEADER_LENGTH */
-static int IR_COMMAND_OFFSET = 33; /* 26 + HEADER_LENGTH */
-static int BATTERY_SENSOR_OFFSET = 37; /* 30 + HEADER_LENGTH */
-static int REFERENCE_VOLTAGE_OFFSET = 43; /* 36 + HEADER_LENGTH */
-static int POTENTIOMETER_POWER_OFFSET = 45; /* 38 + HEADER_LENGTH */
-static int POTENTIOMETER_SENSOR_OFFSET = 7; /* 0 + HEADER_LENGTH */
-static int MOTOR_CURRENT_SENSOR_OFFSET = 19; /* 12 + HEADER_LENGTH */
+static int ULTRASONIC_OFFSET = 6; /* 0 + HEADER_LENGTH */
+static int ENCODER_PULSE_OFFSET = 30; /* 24 + HEADER_LENGTH */
+static int ENCODER_SPEED_OFFSET = 38; /* 32 + HEADER_LENGTH */
+static int STANDARD_IR_RANGE_OFFSET = 30; /* 24 + HEADER_LENGTH */
+static int CUSTOM_IR_RANGE_OFFSET = 10; /* 4 + HEADER_LENGTH */
+static int HUMAN_ALARM_OFFSET = 12; /* 6 + HEADER_LENGTH */
+static int HUMAN_MOTION_OFFSET = 14; /* 8 + HEADER_LENGTH */
+static int TILTING_X_OFFSET = 20; /* 14 + HEADER_LENGTH */
+static int TILTING_Y_OFFSET = 22; /* 16 + HEADER_LENGTH */
+static int ENCODER_DIRECTION_OFFSET = 38; /* 32 + HEADER_LENGTH */
+static int MOTOR_SPEED_OFFSET = 32; /* 26 + HEADER_LENGTH */
+static int CUSTOM_AD_OFFSET = 6; /* 0 + HEADER_LENGTH */
+static int TEMPERATURE_AD_OFFSET = 28; /* 22 + HEADER_LENGTH */
+static int OVERHEAT_SENSOR_OFFSET = 24; /* 18 + HEADER_LENGTH */
+static int IR_COMMAND_OFFSET = 32; /* 26 + HEADER_LENGTH */
+static int BATTERY_SENSOR_OFFSET = 36; /* 30 + HEADER_LENGTH */
+static int REFERENCE_VOLTAGE_OFFSET = 42; /* 36 + HEADER_LENGTH */
+static int POTENTIOMETER_POWER_OFFSET = 44; /* 38 + HEADER_LENGTH */
+static int POTENTIOMETER_SENSOR_OFFSET = 6; /* 0 + HEADER_LENGTH */
+static int MOTOR_CURRENT_SENSOR_OFFSET = 18; /* 12 + HEADER_LENGTH */
+static int MOTOR_SENSOR_DATA_LENGTH = 34;
+static int CUSTOM_SENSOR_DATA_LENGTH = 37;
+static int STANDARD_SENSOR_DATA_LENGTH = 33;
 
 typedef struct
 {
@@ -138,6 +141,10 @@ typedef struct
     int SERVO_NON_TIME_CTRL_SIZE;
     int SERVO_TIME_CTRL_ALL_SIZE;
     int SERVO_NON_TIME_CTRL_ALL_SIZE;
+	
+	int MOTOR_SENSOR_DATA_LENGTH;
+	int CUSTOM_SENSOR_DATA_LENGTH;
+	int STANDARD_SENSOR_DATA_LENGTH;
 
     /* Start transmission, End transmission */
     unsigned char STX0;
