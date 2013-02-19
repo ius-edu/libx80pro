@@ -61,8 +61,8 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	public static final int BIG_DELAY = 1000;
 	public static final int UBER_DELAY = 5000;
 	
-	public static final int MAX_PWM_L = 32767;
-	public static final int MAX_PWM_R = 0;
+	public static final int MAX_PWM_L = 32767; // 32767;
+	public static final int MAX_PWM_R = -0; // 0;
 	
 	public static final int PWM_N = 16383;
 	public static final int PWM_O = 8000;
@@ -396,21 +396,6 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		socket.close();
 	}
 	
-	public byte[] getStandardSensorData()
-	{
-		return this.standardSensorData;
-	}
-	
-	public byte[] getCustomSensorData()
-	{
-		return this.customSensorData;
-	}
-	
-	public byte[] getMotorSensorData()
-	{
-		return this.motorSensorData;
-	}
-	
 	/**
 	 * analog to digital conversion
 	 * 
@@ -462,9 +447,11 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	public void resumeAllSensors()
 	{
 		System.err.println("Activating All Sensors");
+		
 		socket.send(PMS5005.enableCustomSensorSending());
 		socket.send(PMS5005.enableStandardSensorSending());
 		socket.send(PMS5005.enableMotorSensorSending());
+		
 		System.err.println("All Sensors Activated");
 	}
 	

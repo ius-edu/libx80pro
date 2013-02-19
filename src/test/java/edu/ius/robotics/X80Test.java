@@ -9,34 +9,42 @@ public class X80Test
 	public static void main(String[] args)
 	{
 		X80Pro robot = null;
+		X80Pro otherRobot = null;
 		
 		try
 		{
-			robot = new X80Pro("192.168.0.204");
+			robot = new X80Pro("192.168.0.203");
+			otherRobot = new X80Pro("192.168.0.202");
 		}
 		catch (IOException ex)
 		{
 			ex.printStackTrace();
+		}
+		
+		if (robot == null || otherRobot == null)
+		{
 			return;
 		}
+		
+		otherRobot.resumeAllSensors();
+		otherRobot.resetHead();
 		
 		robot.resumeAllSensors();
 		robot.resetHead();
 		
 		//robot.setBothDCMotorControlModes(X80Pro.PWM_CONTROL_MODE, X80Pro.PWM_CONTROL_MODE);
 		robot.setBothDCMotorSensorUsages(X80Pro.SENSOR_USAGE_ENCODER, X80Pro.SENSOR_USAGE_ENCODER);
-		robot.setBothDCMotorControlModes(X80Pro.CONTROL_MODE_VELOCITY, X80Pro.CONTROL_MODE_VELOCITY);
+		robot.setBothDCMotorControlModes(X80Pro.CONTROL_MODE_PWM, X80Pro.CONTROL_MODE_PWM);
 		robot.resumeBothDCMotors();
 		
-		//robot.setBothDCMotorPulsePercentages(100, 100);
-		//robot.setBothDCMotorVelocities(3000, 3000);
-		//robot.setBothDCMotorPulses(X80Pro.MAX_PWM_L, X80Pro.MAX_PWM_R);
+		robot.setBothDCMotorPulsePercentages(100, 100);
+		robot.setBothDCMotorPulses(X80Pro.MAX_PWM_L, X80Pro.MAX_PWM_R);
 		
-		robot.setBothDCMotorVelocities(30000, 30000);
+		//robot.setBothDCMotorVelocities(400, 400);
 		
 		try
 		{
-			Thread.sleep(3000);
+			Thread.sleep(2600);
 		}
 		catch (Exception ex)
 		{

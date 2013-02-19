@@ -7,9 +7,9 @@ int main()
 	X80Pro robot;
 	X80Pro_init(&robot);
 
-	if (TRUE == robot.connect(&robot, "192.168.0.203"))
+	if (FALSE == robot.connect(&robot, "192.168.0.203"))
 	{
-		
+		return;
 	}
 
 	printf("reset head\n");
@@ -29,7 +29,8 @@ int main()
 	
 	/* halt robot */
 	printf("halt robot\n");
-	robot.suspendBothDCMotors(&robot);
+	/* robot.suspendBothDCMotors(&robot); */
+	robot.shutdown();
 	
 	return 0;
 }

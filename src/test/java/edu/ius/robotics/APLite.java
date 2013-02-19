@@ -17,7 +17,7 @@ public class APLite implements Runnable
 	{
 		this.robot = robot;
 		//resetHead();
-		velocity = 0.70; // 70%
+		velocity = 1.00; // 100% // = 0.7 // 70%
 //		heading = 0.0; // radians
 //		step = 1.0;
 //		isFullStop = true;
@@ -49,7 +49,7 @@ public class APLite implements Runnable
 			{
 				//x = Sensors.thetaIR[i];
 				x = (int)(100*robot.getSensorIRRange(i));
-				System.err.println("in if statement: robot.getSensorIRRange( " + i + "): " + irr); // range in CM
+				System.err.println("in if statement: robot.getSensorIRRange( " + i + "): " + x); // range in CM
 				//++count;
 			} // object detected
 			else
@@ -57,11 +57,11 @@ public class APLite implements Runnable
 				x = 0; // nothing seen
 			}
 			
-			if (i == 1 || i == 2)
+			if (i == 1 || i == 2) // interior IR sensors
 			{
 				F = kmid*x; // compute force from two inside sensors
 			}
-			else
+			else // exterior IR sensors
 			{
 				F = kside*x; // compute force from two outside sensors
 			}

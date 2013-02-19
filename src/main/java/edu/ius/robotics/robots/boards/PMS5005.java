@@ -1357,21 +1357,20 @@ public class PMS5005
 	public static byte[] setDCMotorControlMode(byte channel, byte controlMode)
 	{
 		byte[] packet = new byte[12];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
 		packet[3] = 0;
-		
 		packet[4] = PARAM_SET; // DID
 		packet[5] = 3; // LEN
 		packet[6] = DC_CTRL_MODE; // Subcommand
 		packet[7] = channel; // channel 0-5
-		packet[8] = controlMode; // 0 = open, 1 = closed position, 2 = closed
-									// velocity
+		packet[8] = controlMode; // 0 = open, 1 = closed position, 2 = closed // velocity
 		packet[9] = calcCRC(packet); // Checksum
-		
 		packet[10] = ETX0;
 		packet[11] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1717,20 +1716,20 @@ public class PMS5005
 		packet[4] = ALL_VELOCITY_CTRL; // DID
 		packet[5] = 15; // LEN
 		packet[6] = (byte) (v0 & 0xff); // MOTOR 1
-		packet[7] = (byte) ((v0 >> 8) & 0xff);
+		packet[7] = (byte) ((v0 >>> 8) & 0xff);
 		packet[8] = (byte) (v1 & 0xff); // MOTOR 2
-		packet[9] = (byte) ((v1 >> 8) & 0xff);
+		packet[9] = (byte) ((v1 >>> 8) & 0xff);
 		packet[10] = (byte) (v2 & 0xff); // MOTOR 3
-		packet[11] = (byte) ((v2 >> 8) & 0xff);
+		packet[11] = (byte) ((v2 >>> 8) & 0xff);
 		packet[12] = (byte) (v3 & 0xff); // MOTOR 4
-		packet[13] = (byte) ((v3 >> 8) & 0xff);
+		packet[13] = (byte) ((v3 >>> 8) & 0xff);
 		packet[14] = (byte) (v4 & 0xff); // MOTOR 5
-		packet[15] = (byte) ((v4 >> 8) & 0xff);
+		packet[15] = (byte) ((v4 >>> 8) & 0xff);
 		packet[16] = (byte) (v5 & 0xff); // MOTOR 6
-		packet[17] = (byte) ((v5 >> 8) & 0xff);
+		packet[17] = (byte) ((v5 >>> 8) & 0xff);
 		packet[18] = (byte) 0x06; // we have a flag
 		packet[19] = (byte) (timePeriod & 0xff); // time
-		packet[20] = (byte) ((timePeriod >> 8) & 0xff);
+		packet[20] = (byte) ((timePeriod >>> 8) & 0xff);
 		packet[21] = calcCRC(packet); // Checksum
 		packet[22] = ETX0;
 		packet[23] = ETX1;
@@ -1782,7 +1781,6 @@ public class PMS5005
 		packet[5] = 12; // LEN
 		packet[6] = (byte) (v0 & 0xff); // MOTOR 1
 		packet[7] = (byte) ((v0 >>> 8) & 0xff);
-		//System.err.println();
 		packet[8] = (byte) (v1 & 0xff); // MOTOR 2
 		packet[9] = (byte) ((v1 >>> 8) & 0xff);
 		packet[10] = (byte) (v2 & 0xff); // MOTOR 3
@@ -1836,7 +1834,7 @@ public class PMS5005
 	 */
 	public static byte[] setAllDCMotorPulses(short p0, short p1, short p2, short p3, short p4, short p5, short timePeriod)
 	{
-		byte[] packet = new byte[23];
+		byte[] packet = new byte[24];
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
@@ -1844,23 +1842,24 @@ public class PMS5005
 		packet[3] = 0;
 		packet[4] = ALL_PWM_CTRL; // DID
 		packet[5] = 14; // LEN
-		packet[6] = (byte) (p0 & 0xFF); // MOTOR 1
-		packet[7] = (byte) ((p0 >>> 8) & 0xFF);
-		packet[8] = (byte) (p1 & 0xFF); // MOTOR 2
-		packet[9] = (byte) ((p1 >>> 8) & 0xFF);
-		packet[10] = (byte) (p2 & 0xFF); // MOTOR 3
-		packet[11] = (byte) ((p2 >>> 8) & 0xFF);
-		packet[12] = (byte) (p3 & 0xFF); // MOTOR 4
-		packet[13] = (byte) ((p3 >>> 8) & 0xFF);
-		packet[14] = (byte) (p4 & 0xFF); // MOTOR 5
-		packet[15] = (byte) ((p4 >>> 8) & 0xFF);
-		packet[16] = (byte) (p5 & 0xFF); // MOTOR 6
-		packet[17] = (byte) ((p5 >>> 8) & 0xFF);
-		packet[18] = (byte) (timePeriod & 0xFF); // time
-		packet[19] = (byte) ((timePeriod >>> 8) & 0xFF);
-		packet[20] = calcCRC(packet); // Checksum
-		packet[21] = ETX0;
-		packet[22] = ETX1;
+		packet[6] = (byte) (p0 & 0xff); // MOTOR 1
+		packet[7] = (byte) ((p0 >>> 8) & 0xff);
+		packet[8] = (byte) (p1 & 0xff); // MOTOR 2
+		packet[9] = (byte) ((p1 >>> 8) & 0xff);
+		packet[10] = (byte) (p2 & 0xff); // MOTOR 3
+		packet[11] = (byte) ((p2 >>> 8) & 0xff);
+		packet[12] = (byte) (p3 & 0xff); // MOTOR 4
+		packet[13] = (byte) ((p3 >>> 8) & 0xff);
+		packet[14] = (byte) (p4 & 0xff); // MOTOR 5
+		packet[15] = (byte) ((p4 >>> 8) & 0xff);
+		packet[16] = (byte) (p5 & 0xff); // MOTOR 6
+		packet[17] = (byte) 0x06;
+		packet[18] = (byte) ((p5 >>> 8) & 0xff);
+		packet[19] = (byte) (timePeriod & 0xff); // time
+		packet[20] = (byte) ((timePeriod >>> 8) & 0xff);
+		packet[21] = calcCRC(packet); // Checksum
+		packet[22] = ETX0;
+		packet[23] = ETX1;
 		
 		return packet;
 	}
@@ -1883,8 +1882,6 @@ public class PMS5005
 	 *            Target PWM value (pulse width) for channel #5
 	 * @param p5
 	 *            Target PWM value (pulse width) for channel #6
-	 * @param timePeriod
-	 *            Execution time in milliseconds
 	 * 
 	 *            1) All channels (motors) will be enable automatically by the
 	 *            system when this command is received. 2) Target pulse width
@@ -1901,29 +1898,29 @@ public class PMS5005
 	public static byte[] setAllDCMotorPulses(short p0, short p1, short p2, short p3, short p4, short p5)
 	{
 		byte[] packet = new byte[21];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
 		packet[3] = 0;
-		
 		packet[4] = ALL_PWM_CTRL; // DID
 		packet[5] = 12; // LEN
-		packet[6] = (byte) (p0 & 0xFF); // MOTOR 1
-		packet[7] = (byte) ((p0 >>> 8) & 0xFF);
-		packet[8] = (byte) (p1 & 0xFF); // MOTOR 2
-		packet[9] = (byte) ((p1 >>> 8) & 0xFF);
-		packet[10] = (byte) (p2 & 0xFF); // MOTOR 3
-		packet[11] = (byte) ((p2 >>> 8) & 0xFF);
-		packet[12] = (byte) (p3 & 0xFF); // MOTOR 4
-		packet[13] = (byte) ((p3 >>> 8) & 0xFF);
-		packet[14] = (byte) (p4 & 0xFF); // MOTOR 5
-		packet[15] = (byte) ((p4 >>> 8) & 0xFF);
-		packet[16] = (byte) (p5 & 0xFF); // MOTOR 6
-		packet[17] = (byte) ((p5 >>> 8) & 0xFF);
+		packet[6] = (byte) (p0 & 0xff); // MOTOR 1
+		packet[7] = (byte) ((p0 >>> 8) & 0xff);
+		packet[8] = (byte) (p1 & 0xff); // MOTOR 2
+		packet[9] = (byte) ((p1 >>> 8) & 0xff);
+		packet[10] = (byte) (p2 & 0xff); // MOTOR 3
+		packet[11] = (byte) ((p2 >>> 8) & 0xff);
+		packet[12] = (byte) (p3 & 0xff); // MOTOR 4
+		packet[13] = (byte) ((p3 >>> 8) & 0xff);
+		packet[14] = (byte) (p4 & 0xff); // MOTOR 5
+		packet[15] = (byte) ((p4 >>> 8) & 0xff);
+		packet[16] = (byte) (p5 & 0xff); // MOTOR 6
+		packet[17] = (byte) ((p5 >>> 8) & 0xff);
 		packet[18] = calcCRC(packet); // Checksum
-		
 		packet[19] = ETX0;
 		packet[20] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1941,19 +1938,19 @@ public class PMS5005
 	public static byte[] enableServo(byte channel)
 	{
 		byte[] packet = new byte[11];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
 		packet[2] = 1;
 		packet[3] = 0;
-		
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
 		packet[6] = 0; // 0 = Enable
 		packet[7] = channel; // 6-11 SERVO
 		packet[8] = calcCRC(packet); // Checksum
-		
 		packet[9] = ETX0;
 		packet[10] = ETX1;
+		
 		return packet;
 	}
 	
