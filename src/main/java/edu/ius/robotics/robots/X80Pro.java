@@ -138,13 +138,30 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	volatile private byte[] customSensorData;
 	//private int[] powerSensorData;
 	
+	volatile private byte[][] oldMotorSensorData;
+	volatile private byte[][] oldStandardSensorData;
+	volatile private byte[][] oldCustomSensorData;
+	
+	//private boolean[] lockIRRange;
+	
 	private UDPSocket socket;
 
 	private X80Pro()
 	{
-		//this.motorSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.MOTOR_SENSOR_DATA_LENGTH];
-		//this.customSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.CUSTOM_SENSOR_DATA_LENGTH];
-		//this.standardSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.STANDARD_SENSOR_DATA_LENGTH];		
+		//lockIRRange = new boolean[NUM_IR_SENSORS];
+		
+		this.motorSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.MOTOR_SENSOR_DATA_LENGTH];
+		this.customSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.CUSTOM_SENSOR_DATA_LENGTH];
+		this.standardSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.STANDARD_SENSOR_DATA_LENGTH];
+		
+		this.oldMotorSensorData = new byte[2][];
+		this.oldCustomSensorData = new byte[2][];
+		this.oldStandardSensorData = new byte[2][];
+		
+		this.oldMotorSensorData[0] = this.motorSensorData;
+		this.oldCustomSensorData[0] = this.customSensorData;
+		this.oldStandardSensorData[0] = this.standardSensorData;
+		
 		this.attachShutdownHook();
 	}
 	
@@ -321,6 +338,8 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 				//	System.err.print(sensorData[i]);
 				//}
 				//System.err.println();
+				this.oldMotorSensorData[1] = this.oldMotorSensorData[0];
+				this.oldMotorSensorData[0] = this.motorSensorData;
 				this.motorSensorData = sensorData;
 //				System.err.print("content: ");
 //				for (int x : sensorData)
@@ -341,7 +360,22 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 					//System.err.print("DEBUG: " + sensorData[i]);
 				//}
 				//System.err.println("DEBUG: ");
+				this.oldCustomSensorData[1] = this.oldCustomSensorData[0];
+				this.oldCustomSensorData[0] = this.customSensorData;
 				this.customSensorData = sensorData;
+				/* Patch sensor behavior */
+//				for (int channel = 1; channel < 7; ++channel)
+//				{
+//					short oldestIRRange = ((short) (((oldCustomSensorData[1][2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER + 1] & 0xff) << 8) | (oldCustomSensorData[1][2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER] & 0xff)));
+//					short oldIRRange = ((short) (((oldCustomSensorData[0][2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER + 1] & 0xff) << 8) | (oldCustomSensorData[0][2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER] & 0xff)));
+//					short newIRRange = ((short) (((customSensorData[2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER + 1] & 0xff) << 8) | (customSensorData[2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER] & 0xff)));
+//					if (AD2Dis(oldestIRRange) < AD2Dis(oldIRRange) && 0.09 == AD2Dis(newIRRange))
+//					{
+//						customSensorData[2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER + 1] = (byte) (oldCustomSensorData[0][2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER + 1] & 0xff);
+//						customSensorData[2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER] = (byte) (oldCustomSensorData[0][2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER] & 0xff);
+//					}
+//				}
+
 //				System.err.print("content: ");
 //				for (int x : sensorData)
 //				{
@@ -351,8 +385,8 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 			}
 			else if (sensorData[PMS5005.DID_OFFSET] == PMS5005.GET_STANDARD_SENSOR_DATA)
 			{
-				System.err.println("-*- RECEIVED STANDARD SENSOR DATA -*-");
-				System.err.println("length: " + z);
+				//System.err.println("-*- RECEIVED STANDARD SENSOR DATA -*-");
+				//System.err.println("length: " + z);
 				//this.standardSensorData = Arrays.copyOfRange(sensorData, PMS5005.HEADER_LENGTH, sensorData.length);
 //				int c = 0;
 				//for (int i = 0, y = sensorData.length; i < y; ++i)
@@ -361,8 +395,20 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 					//System.err.print("DEBUG: " + sensorData[i]);
 				//}
 				//System.err.println("DEBUG: ");
+				this.oldStandardSensorData[1] = this.oldStandardSensorData[0];
+				this.oldStandardSensorData[0] = this.standardSensorData;
 				this.standardSensorData = sensorData;
-//				System.err.print("content: ");
+				/* Patch sensor behavior */
+				short oldestIRRange = ((short) (((oldStandardSensorData[1][PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER + 1] & 0xff) << 8) | (oldStandardSensorData[1][PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER] & 0xff)));
+				short oldIRRange = ((short) (((oldStandardSensorData[0][PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER + 1] & 0xff) << 8) | (oldStandardSensorData[0][PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER] & 0xff)));
+				short newIRRange = ((short) (((standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER + 1] & 0xff) << 8) | (standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER] & 0xff)));
+				if (AD2Dis(oldestIRRange) < AD2Dis(oldIRRange) || 0.81 == AD2Dis(oldIRRange) && 0.09 == AD2Dis(newIRRange))
+				{
+					standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER + 1] = (byte) (oldStandardSensorData[0][PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER + 1] & 0xff);
+					standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER] = (byte) (oldStandardSensorData[0][PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER + 1] & 0xff);
+				}
+
+				//				System.err.print("content: ");
 //				for (int x : sensorData)
 //				{
 //					System.err.print(x + " ");
@@ -437,12 +483,11 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		socket.send(PMS5005.setAllServoPulses((short) SERVO0_INI, (short) SERVO1_INI, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
 	}
 	
-//	public void releaseHead()
-//	{
-		// This does not release the head, it only sets the pulse width to zero, resulting in the head being forcibly lowered and kept down.
-//		System.err.println("Release Head");
-//		socket.send(PMS5005.setAllServoPulses((short) 0, (short) 0, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
-//	}
+	public void lowerHead()
+	{
+		System.err.println("Lower Head");
+		socket.send(PMS5005.setAllServoPulses((short) (SERVO0_INI/2), (short) (SERVO1_INI/2), (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
+	}
 	
 	public void resumeAllSensors()
 	{
@@ -540,7 +585,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 //		return (byte) (standardSensorData[channel + PMS5005.ULTRASONIC_OFFSET] & 0xff);
 //	}
 	
-	public double getSensorSonarRange(int channel)
+	synchronized public double getSensorSonarRange(int channel)
 	{
 		return AD2Dis ((byte) (standardSensorData[channel + PMS5005.ULTRASONIC_OFFSET_WITH_HEADER] & 0xff));
 	}
@@ -553,11 +598,11 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		{
 			//System.err.println("standardSensorData[24]: " + ((byte) (standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER+1] & 0x0f)));
 			//System.err.println("standardSensorData[25]: " + ((byte) (standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER] & 0xff)));			
-			result = AD2Dis((short) (((standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER+1] & 0x0f) << 8) | (standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER] & 0xff)));
+			result = AD2Dis((short) (((standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER + 1] & 0xff) << 8) | (standardSensorData[PMS5005.STANDARD_IR_RANGE_OFFSET_WITH_HEADER] & 0xff)));
 		}
 		else if (1 <= channel && channel < 7)
 		{
-			result = AD2Dis((short) (((customSensorData[2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER+1] & 0x0f) << 8) | (customSensorData[2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER] & 0xff)));
+			result = AD2Dis((short) (((customSensorData[2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER + 1] & 0xff) << 8) | (customSensorData[2*(channel-1) + PMS5005.CUSTOM_IR_RANGE_OFFSET_WITH_HEADER] & 0xff)));
 		}
 		
 		return result;
@@ -614,23 +659,23 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	
 	public int getSensorRefVoltage()
 	{
-		return (short) (((standardSensorData[PMS5005.REFERENCE_VOLTAGE_OFFSET_WITH_HEADER+1] & 0xff) << 8 | standardSensorData[PMS5005.REFERENCE_VOLTAGE_OFFSET_WITH_HEADER] & 0xff));
+		return (short) (((standardSensorData[PMS5005.REFERENCE_VOLTAGE_OFFSET_WITH_HEADER + 1] & 0xff) << 8 | standardSensorData[PMS5005.REFERENCE_VOLTAGE_OFFSET_WITH_HEADER] & 0xff));
 	}
 	
 	public int getSensorPotVoltage()
 	{
-		return (short) (((standardSensorData[PMS5005.POTENTIOMETER_POWER_OFFSET_WITH_HEADER+1] & 0xff) << 8 | standardSensorData[PMS5005.POTENTIOMETER_POWER_OFFSET_WITH_HEADER] & 0xff));
+		return (short) (((standardSensorData[PMS5005.POTENTIOMETER_POWER_OFFSET_WITH_HEADER + 1] & 0xff) << 8 | standardSensorData[PMS5005.POTENTIOMETER_POWER_OFFSET_WITH_HEADER] & 0xff));
 	}
 	
 	public int getSensorPot(int channel)
 	{
-		return (short) (((motorSensorData[2 * channel + PMS5005.POTENTIOMETER_SENSOR_OFFSET_WITH_HEADER+1]) << 8 | motorSensorData[2 * channel + PMS5005.POTENTIOMETER_SENSOR_OFFSET_WITH_HEADER]));
+		return (short) (((motorSensorData[2 * channel + PMS5005.POTENTIOMETER_SENSOR_OFFSET_WITH_HEADER + 1]) << 8 | motorSensorData[2 * channel + PMS5005.POTENTIOMETER_SENSOR_OFFSET_WITH_HEADER]));
 
 	}
 	
 	public int getMotorCurrent(int channel)
 	{
-		return (short) ((((motorSensorData[2 * channel + PMS5005.MOTOR_CURRENT_SENSOR_OFFSET_WITH_HEADER+1]) << 8 | motorSensorData[2 * channel + PMS5005.MOTOR_CURRENT_SENSOR_OFFSET_WITH_HEADER])) / 728.0);
+		return (short) ((((motorSensorData[2 * channel + PMS5005.MOTOR_CURRENT_SENSOR_OFFSET_WITH_HEADER + 1]) << 8 | motorSensorData[2 * channel + PMS5005.MOTOR_CURRENT_SENSOR_OFFSET_WITH_HEADER])) / 728.0);
 	}
 	
 	public int getEncoderDirection(int channel)
@@ -956,41 +1001,43 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	
 	public void setBothDCMotorPulsePercentages(int leftPulseWidth, int rightPulseWidth)
 	{
-		double translatedLeftPulseWidth = leftPulseWidth/100.0;
-		double translatedRightPulseWidth = rightPulseWidth/100.0;
+		double[] power = new double[2];
 		
-		System.err.println("translatedLeftPulseWidth: " + translatedLeftPulseWidth);
-		System.err.println("translatedRightPulseWidth: " + translatedRightPulseWidth);
+		power[L] = leftPulseWidth/100.0; // 0.0 <= x <= 1.0
+		power[R] = rightPulseWidth/100.0; // 0.0 <= x <= 1.0
+		
+		System.err.println("translatedLeftPulseWidth: " + power[L]);
+		System.err.println("translatedRightPulseWidth: " + power[R]);
 		
 		// if > 100% power output requested, cap the motor power.
-		if (1 < translatedLeftPulseWidth || 1 < translatedRightPulseWidth)
-		{
-			if (translatedLeftPulseWidth <= translatedRightPulseWidth)
-			{
-				translatedLeftPulseWidth = translatedLeftPulseWidth/translatedRightPulseWidth; 
-				translatedRightPulseWidth = 1;
-			}
-			else
-			{
-				translatedRightPulseWidth = translatedRightPulseWidth/translatedLeftPulseWidth; 
-				translatedLeftPulseWidth = 1;
-			}
-		}
+//		if (1 < translatedLeftPulseWidth || 1 < translatedRightPulseWidth)
+//		{
+//			if (translatedLeftPulseWidth <= translatedRightPulseWidth)
+//			{
+//				translatedLeftPulseWidth = translatedLeftPulseWidth/translatedRightPulseWidth; 
+//				translatedRightPulseWidth = 1;
+//			}
+//			else
+//			{
+//				translatedRightPulseWidth = translatedRightPulseWidth/translatedLeftPulseWidth; 
+//				translatedLeftPulseWidth = 1;
+//			}
+//		}
 		
-		if (0 < translatedLeftPulseWidth)
+		if (0 < power[L])
 		{
 			// 16384 + 8000 + (scaled) power[L]: increase left motor velocity.
-			translatedLeftPulseWidth = PMS5005.PWM_N + PMS5005.PWM_O + (PMS5005.DUTY_CYCLE_UNIT/3)*translatedLeftPulseWidth;
+			power[L] = PMS5005.PWM_N + PMS5005.PWM_O + power[L]*(PMS5005.DUTY_CYCLE_UNIT/3.0);
 		}
-		else if (translatedLeftPulseWidth < 0)
+		else if (power[L] < 0)
 		{
 			// 16384 - 8000 + (scaled) power[L]: reduce left motor velocity.
-			translatedLeftPulseWidth = PMS5005.PWM_N - PMS5005.PWM_O + (PMS5005.DUTY_CYCLE_UNIT/3)*translatedLeftPulseWidth; 
+			power[L] = PMS5005.PWM_N - PMS5005.PWM_O - power[L]*(PMS5005.DUTY_CYCLE_UNIT/3.0); 
 		}
 		else
 		{
 			// neutral PWM setting, 0% duty cycle, let left motor sit idle
-			translatedLeftPulseWidth = PMS5005.PWM_N;
+			power[L] = PMS5005.PWM_N;
 		}
 		
 		//if (power[L] > L_MAX_PWM)
@@ -1004,26 +1051,26 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		//	power[L] = N_PWM;
 		//}
 		
-		if (0 < translatedRightPulseWidth)
+		if (0 < power[R])
 		{
-			translatedRightPulseWidth = PMS5005.PWM_N - PMS5005.PWM_O - (PMS5005.DUTY_CYCLE_UNIT/3)*translatedRightPulseWidth; // reverse: 16384 - 8000 - power[R]
+			power[R] = PMS5005.PWM_N - PMS5005.PWM_O - power[R]*(PMS5005.DUTY_CYCLE_UNIT/3.0); // reverse: 16384 - 8000 - power[R]
 		}
-		else if (translatedRightPulseWidth < 0)
+		else if (power[R] < 0)
 		{
-			translatedRightPulseWidth = PMS5005.PWM_N + PMS5005.PWM_O - (PMS5005.DUTY_CYCLE_UNIT/3)*translatedRightPulseWidth; // reverse: 16384 + 8000 + rightPulseWidth
+			power[R] = PMS5005.PWM_N + PMS5005.PWM_O + power[R]*(PMS5005.DUTY_CYCLE_UNIT/3.0); // reverse: 16384 + 8000 + rightPulseWidth
 		}
 		else
 		{
-			translatedRightPulseWidth = PMS5005.PWM_N; // neutral PWM setting, 0% duty cycle
+			power[R] = PMS5005.PWM_N; // neutral PWM setting, 0% duty cycle
 		}
 		//if (power[R] < R_MAX_PWM) power[R] = R_MAX_PWM; // yes, < .. negative threshold @ -100% duty cycle
 		//else if (power[R] > N_PWM) power[R] = N_PWM; // stand still, 0% duty cycle
 		//robot.dcMotorPwmNonTimeCtrlAll((int)power[L], (int)power[R], NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL);
 		
-		System.err.println("translatedLeftPulseWidth: " + translatedLeftPulseWidth);
-		System.err.println("translatedRightPulseWidth: " + translatedRightPulseWidth);
+		System.err.println("translatedLeftPulseWidth: " + power[L]);
+		System.err.println("translatedRightPulseWidth: " + power[R]);
 		
-		socket.send(PMS5005.setAllDCMotorPulses((short) translatedLeftPulseWidth, (short) -translatedRightPulseWidth, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
+		socket.send(PMS5005.setAllDCMotorPulses((short) power[L], (short) power[R], (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
 	//} else Robot.DcMotorPwmNonTimeCtrAll((short)N_PWM, (short)N_PWM, NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL); Sleep(MICRO_DELAY);
 	}
 }

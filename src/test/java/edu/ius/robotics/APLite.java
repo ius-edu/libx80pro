@@ -5,7 +5,10 @@ import edu.ius.robotics.robots.X80Pro;
 import java.lang.Math;
 
 public class APLite implements Runnable
-{	
+{
+	public static final int MID_LEFT = 1;
+	public static final int MID_RIGHT = 2;
+	
 	private double velocity;
 //	private double heading;
 //	private double step;
@@ -49,7 +52,8 @@ public class APLite implements Runnable
 			{
 				//x = Sensors.thetaIR[i];
 				x = (int)(100*robot.getSensorIRRange(i));
-				System.err.println("in if statement: robot.getSensorIRRange( " + i + "): " + x); // range in CM
+				System.err.println("too close, or wide open?");
+				System.err.println("in if statement: robot.getSensorIRRange(" + i + "): " + x); // range in CM
 				//++count;
 			} // object detected
 			else
@@ -57,7 +61,7 @@ public class APLite implements Runnable
 				x = 0; // nothing seen
 			}
 			
-			if (i == 1 || i == 2) // interior IR sensors
+			if (i == MID_LEFT || i == MID_RIGHT) // interior IR sensors
 			{
 				F = kmid*x; // compute force from two inside sensors
 			}
@@ -80,12 +84,17 @@ public class APLite implements Runnable
 		//else if ((-PI < theta) && (theta < -PI/2.0)) w = -PI/4.0 - theta; // turn toward 3rd quadrant
 		//else w = theta; // turn toward 1st or 4th quadrant
 		//w = theta;
-		//if ((-PI/2.0 <= theta) && (theta <= PI/2.0)) { // if theta is in 1st or 4th quadrant
-			power[X80Pro.L] = (int)(v - v*alpha*theta); // power to left motor (v - v*alpha*w)
-			power[X80Pro.R] = (int)(v + v*alpha*theta); // power to right motor (v + v*alpha*w)
+		//if ((-PI/2.0 <= theta) && (theta <= PI/2.0)) 
+		//{ // if theta is in 1st or 4th quadrant
+		power[X80Pro.L] = (int)(v - v*alpha*theta); // power to left motor (v - v*alpha*w)
+		power[X80Pro.R] = (int)(v + v*alpha*theta); // power to right motor (v + v*alpha*w)
 			
-			power[X80Pro.L] /= Math.PI/2; // get percentage output.
-			power[X80Pro.R] /= Math.PI/2; // get percentage output.
+		power[X80Pro.L] /= Math.PI/2; // get percentage output.
+		power[X80Pro.R] /= Math.PI/2; // get percentage output.
+		//}
+		
+		power[X80Pro.L] *= 1.5;
+		power[X80Pro.R] *= 1.5;
 		
 		robot.setBothDCMotorPulsePercentages((int) power[X80Pro.L], (int) power[X80Pro.R]);
 		System.err.println("APLite.directRobot(): end");

@@ -13,7 +13,7 @@ public class UDPSocket implements Runnable
 	private IRobot iRobot;
 	
 	public static final int DEFAULT_ROBOT_PORT = 10001;
-	public static final int DEFAULT_MIN_TIME_STEP_IN_MS = 60;
+	public static final int DEFAULT_MIN_TIME_STEP_IN_MS = 80;
 	public static final int CONNECT_WAIT = 5000;
 	
 	private DatagramSocket socket;
@@ -129,9 +129,26 @@ public class UDPSocket implements Runnable
 //				ex.printStackTrace();
 //			}
 			
-			// wait synchronously for feedback from robot to be clear that we have established connection?
-			socket.setSoTimeout(CONNECT_WAIT);
-			socket.receive(rxPkt);
+			// wait synchronously for feedback from robot to be clear that we have established connection
+			try
+			{
+				socket.setSoTimeout(CONNECT_WAIT);
+				socket.receive(rxPkt);
+			}
+			catch (Exception ex)
+			{
+				try
+				{
+					Thread.sleep(2*CONNECT_WAIT);
+				}
+				catch (Exception ex2)
+				{
+					ex2.printStackTrace();
+				}
+				// wait synchronously for feedback from robot to be clear that we have established connection
+				socket.setSoTimeout(CONNECT_WAIT);
+				socket.receive(rxPkt);
+			}
 //			result = true;
 //		}
 //		catch (IOException ex)
@@ -158,12 +175,12 @@ public class UDPSocket implements Runnable
 		try
 		{
 			this.socket.send(txPkt);
-			delay(beginTime);
 		}
 		catch (IOException ioException)	
 		{
 			ioException.printStackTrace();
 		}
+		delay(beginTime);
 	}
 	
 	public void delay(long beginTime)
@@ -201,7 +218,7 @@ public class UDPSocket implements Runnable
 		{
 			try
 			{
-				socket.setSoTimeout(10);
+				socket.setSoTimeout(40);
 				socket.receive(rxPkt);
 			}
 			catch (IOException ex)
