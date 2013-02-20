@@ -26,8 +26,21 @@ public class PMS5005
 	/* Start transmission, End transmission */
 	public static final byte STX0 = 94; // 0x5e
 	public static final byte STX1 = 2; // 0x02
-	public static final byte ETX0 = 94;
-	public static final byte ETX1 = 13;
+	public static final byte ETX0 = 94; // 0x5e
+	public static final byte ETX1 = 13; // 0x13
+	
+	/* RID */
+	public static final byte RID_HOST = 0x00;
+	public static final byte RID_ROBOT = 0x01;
+
+	/* RESERVED */
+	public static final byte RESERVED = 0x00;
+	
+	/* FLAG */
+	public static final byte FLAG_VALUE = 0x06;
+	
+	/* LCD Display */
+	public static final byte FRAME_LENGTH = 64;
 	
 	/* Data ID (DID) descriptor listing */
 	public static final byte POSITION_CTRL = 3;
@@ -176,8 +189,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
@@ -210,8 +223,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
@@ -244,8 +257,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_CUSTOM_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
@@ -278,8 +291,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_ALL_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
@@ -305,8 +318,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 0; // len
 		cmd[6] = calcCRC(cmd);
@@ -331,8 +344,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_STANDARD_SENSOR_DATA;
 		cmd[5] = 0; // len
 		cmd[6] = calcCRC(cmd);
@@ -357,8 +370,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_CUSTOM_SENSOR_DATA;
 		cmd[5] = 0; // len
 		cmd[6] = calcCRC(cmd);
@@ -383,8 +396,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_ALL_SENSOR_DATA;
 		cmd[5] = 0; // len
 		cmd[6] = calcCRC(cmd);
@@ -405,8 +418,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = 0; // (byte) (0 & 0xff);
@@ -428,8 +441,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_STANDARD_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = 0; // (byte) (0 & 0xff);
@@ -451,8 +464,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_CUSTOM_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = 0; // (byte) (0 & 0xff);
@@ -474,8 +487,8 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = 1;
-		cmd[3] = 0;
+		cmd[2] = RID_ROBOT;
+		cmd[3] = RESERVED;
 		cmd[4] = GET_ALL_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = 0; // (byte) (0 & 0xff);
@@ -561,491 +574,7 @@ public class PMS5005
 		// TODO stub
 		return null;
 	}
-	
-	/**
-	 * Returns the current distance value between the relevant ultrasonic range
-	 * sensor module (DUR5200) and the object in front of it.
-	 * 
-	 * @param channel
-	 *            0, 1, 2, 3, 4 or 5 for Sonar #1 through #6.
-	 * 
-	 * @return 4 means a distance of 0 to 4 cm to object. 4 to 254 means a
-	 *         distance of 4 to 254 cm to object. 255 means 255 cm or longer
-	 *         distance to object.
-	 * 
-	 *         Please note: By default, the sensors are indexed clockwise,
-	 *         starting with the left-front sensor (robot first person
-	 *         perspective) at Sonar #1 (channel 0).
-	 */
-	/*
-	public static short getSensorSonar(short channel, int[] standardSensorAry)
-	{
-		return (byte) (standardSensorAry[channel + ULTRASONIC_OFFSET] & 0xff);
-	}
-	*/
-	
-	/**
-	 * Returns the current distance measurement value between an infrared sensor
-	 * and the object in front of it.
-	 * 
-	 * @param channel
-	 *            0, 1, 2, 3, 4 or 5 for IR #1 through #6.
-	 * 
-	 * @return <= 585 means a distance of 80 cm or longer to object. 585 to 3446
-	 *         means a distance of 80 to 8 cm to object. >= 3446 means a
-	 *         distance of 0 to 8 cm to object.
-	 * 
-	 *         Please Note: The relationship between the return data and the
-	 *         distance is not linear. Please refer to the sensor's datashee for
-	 *         distance- voltage curve. The data returned is the raw data of the
-	 *         analog to digital converter. The output voltage of the sensor can
-	 *         be calculated from the following equation: sensorOutputVoltage =
-	 *         (ival)*3.0/4095(v)
-	 */
-	/*
-	public static short getSensorIRRange(short channel, int[] standardSensorAry, int[] customSensorAry)
-	{
-		short result = -1;
-		
-		if (0 <= channel && channel < 1)
-		{
-			result = (short) (((standardSensorAry[STANDARD_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[STANDARD_IR_RANGE_OFFSET] & 0xff));
-		}
-		else
-		{
-			result = (short) (((customSensorAry[2 * (channel - 1) + CUSTOM_IR_RANGE_OFFSET + 1] & 0xff) << 8) | (customSensorAry[2 * (channel - 1)
-					+ CUSTOM_IR_RANGE_OFFSET] & 0xff));
-		}
-		
-		return result;
-	}
-	*/
-	
-	/**
-	 * Returns the current human alarm data from the DHM5150 Human Motion Sensor
-	 * Module. Please refer to the DHM5150 hardware manual for detailed
-	 * information.
-	 * 
-	 * @param channel
-	 *            0 for left, 1 for right (robot first person perspective)
-	 * 
-	 * @return the raw value from the analog to digital converter indicating the
-	 *         amplified (5x) output voltage of the sensor device. The data
-	 *         range is between 0 and 4095. When there is no human present, the
-	 *         module output voltage is ~1.5V and the return value is about
-	 *         2047.
-	 * 
-	 *         Please note: To detect human presence, the application should
-	 *         compare the difference of two samples (to detect the change from
-	 *         "absence" to "presence"), and also compare the sample data to a
-	 *         user defined threshold (to determine whether to report an alarm
-	 *         or not). The threshold determines the sensitivity of the sensor.
-	 *         The higher the threshold, the lower the sensitivity will be.
-	 */
-	/*
-	public static short getSensorHumanAlarm(short channel, int[] standardSensorAry)
-	{
-		int offset = 2 * channel + HUMAN_ALARM_OFFSET;
-		return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns the current human motion value from the DHM5150 Human Motion
-	 * Sensor Module. Please refer to the DHM5150 hardware manual for detailed
-	 * information.
-	 * 
-	 * @param channel
-	 *            0 for left, 1 for right (robot first person perspective)
-	 * 
-	 * @return the un-amplified raw value of the analog to digital converter
-	 *         indicating the output voltage of the sensor device. The data
-	 *         ranges between 0 and 4095.
-	 * 
-	 *         Please note: To detect human motion direction, the application
-	 *         should compare the difference of two samples of each sensor
-	 *         module's output (to detect the change from "absence" to
-	 *         "presence"), and then compare the sample data of the two sensor
-	 *         modules. For a single source of human motion, the different
-	 *         patterns of the two sensor modules manifest the direction of
-	 *         motion. The relationship can be obtained empirically.
-	 */
-	/*
-	public static short getSensorHumanMotion(short channel, int[] standardSensorAry)
-	{
-		int offset = 2 * channel + HUMAN_MOTION_OFFSET;
-		return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns the current tilt angle value in the horizontal direction from the
-	 * DTA5102 Tilting and Acceleration Sensor Module.
-	 * 
-	 * @return Tilting Angle = arcsin((ival - ZeroGValue)/abs(90DegreeGValue -
-	 *         ZeroGValue)); Where 90DegreeGValue and ZeroGValue are
-	 *         module-specific values that can be measured by experiment: 1)
-	 *         Place the sensor level, so that the gravity vector is
-	 *         perpendicular to the measured sensor axis. 2) Take the
-	 *         measurement and this value would be the ZeroGValue. 3) Rotate the
-	 *         sensor so that the gravity vector is parallel with the measured
-	 *         axis. 4) Take the measurement and this value would be the
-	 *         90DegreeGValue. 5) Repeat this step for the other direction.
-	 *         Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue
-	 *         - ZeroGValue) is about 1250.
-	 */
-	/*
-	public static short getSensorTiltingX(int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[TILTING_X_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TILTING_X_OFFSET] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns the current tilt angle value in the vertical direction from the
-	 * DTA5102 Tilting and Acceleration Sensor Module.
-	 * 
-	 * @return Tilting Angle = arcsin((ival - ZeroGValue)/abs(90DegreeGValue -
-	 *         ZeroGValue)); Where 90DegreeGValue and ZeroGValue are
-	 *         module-specific values that can be measured by experiment: 1)
-	 *         Place the sensor level, so that the gravity vector is
-	 *         perpendicular to the measured sensor axis. 2) Take the
-	 *         measurement and this value would be the ZeroGValue. 3) Rotate the
-	 *         sensor so that the gravity vector is parallel with the measured
-	 *         axis. 4) Take the measurement and this value would be the
-	 *         90DegreeGValue. 5) Repeat this step for the other direction.
-	 *         Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue
-	 *         - ZeroGValue) is about 1250.
-	 */
-	/*
-	public static short getSensorTiltingY(int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[TILTING_Y_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TILTING_Y_OFFSET] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns the current air temperature values near the relevant DC motor
-	 * drive modules (MDM5253).
-	 * 
-	 * The current air temperature values could be used for monitoring whether
-	 * the motor drivers are overheating or not. This situation usually occurs
-	 * if the motor currents are kept high (but still lower than the current
-	 * limit of the motor driver module) for a significant amount of time, which
-	 * may result in unfavorable inner or external system conditions and is not
-	 * recommended for regular system operations.
-	 * 
-	 * @param channel
-	 *            0 for left, 1 for right (robot first person perspective)
-	 * 
-	 * @return The raw value of the analog to digital converter indicating the
-	 *         output voltage of the sensor. The data range of the return value
-	 *         is between 0 and 4095. The output voltage of the sensor can be
-	 *         calculated from the following equation: Temperature = 100 - (ival
-	 *         - 980)/11.6 where Temperature is in degrees Celsius.
-	 */
-	/*
-	public static short getSensorOverheat(short channel, int[] standardSensorAry)
-	{
-		int offset = 2 * channel + OVERHEAT_SENSOR_OFFSET;
-		return (short) (((standardSensorAry[offset + 1] & 0xff) << 8) | (standardSensorAry[offset] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns the current temperature value from the DA5280 Ambient Temperature
-	 * Sensor Module.
-	 * 
-	 * @return Temperature = (ival - 1256) / 34.8, where Temperature is in
-	 *         degrees Celsius.
-	 */
-	/*
-	public static short getSensorTemperature(int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[TEMPERATURE_AD_OFFSET + 1] & 0xff) << 8) | (standardSensorAry[TEMPERATURE_AD_OFFSET] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns the four parts of a two-16-bit-code infrared remote control
-	 * command captured by the Sensing and Motion Controller (PMS5005) through
-	 * the Infrared Remote Controller Module (MIR5500).
-	 * 
-	 * @param index
-	 *            Refers to byte 0, 1, 2, or 3. See return value for details
-	 * 
-	 * @return The infrared remote control command (4 byte code) is as follows:
-	 *         Key Code: byte[2] byte[1] byte[0] Repeat Code: byte[3] Where the
-	 *         repeat byte would be 255 if the button is pressed continuously
-	 */
-	/*
-	public static short getSensorIRCode(short index, int[] standardSensorAry)
-	{
-		return (short) standardSensorAry[INFRARED_COMMAND_OFFSET + index];
-	}
-	*/
-	
-	/**
-	 * Sends two 16-bit words of infrared communication output data to the
-	 * Sensing and Motion Controller (PMS5005).
-	 * 
-	 * The PMS5005 will then send the data out through the infrared Remote
-	 * Controller Module (MIR5500). In the case it is used as an infrared remote
-	 * control, the output data serves as the remote control command.
-	 * 
-	 * @param lowWord
-	 *            First word
-	 * @param highWord
-	 *            Second word
-	 * 
-	 *            Please note: 1) With infrared communication, the data format
-	 *            and interpretation can be defined by the user at the
-	 *            application level. 2) The control command should be compatible
-	 *            with the device to which the command is sent. 3) This API
-	 *            method is under development and will be available soon.
-	 */
-	/*
-	public static byte[] setInfraredControlOutput(short lowWord, short highWord)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	*/
-	
-	/**
-	 * Returns the current value of the power supply voltage for the channel
-	 * specified.
-	 * 
-	 * Returns the current value of the relevant power supply voltage if the
-	 * battery voltage monitor is enabled (default). If the battery voltage
-	 * monitor is disabled, this method returns the relevant custom A/D inputs,
-	 * if the custom A/D input is enabled -- which may be configured by the
-	 * jumpers on the PMS5005 board. Please refer to the PMS5005 Robot Sensing
-	 * and Motion Controller User Manual for detailed information on hardware
-	 * settings.
-	 * 
-	 * @param channel
-	 *            0 -- battery of DSP circuits (or custom A/D channel #1)
-	 *            channel 1 -- battery of DC motors (or custom A/D channel #2)
-	 *            channel 2 -- battery for servo motors (or custom A/D channel
-	 *            #3)
-	 * 
-	 * @return The raw value of the analog to digital converter indicating the
-	 *         output voltage of the monitor. The data range is between 0 and
-	 *         4095
-	 * 
-	 *         Please note: When monitoring the voltage of the power supply, the
-	 *         following equations can be used to calculate the real voltage
-	 *         values. 1) Power supply voltage of DSP circuits = 9v*(ival/4095)
-	 *         2) Power supply voltage of DC motors = 24v*(ival/4095) 3) Power
-	 *         supply voltage of servo motors = 9v*(ival/4095)
-	 */
-	/*
-	public static short getSensorBatteryAD(short channel, int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[2 * channel + BATTERY_SENSOR_OFFSET + 1] & 0xff) << 8 | standardSensorAry[2 * channel
-				+ BATTERY_SENSOR_OFFSET] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns the current value of the reference voltage of the A/D converter
-	 * of the controller DSP.
-	 * 
-	 * @return The raw value of the analog to digital converter indicating the
-	 *         output voltage of the monitor. The data range is between 0 and
-	 *         4095. The following equation can be used to calculate the actual
-	 *         voltage values: Voltage = 6v*(ival/4095)
-	 */
-	/*
-	public static short getSensorRefVoltage(int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[REFERENCE_VOLTAGE_OFFSET + 1] & 0xff) << 8 | standardSensorAry[REFERENCE_VOLTAGE_OFFSET] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns the current value of the reference voltage of the A/D converter
-	 * of the controller DSP.
-	 * 
-	 * @return The raw value of the analog to digital converter indicating the
-	 *         output voltage of the monitor. The data range is between 0 and
-	 *         4095. The following equation can be used to calculate the actual
-	 *         voltage values: Voltage = 6v*(ival/4095)
-	 */
-	/*
-	public static short getSensorPotVoltage(int[] standardSensorAry)
-	{
-		return (short) (((standardSensorAry[POTENTIOMETER_POWER_OFFSET + 1] & 0xff) << 8 | standardSensorAry[POTENTIOMETER_POWER_OFFSET] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns the current value of the specified potentiometer position sensor
-	 * 
-	 * @param channel
-	 *            0, 1, 2, 3, 4, or 5 for Potentiometer sensor #1 through 6
-	 * 
-	 * @return The raw value given by the analog to digital converter indicating
-	 *         the output voltage of the sensor. The data range is between 0 and
-	 *         4095. The angular position can be calculated as follows, with the
-	 *         180 degree position defind at the sensors' physical middle
-	 *         position. Single sensor or dual sensor can be used for rotation
-	 *         measurement.
-	 * 
-	 *         Please note: 1) Single sensor mode is mainly used for the control
-	 *         of a robot joshort with a limited rotation range. The effective
-	 *         mechanical rotation range is 14 degrees to 346 degrees,
-	 *         corresponding to the effective electrical rotation range 0
-	 *         degrees to 332 degrees. Angle position (degrees) = (ival -
-	 *         2048)/4095*333 + 180 2) Dual-sensor mode is mainly used for
-	 *         continuous rotating joshort control (e.g. a wheel). The effective
-	 *         rotation range is 0 degrees to 360 degrees. Dual
-	 *         sensorconfiguration is only available for channel 0 and channel
-	 *         1. By connecting two potentiometers to potentiometer channel 0
-	 *         and channel 5, and by specifying the sensor type with command
-	 *         setDCMotorSensorUsage set to "Dual potentiometer sensor" the
-	 *         channel 0 reading will combine these two sensor readings into 0
-	 *         degrees to 360 degree range. For channel 1, channel 1 and channel
-	 *         4 would be combined instead. Angle position (degrees) = (ival -
-	 *         2214)/2214*180 + 180
-	 * 
-	 * @see setDCMotorSensorUsage
-	 */
-	/*
-	public static short getSensorPot(short channel, int[] motorSensorAry)
-	{
-		return (short) (((motorSensorAry[2 * channel + POTENTIOMETER_SENSOR_OFFSET] + 1) << 8 | motorSensorAry[2 * channel
-				+ POTENTIOMETER_SENSOR_OFFSET]));
-	}
-	*/
-	
-	/**
-	 * Returns the sampling value of the selected motor current sensor.
-	 * 
-	 * @param channel
-	 *            0, 1, 2, 3, 4, or 5 for sensor #1, #2, #3, #4, #5, or #6.
-	 * 
-	 * @return The raw value of the analog to digital converter indicating the
-	 *         motor current. The data range is between 0 and 4095. The actual
-	 *         current value can be calculated with the following formula: Motor
-	 *         Current (amperes) = ival/728 ( = ival*3*375/200/4095)
-	 */
-	/*
-	public static short getMotorCurrent(short channel, int[] motorSensorAry)
-	{
-		return (short) ((((motorSensorAry[2 * channel + MOTOR_CURRENT_SENSOR_OFFSET + 1]) << 8 | motorSensorAry[2 * channel
-				+ MOTOR_CURRENT_SENSOR_OFFSET])) / 728.0);
-	}
-	*/
-	
-	/**
-	 * Returns +1, 0, or -1 to indicate the direction of rotation.
-	 * 
-	 * @param channel
-	 *            0 for left encoder, 1 for right encoder (robot first person
-	 *            perspective).
-	 * 
-	 * @return 1 to indicate positive direction, 0 to indicate no movement, and
-	 *         -1 to indicate negative direction.
-	 */
-	/*
-	public static short getEncoderDirection(short channel, int[] motorSensorAry)
-	{
-		int offset = channel + ENCODER_DIRECTION_OFFSET;
-		short result = -1;
-		
-		switch (channel)
-		{
-		case 0:
-			result = (short) (motorSensorAry[offset] & 0x01);
-			break;
-		case 1:
-			result = (short) (motorSensorAry[offset] & 0x03);
-			break;
-		}
-		
-		return result;
-	}
-	*/
-	
-	/**
-	 * Returns the current pulse counter to indicate the position of rotation.
-	 * 
-	 * @param channel
-	 *            0 for left encoder, 1 for right encoder (robot first person
-	 *            perspective).
-	 * 
-	 * @return Pulse counter, an short integral value to rotation with range of
-	 *         0 to 32767 in cycles.
-	 */
-	/*
-	public static short getEncoderPulse(short channel, int[] motorSensorAry)
-	{
-		int offset = 4 * channel + ENCODER_PULSE_OFFSET;
-		return (short) (((motorSensorAry[offset + 1] & 0xff) << 8) | (motorSensorAry[offset] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns the rotation speed. The unit is defined as the absolute value of
-	 * the pulse change within 1 second.
-	 * 
-	 * @param channel
-	 *            0 for left encoder, 1 for right encoder (robot first person
-	 *            perspective).
-	 * 
-	 * @see setDCMotorSensorUsage
-	 */
-	/*
-	public static short getEncoderSpeed(short channel, int[] motorSensorAry)
-	{
-		int offset = 4 * channel + MOTOR_SPEED_OFFSET;
-		return (short) (((motorSensorAry[offset + 1] & 0xff) << 8) | (motorSensorAry[offset] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns the sampling value of the custom analog to digital input signals.
-	 * By default, custom AD1 - AD3 are used as the inputs of power supply
-	 * voltage monitors for DSP circuits, DC motors, and servo motors. Users may
-	 * change this setting by configuring the jumpers on the PMS5005. Please
-	 * refer to the PMS5005 Robot Sensing and Motion Controller hardware user's
-	 * manual for detailed information on hardware jumper settings.
-	 * 
-	 * @param channel
-	 *            0, 1, 2, 3, 4, 5, 6, or 7 for channel #1 through #8
-	 * 
-	 * @return The raw value from the analog to digital converter indicating the
-	 *         input voltage levels. The data range is between 0 and 4095. The
-	 *         voltage levels can be calculated from the following equation:
-	 *         Sensor output voltage = (ival) * 3.0v/4095
-	 * 
-	 * @see getSensorBatteryAd
-	 */
-	/*
-	public static short getCustomAD(short channel, int[] customSensorAry)
-	{
-		int offset = 2 * channel + CUSTOM_AD_OFFSET;
-		return (short) (((customSensorAry[offset + 1] & 0xff) << 8) | (customSensorAry[offset] & 0xff));
-	}
-	*/
-	
-	/**
-	 * Returns a value with the lower 8 bits corresponding to the 8 channel
-	 * custom digital inputs.
-	 * 
-	 * @param channel
-	 *            0, 1, 2, 3, 4, 5, 6, or 7 for channel #1 through #8.
-	 */
-	/*
-	public static short getCustomDIn(byte channel, int[] customSensorAry)
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	*/
-	
+
 	/**
 	 * Sets the 8-channel custom digital outputs.
 	 * 
@@ -1080,20 +609,20 @@ public class PMS5005
 	public static byte[] setMotorPolarity(byte channel, byte polarity)
 	{
 		byte[] packet = new byte[12];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = PARAM_SET; // DID
-		packet[5] = 5; // LEN
+		packet[5] = 3; // LEN
 		packet[6] = DC_SENSOR_USAGE; // Subcommand
 		packet[7] = channel; // 0-L | 1=R
 		packet[8] = polarity; // polarity 1 | -1
 		packet[9] = calcCRC(packet); // Checksum
-		
 		packet[10] = ETX0;
-		packet[11] = ETX0;
+		packet[11] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1110,19 +639,19 @@ public class PMS5005
 	public static byte[] enableDCMotor(byte channel)
 	{
 		byte[] packet = new byte[11];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
 		packet[6] = 1; // 1 = Enable/Resume
 		packet[7] = channel; // 0=L | 1=R
 		packet[8] = calcCRC(packet); // Checksum
-		
 		packet[9] = ETX0;
 		packet[10] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1139,19 +668,19 @@ public class PMS5005
 	public static byte[] disableDCMotor(byte channel)
 	{
 		byte[] packet = new byte[11];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
 		packet[6] = 0; // 0 = Disable/Suspend
 		packet[7] = channel; // 0=L | 1=R
 		packet[8] = calcCRC(packet); // Checksum
-		
 		packet[9] = ETX0;
 		packet[10] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1167,15 +696,13 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
 		packet[6] = 1; // resume
 		packet[7] = channel; // 0=L | 1=R
 		packet[8] = calcCRC(packet); // Checksum
-		
 		packet[9] = ETX0;
 		packet[10] = ETX1;
 		
@@ -1193,19 +720,19 @@ public class PMS5005
 	public static byte[] suspendDCMotor(byte channel)
 	{
 		byte[] packet = new byte[11];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
 		packet[6] = 0; // SUSPEND
 		packet[7] = channel; // 0=L | 1=R
 		packet[8] = calcCRC(packet); // Checksum
-		
 		packet[9] = ETX0;
 		packet[10] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1229,56 +756,56 @@ public class PMS5005
 	public static byte[] setDCMotorPositionControlPID(byte channel, short kp, short kd, short ki)
 	{
 		byte[] packet = new byte[20];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = PARAM_SET; // DID
 		packet[5] = 11; // LEN
 		packet[6] = DC_POSITION_PID; // Subcommand
 		packet[7] = channel; // 0=L | 1=R
 		packet[8] = KP_ID; // Proportional gain
 		packet[9] = (byte) (kp & 0xff);
-		packet[10] = (byte) ((kp >>> 8) & 0xff);
+		packet[10] = (byte) (kp >>> 8 & 0xff);
 		packet[11] = KD_ID; // Derivative gain
 		packet[12] = (byte) (kd & 0xff);
-		packet[13] = (byte) ((kd >>> 8) & 0xff);
+		packet[13] = (byte) (kd >>> 8 & 0xff);
 		packet[14] = KI_ID; // Integral gain
 		packet[15] = (byte) (ki & 0xff);
-		packet[16] = (byte) ((ki >>> 8) & 0xff);
+		packet[16] = (byte) (ki >>> 8 & 0xff);
 		packet[17] = calcCRC(packet); // Checksum
-		
 		packet[18] = ETX0;
 		packet[19] = ETX1;
+		
 		return packet;
 	}
 	
 	public static byte[] setDCMotorVelocityControlPID(byte channel, int kp, int kd, int ki)
 	{
 		byte[] packet = new byte[20];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = PARAM_SET; // DID
 		packet[5] = 11; // LEN
 		packet[6] = DC_VELOCITY_PID; // Subcommand
 		packet[7] = channel; // 0=L | 1=R
 		packet[8] = KP_ID; // Proportional gain
 		packet[9] = (byte) (kp & 0xff);
-		packet[10] = (byte) ((kp >>> 8) & 0xff);
+		packet[10] = (byte) (kp >>> 8 & 0xff);
 		packet[11] = KD_ID; // Derivative gain
 		packet[12] = (byte) (kd & 0xff);
-		packet[13] = (byte) ((kd >>> 8) & 0xff);
+		packet[13] = (byte) (kd >>> 8 & 0xff);
 		packet[14] = KI_ID; // Integral gain
 		packet[15] = (byte) (ki & 0xff);
-		packet[16] = (byte) ((ki >>> 8) & 0xff);
+		packet[16] = (byte) (ki >>> 8 & 0xff);
 		packet[17] = calcCRC(packet); // Checksum
-		
 		packet[18] = ETX0;
 		packet[19] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1322,20 +849,20 @@ public class PMS5005
 	public static byte[] setDCMotorSensorUsage(byte channel, byte sensorType)
 	{
 		byte[] packet = new byte[12];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = PARAM_SET; // DID
-		packet[5] = 5; // LEN
+		packet[5] = 3; // LEN
 		packet[6] = DC_SENSOR_USAGE; // Subcommand
 		packet[7] = channel; // 0-5 = Single Potentiometer, 0-2 = Dual Potentiometer, 0-1 = Encoder
 		packet[8] = sensorType; // 0x00 = Single Potentiometer, 0x01 = Dual Potentiometer, 0x02 = Encoder
 		packet[9] = calcCRC(packet); // Checksum
-		
 		packet[10] = ETX0;
-		packet[11] = ETX0;
+		packet[11] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1360,8 +887,8 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = PARAM_SET; // DID
 		packet[5] = 3; // LEN
 		packet[6] = DC_CTRL_MODE; // Subcommand
@@ -1391,22 +918,22 @@ public class PMS5005
 	public static byte[] setDCMotorPosition(byte channel, short pos, short timePeriod)
 	{
 		byte[] packet = new byte[14];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = POSITION_CTRL; // DID
 		packet[5] = 5; // LEN
 		packet[6] = channel; // Channel 0-5
-		packet[7] = (byte) (pos & 0xFF); // cmdValue
-		packet[8] = (byte) ((pos >>> 8) & 0xFF);
-		packet[9] = (byte) (timePeriod & 0xFF); // time
-		packet[10] = (byte) ((timePeriod >>> 8) & 0xFF);
+		packet[7] = (byte) (pos & 0xff); // cmdValue
+		packet[8] = (byte) (pos >>> 8 & 0xff);
+		packet[9] = (byte) (timePeriod & 0xff); // time
+		packet[10] = (byte) (timePeriod >>> 8 & 0xff);
 		packet[11] = calcCRC(packet); // Checksum
-		
 		packet[12] = ETX0;
 		packet[13] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1435,20 +962,20 @@ public class PMS5005
 	public static byte[] setDCMotorPosition(byte channel, short pos)
 	{
 		byte[] packet = new byte[12];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = POSITION_CTRL; // DID
 		packet[5] = 3; // LEN
 		packet[6] = channel; // channel 0-5
-		packet[7] = (byte) (pos & 0xFF); // cmdValue
-		packet[8] = (byte) ((pos >>> 8) & 0xFF);
+		packet[7] = (byte) (pos & 0xff); // cmdValue
+		packet[8] = (byte) (pos >>> 8 & 0xff);
 		packet[9] = calcCRC(packet); // Checksum
-		
 		packet[10] = ETX0;
 		packet[11] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1470,10 +997,10 @@ public class PMS5005
 	 *            width value range is 0 to 32767 (0x7FFF), corresponding to the
 	 *            duty cycle of 0 to 100% linearly. 3) A pulse width value of
 	 *            16383 means 50% duty cycle, putting the motor in the stop
-	 *            (neutral) stage. Any value in between 16384 - 32767 will cause
+	 *            (neutral) stage. Any value in between 16384 -> 32767 will cause
 	 *            the motor to turn clockwise (facing the front side of the
-	 *            motor) and any value in between 0 - 16362 will cause the motor
-	 *            to turn counter-clockwise.
+	 *            motor) and any value in between 16362 -> 0 will cause the motor
+	 *            to turn counter-clockwise. 16383 is neutral.
 	 * 
 	 */
 	public static byte[] setDCMotorPulse(byte channel, short pulseWidth, short timePeriod)
@@ -1482,16 +1009,16 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = PWM_CTRL; // DID
 		packet[5] = 6; // LEN
 		packet[6] = channel; // Channel 0-5
 		packet[7] = (byte) (pulseWidth & 0xff); // cmdValue
-		packet[8] = (byte) ((pulseWidth >> 8) & 0x0f);
-		packet[9] = (byte) 0x06; // we have a flag
+		packet[8] = (byte) (pulseWidth >>> 8 & 0xff);
+		packet[9] = (byte) FLAG_VALUE; // we have a flag
 		packet[10] = (byte) (timePeriod & 0xff); // time
-		packet[11] = (byte) ((timePeriod >> 8) & 0x0f);
+		packet[11] = (byte) (timePeriod >>> 8 & 0xff);
 		packet[12] = calcCRC(packet); // Checksum
 		packet[13] = ETX0;
 		packet[14] = ETX1;
@@ -1516,10 +1043,10 @@ public class PMS5005
 	 *            width value range is 0 to 32767 (0x7FFF), corresponding to the
 	 *            duty cycle of 0 to 100% linearly. 3) A pulse width value of
 	 *            16383 means 50% duty cycle, putting the motor in the "Stop"
-	 *            stage. Any value between 16364 - 32767 will cause the motor to
+	 *            stage. Any value between 16364 -> 32767 will cause the motor to
 	 *            turn clockwise (facing the front side of the motor) and any
-	 *            value in between 0 - 16362 will cause the motor to turn
-	 *            counter-clockwise.
+	 *            value in between 16362 -> 0  will cause the motor to turn
+	 *            counter-clockwise. 16383 is neutral.
 	 * 
 	 * @see DCMotorPwmTimeCtrl
 	 */
@@ -1529,13 +1056,13 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = PWM_CTRL; // DID
 		packet[5] = 3; // LEN
 		packet[6] = channel; // Channel 0-5
 		packet[7] = (byte) (pulseWidth & 0xff); // cmdValue
-		packet[8] = (byte) ((pulseWidth >> 8) & 0x0f);
+		packet[8] = (byte) (pulseWidth >>> 8 & 0xff);
 		packet[9] = calcCRC(packet); // Checksum
 		packet[10] = ETX0;
 		packet[11] = ETX1;
@@ -1581,31 +1108,31 @@ public class PMS5005
 	public static byte[] setAllDCMotorPositions(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
 	{
 		byte[] packet = new byte[23];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = ALL_POSITION_CTRL; // DID
 		packet[5] = 14; // LEN
 		packet[6] = (byte) (pos1 & 0xff); // channel 1
-		packet[7] = (byte) ((pos1 >>> 8) & 0xff);
+		packet[7] = (byte) (pos1 >>> 8 & 0xff);
 		packet[8] = (byte) (pos2 & 0xff); // channel 2
-		packet[9] = (byte) ((pos2 >>> 8) & 0xff);
+		packet[9] = (byte) (pos2 >>> 8 & 0xff);
 		packet[10] = (byte) (pos3 & 0xff); // channel 3
-		packet[11] = (byte) ((pos3 >>> 8) & 0xff);
+		packet[11] = (byte) (pos3 >>> 8 & 0xff);
 		packet[12] = (byte) (pos4 & 0xff); // channel 4
-		packet[13] = (byte) ((pos4 >>> 8) & 0xff);
+		packet[13] = (byte) (pos4 >>> 8 & 0xff);
 		packet[14] = (byte) (pos5 & 0xff); // channel 5
-		packet[15] = (byte) ((pos5 >>> 8) & 0xff);
+		packet[15] = (byte) (pos5 >>> 8 & 0xff);
 		packet[16] = (byte) (pos6 & 0xff); // channel 6
-		packet[17] = (byte) ((pos6 >>> 8) & 0xff);
+		packet[17] = (byte) (pos6 >>> 8 & 0xff);
 		packet[18] = (byte) (timePeriod & 0xff); // time
-		packet[19] = (byte) ((timePeriod >>> 8) & 0x0ff);
+		packet[19] = (byte) (timePeriod >>> 8 & 0xff);
 		packet[20] = calcCRC(packet); // Checksum
-		
 		packet[21] = ETX0;
 		packet[22] = ETX1;
+		
 		return packet;
 	}
 	
@@ -1649,22 +1176,22 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = ALL_POSITION_CTRL; // DID
 		packet[5] = 12; // LEN
 		packet[6] = (byte) (pos1 & 0xff); // channel 1
-		packet[7] = (byte) ((pos1 >>> 8) & 0xff);
+		packet[7] = (byte) (pos1 >>> 8 & 0xff);
 		packet[8] = (byte) (pos2 & 0xff); // channel 2
-		packet[9] = (byte) ((pos2 >>> 8) & 0xff);
+		packet[9] = (byte) (pos2 >>> 8 & 0xff);
 		packet[10] = (byte) (pos3 & 0xff); // channel 3
-		packet[11] = (byte) ((pos3 >>> 8) & 0xff);
+		packet[11] = (byte) (pos3 >>> 8 & 0xff);
 		packet[12] = (byte) (pos4 & 0xff); // channel 4
-		packet[13] = (byte) ((pos4 >>> 8) & 0xff);
+		packet[13] = (byte) (pos4 >>> 8 & 0xff);
 		packet[14] = (byte) (pos5 & 0xff); // channel 5
-		packet[15] = (byte) ((pos5 >>> 8) & 0xff);
+		packet[15] = (byte) (pos5 >>> 8 & 0xff);
 		packet[16] = (byte) (pos6 & 0xff); // channel 6
-		packet[17] = (byte) ((pos6 >>> 8) & 0xff);
+		packet[17] = (byte) (pos6 >>> 8 & 0xff);
 		packet[18] = calcCRC(packet); // Checksum
 		packet[19] = ETX0;
 		packet[20] = ETX1;
@@ -1707,32 +1234,31 @@ public class PMS5005
 	 */
 	public static byte[] setAllDCMotorVelocities(short v0, short v1, short v2, short v3, short v4, short v5, short timePeriod)
 	{
-		byte[] packet = new byte[24];
+		byte[] packet = new byte[23];
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = ALL_VELOCITY_CTRL; // DID
-		packet[5] = 15; // LEN
+		packet[5] = 14; // LEN
 		packet[6] = (byte) (v0 & 0xff); // MOTOR 1
-		packet[7] = (byte) ((v0 >>> 8) & 0xff);
+		packet[7] = (byte) (v0 >>> 8 & 0xff);
 		packet[8] = (byte) (v1 & 0xff); // MOTOR 2
-		packet[9] = (byte) ((v1 >>> 8) & 0xff);
+		packet[9] = (byte) (v1 >>> 8 & 0xff);
 		packet[10] = (byte) (v2 & 0xff); // MOTOR 3
-		packet[11] = (byte) ((v2 >>> 8) & 0xff);
+		packet[11] = (byte) (v2 >>> 8 & 0xff);
 		packet[12] = (byte) (v3 & 0xff); // MOTOR 4
-		packet[13] = (byte) ((v3 >>> 8) & 0xff);
+		packet[13] = (byte) (v3 >>> 8 & 0xff);
 		packet[14] = (byte) (v4 & 0xff); // MOTOR 5
-		packet[15] = (byte) ((v4 >>> 8) & 0xff);
+		packet[15] = (byte) (v4 >>> 8 & 0xff);
 		packet[16] = (byte) (v5 & 0xff); // MOTOR 6
-		packet[17] = (byte) ((v5 >>> 8) & 0xff);
-		packet[18] = (byte) 0x06; // we have a flag
-		packet[19] = (byte) (timePeriod & 0xff); // time
-		packet[20] = (byte) ((timePeriod >>> 8) & 0xff);
-		packet[21] = calcCRC(packet); // Checksum
-		packet[22] = ETX0;
-		packet[23] = ETX1;
+		packet[17] = (byte) (v5 >>> 8 & 0xff);
+		packet[18] = (byte) (timePeriod & 0xff); // time
+		packet[19] = (byte) (timePeriod >>> 8 & 0xff);
+		packet[20] = calcCRC(packet); // Checksum
+		packet[21] = ETX0;
+		packet[22] = ETX1;
 		
 		return packet;
 	}
@@ -1775,22 +1301,22 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = ALL_VELOCITY_CTRL; // DID
 		packet[5] = 12; // LEN
 		packet[6] = (byte) (v0 & 0xff); // MOTOR 1
-		packet[7] = (byte) ((v0 >>> 8) & 0xff);
+		packet[7] = (byte) (v0 >>> 8 & 0xff);
 		packet[8] = (byte) (v1 & 0xff); // MOTOR 2
-		packet[9] = (byte) ((v1 >>> 8) & 0xff);
+		packet[9] = (byte) (v1 >>> 8 & 0xff);
 		packet[10] = (byte) (v2 & 0xff); // MOTOR 3
-		packet[11] = (byte) ((v2 >>> 8) & 0xff);
+		packet[11] = (byte) (v2 >>> 8 & 0xff);
 		packet[12] = (byte) (v3 & 0xff); // MOTOR 4
-		packet[13] = (byte) ((v3 >>> 8) & 0xff);
+		packet[13] = (byte) (v3 >>> 8 & 0xff);
 		packet[14] = (byte) (v4 & 0xff); // MOTOR 5
-		packet[15] = (byte) ((v4 >>> 8) & 0xff);
+		packet[15] = (byte) (v4 >>> 8 & 0xff);
 		packet[16] = (byte) (v5 & 0xff); // MOTOR 6
-		packet[17] = (byte) ((v5 >>> 8) & 0xff);
+		packet[17] = (byte) (v5 >>> 8 & 0xff);
 		//packet[18] = (byte) 0x06; // we have a flag?
 		packet[18] = calcCRC(packet); // Checksum
 		packet[19] = ETX0;
@@ -1834,32 +1360,31 @@ public class PMS5005
 	 */
 	public static byte[] setAllDCMotorPulses(short p0, short p1, short p2, short p3, short p4, short p5, short timePeriod)
 	{
-		byte[] packet = new byte[24];
+		byte[] packet = new byte[23];
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = ALL_PWM_CTRL; // DID
 		packet[5] = 14; // LEN
 		packet[6] = (byte) (p0 & 0xff); // MOTOR 1
-		packet[7] = (byte) ((p0 >>> 8) & 0xff);
+		packet[7] = (byte) (p0 >>> 8 & 0xff);
 		packet[8] = (byte) (p1 & 0xff); // MOTOR 2
-		packet[9] = (byte) ((p1 >>> 8) & 0xff);
+		packet[9] = (byte) (p1 >>> 8 & 0xff);
 		packet[10] = (byte) (p2 & 0xff); // MOTOR 3
-		packet[11] = (byte) ((p2 >>> 8) & 0xff);
+		packet[11] = (byte) (p2 >>> 8 & 0xff);
 		packet[12] = (byte) (p3 & 0xff); // MOTOR 4
-		packet[13] = (byte) ((p3 >>> 8) & 0xff);
+		packet[13] = (byte) (p3 >>> 8 & 0xff);
 		packet[14] = (byte) (p4 & 0xff); // MOTOR 5
-		packet[15] = (byte) ((p4 >>> 8) & 0xff);
+		packet[15] = (byte) (p4 >>> 8 & 0xff);
 		packet[16] = (byte) (p5 & 0xff); // MOTOR 6
-		packet[17] = (byte) 0x06;
-		packet[18] = (byte) ((p5 >>> 8) & 0xff);
-		packet[19] = (byte) (timePeriod & 0xff); // time
-		packet[20] = (byte) ((timePeriod >>> 8) & 0xff);
-		packet[21] = calcCRC(packet); // Checksum
-		packet[22] = ETX0;
-		packet[23] = ETX1;
+		packet[17] = (byte) (p5 >>> 8 & 0xff);
+		packet[18] = (byte) (timePeriod & 0xff); // time
+		packet[19] = (byte) (timePeriod >>> 8 & 0xff);
+		packet[20] = calcCRC(packet); // Checksum
+		packet[21] = ETX0;
+		packet[22] = ETX1;
 		
 		return packet;
 	}
@@ -1901,22 +1426,22 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = ALL_PWM_CTRL; // DID
 		packet[5] = 12; // LEN
 		packet[6] = (byte) (p0 & 0xff); // MOTOR 1
-		packet[7] = (byte) ((p0 >>> 8) & 0xff);
+		packet[7] = (byte) (p0 >>> 8 & 0xff);
 		packet[8] = (byte) (p1 & 0xff); // MOTOR 2
-		packet[9] = (byte) ((p1 >>> 8) & 0xff);
+		packet[9] = (byte) (p1 >>> 8 & 0xff);
 		packet[10] = (byte) (p2 & 0xff); // MOTOR 3
-		packet[11] = (byte) ((p2 >>> 8) & 0xff);
+		packet[11] = (byte) (p2 >>> 8 & 0xff);
 		packet[12] = (byte) (p3 & 0xff); // MOTOR 4
-		packet[13] = (byte) ((p3 >>> 8) & 0xff);
+		packet[13] = (byte) (p3 >>> 8 & 0xff);
 		packet[14] = (byte) (p4 & 0xff); // MOTOR 5
-		packet[15] = (byte) ((p4 >>> 8) & 0xff);
+		packet[15] = (byte) (p4 >>> 8 & 0xff);
 		packet[16] = (byte) (p5 & 0xff); // MOTOR 6
-		packet[17] = (byte) ((p5 >>> 8) & 0xff);
+		packet[17] = (byte) (p5 >>> 8 & 0xff);
 		packet[18] = calcCRC(packet); // Checksum
 		packet[19] = ETX0;
 		packet[20] = ETX1;
@@ -1941,8 +1466,8 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
 		packet[6] = 0; // 0 = Enable
@@ -1968,19 +1493,19 @@ public class PMS5005
 	public static byte[] disableServo(byte channel)
 	{
 		byte[] packet = new byte[11];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
 		packet[6] = 0; // 0 = Disable
 		packet[7] = channel; // 6-11 = SERVO
 		packet[8] = calcCRC(packet); // Checksum
-		
 		packet[9] = ETX0;
 		packet[10] = ETX1;
+		
 		return packet;
 	}
 	
@@ -2011,21 +1536,20 @@ public class PMS5005
 	public static byte[] setServoPulse(byte channel, short pulseWidth, short timePeriod)
 	{
 		byte[] packet = new byte[15];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = SERVO_CTRL; // DID
 		packet[5] = 6; // LEN
 		packet[6] = channel; // channel
 		packet[7] = (byte) (pulseWidth & 0xff); // command value low 8 bit
 		packet[8] = (byte) ((pulseWidth >>> 8) & 0xff); // high 8 bit
-		packet[9] = 6; // flag
+		packet[9] = FLAG_VALUE; // flag
 		packet[10] = (byte) (timePeriod & 0xff); // time low 8 bit
 		packet[11] = (byte) ((timePeriod >>> 8) & 0xff); // high 8 bit
 		packet[12] = calcCRC(packet); // Checksum
-		
 		packet[13] = ETX0;
 		packet[14] = ETX1;
 		return packet;
@@ -2048,21 +1572,21 @@ public class PMS5005
 	public static byte[] setServoPulse(byte channel, short pulseWidth)
 	{
 		byte[] packet = new byte[13];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = SERVO_CTRL; // DID
 		packet[5] = 4; // LEN
 		packet[6] = channel; // channel
 		packet[7] = (byte) (pulseWidth & 0xff); // command value low 8 bit
 		packet[8] = (byte) ((pulseWidth >>> 8) & 0xff); // high 8 bit
-		packet[9] = 6; // flag
+		packet[9] = FLAG_VALUE; // flag
 		packet[10] = calcCRC(packet); // Checksum
-		
 		packet[11] = ETX0;
 		packet[12] = ETX1;
+		
 		return packet;
 	}
 	
@@ -2096,31 +1620,31 @@ public class PMS5005
 	public static byte[] setAllServoPulses(short p0, short p1, short p2, short p3, short p4, short p5, short timePeriod)
 	{
 		byte[] packet = new byte[23];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = ALL_SERVO_CTRL; // DID
 		packet[5] = 14; // LEN
 		packet[6] = (byte) (p0 & 0xff); // channel 1
-		packet[7] = (byte) ((p0 >>> 8) & 0xff);
+		packet[7] = (byte) (p0 >>> 8 & 0xff);
 		packet[8] = (byte) (p1 & 0xff); // channel 2
-		packet[9] = (byte) ((p1 >>> 8) & 0xff);
+		packet[9] = (byte) (p1 >>> 8 & 0xff);
 		packet[10] = (byte) (p2 & 0xff); // channel 3
-		packet[11] = (byte) ((p2 >>> 8) & 0xff);
+		packet[11] = (byte) (p2 >>> 8 & 0xff);
 		packet[12] = (byte) (p3 & 0xff); // channel 4
-		packet[13] = (byte) ((p3 >>> 8) & 0xff);
+		packet[13] = (byte) (p3 >>> 8 & 0xff);
 		packet[14] = (byte) (p4 & 0xff); // channel 5
-		packet[15] = (byte) ((p5 >>> 8) & 0xff);
+		packet[15] = (byte) (p5 >>> 8 & 0xff);
 		packet[16] = (byte) (p5 & 0xff); // channel 6
-		packet[17] = (byte) ((p5 >>> 8) & 0xff);
+		packet[17] = (byte) (p5 >>> 8 & 0xff);
 		packet[18] = (byte) (timePeriod & 0xff); // time
-		packet[19] = (byte) ((timePeriod >>> 8) & 0xff);
+		packet[19] = (byte) (timePeriod >>> 8 & 0xff);
 		packet[20] = calcCRC(packet); // Checksum
-		
 		packet[21] = ETX0;
 		packet[22] = ETX1;
+		
 		return packet;
 	}
 	
@@ -2153,29 +1677,29 @@ public class PMS5005
 	public static byte[] setAllServoPulses(short p0, short p1, short p2, short p3, short p4, short p5)
 	{
 		byte[] packet = new byte[21];
+		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = 1;
-		packet[3] = 0;
-		
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
 		packet[4] = ALL_SERVO_CTRL; // DID
 		packet[5] = 12; // LEN
 		packet[6] = (byte) (p0 & 0xff); // motor 1
-		packet[7] = (byte) ((p0 >>> 8) & 0xff);
+		packet[7] = (byte) (p0 >>> 8 & 0xff);
 		packet[8] = (byte) (p1 & 0xff); // motor 2
-		packet[9] = (byte) ((p1 >>> 8) & 0xff);
+		packet[9] = (byte) (p1 >>> 8 & 0xff);
 		packet[10] = (byte) (p2 & 0xff); // motor 3
-		packet[11] = (byte) ((p2 >>> 8) & 0xff);
+		packet[11] = (byte) (p2 >>> 8 & 0xff);
 		packet[12] = (byte) (p3 & 0xff); // motor 4
-		packet[13] = (byte) ((p3 >>> 8) & 0xff);
+		packet[13] = (byte) (p3 >>> 8 & 0xff);
 		packet[14] = (byte) (p4 & 0xff); // motor 5
-		packet[15] = (byte) ((p4 >>> 8) & 0xff);
+		packet[15] = (byte) (p4 >>> 8 & 0xff);
 		packet[16] = (byte) (p5 & 0xff); // motor 6
-		packet[17] = (byte) ((p5 >>> 8) & 0xff);
+		packet[17] = (byte) (p5 >>> 8 & 0xff);
 		packet[18] = calcCRC(packet); // Checksum
-		
 		packet[19] = ETX0;
 		packet[20] = ETX1;
+		
 		return packet;
 	}
 	
@@ -2183,15 +1707,32 @@ public class PMS5005
 	 * Displays the image data in the file bmpFileName (BMP format) on the
 	 * graphic LCD connected to the Sensing and Motion Controller (PMS5005).
 	 * 
-	 * @param bmpFileName
-	 *            Full path of the BMP file for displaying
-	 * 
-	 *            The graphic LCD display is monochrome with dimensions 128 by
-	 *            64 pixels. The BMP image must be 128x64 pixels in mono.
+	 * @param frameNumber
+	 * 			serial frame number
+	 * @param frame
+	 * 			64 byte frame data to display
 	 */
-	public static byte[] setLCDDisplayPMS(String bmpFileName) // LCD PMS
+	public static byte[] setLCDDisplayPMS(byte frameNumber, byte[] frame) // LCD PMS
 	{
-		return null;
-		// TODO Auto-generated method stub
+		byte[] packet = new byte[73];
+		
+		packet[0] = STX0;
+		packet[1] = STX1;
+		packet[2] = RID_ROBOT;
+		packet[3] = RESERVED;
+		packet[4] = LCD_CTRL;
+		packet[5] = 65; // LEN
+		packet[6] = (byte) (frameNumber & 0xff);
+		
+		for (int i = 0; i < FRAME_LENGTH; ++i)
+		{
+			packet[7+i] = (byte) (frame[i] & 0xff);
+		}
+		
+		packet[70] = calcCRC(packet);
+		packet[71] = ETX0;
+		packet[72] = ETX1;
+		
+		return packet;
 	}
 }

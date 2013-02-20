@@ -863,7 +863,16 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	
 	public void setLCDDisplayPMS(String bmpFileName)
 	{
-		socket.send(PMS5005.setLCDDisplayPMS(bmpFileName));
+		/* TODO slice buffer */
+		
+		/* TODO send buffer */
+		
+		/*
+		for (int i = 0; i < 16; ++i)
+		{
+			socket.send(PMS5005.setLCDDisplayPMS(frameNumber, frameContent));
+		}
+		*/
 	}
 	
 	public void setDCMotorVelocityControlPID(byte channel, int kp, int kd, int ki)
@@ -905,7 +914,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	{
 		socket.send(PMS5005.setAllDCMotorPulses((short) p0, (short) -p1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) timePeriod));
 	}
-
+	
 	public void setBothServoPulses(int p0, int p1) 
 	{
 		socket.send(PMS5005.setAllServoPulses((short) p0, (short) -p1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
