@@ -19,6 +19,7 @@ public class PMS5005
 	 * 94 (always) ETX1 = 13 (always)
 	 */
 	
+	/* Packet Info */
 	public static final int HEADER_LENGTH = 6;
 	public static final int FOOTER_LENGTH = 3;
 	public static final int DID_OFFSET = 4;
@@ -31,7 +32,7 @@ public class PMS5005
 	
 	/* RID */
 	public static final byte RID_HOST = 0x00;
-	public static final byte RID_ROBOT = 0x01;
+	public static final byte RID_PMS5005 = 0x01;
 
 	/* RESERVED */
 	public static final byte RESERVED = 0x00;
@@ -90,7 +91,8 @@ public class PMS5005
 	public static final int MAX_PWM_R = 0;
 	
 	public static final int PWM_N = 16383;
-	public static final int PWM_O = 8000;
+	//public static final int PWM_O = 8000;
+	public static final int PWM_O = 12000;
 	public static final int DUTY_CYCLE_UNIT = 8383;
 	
 	/* Sensor Data Offsets */
@@ -189,7 +191,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 1; // len
@@ -223,7 +225,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 1; // len
@@ -257,7 +259,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_CUSTOM_SENSOR_DATA;
 		cmd[5] = 1; // len
@@ -291,7 +293,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_ALL_SENSOR_DATA;
 		cmd[5] = 1; // len
@@ -318,7 +320,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 0; // len
@@ -344,7 +346,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_STANDARD_SENSOR_DATA;
 		cmd[5] = 0; // len
@@ -370,7 +372,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_CUSTOM_SENSOR_DATA;
 		cmd[5] = 0; // len
@@ -396,7 +398,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_ALL_SENSOR_DATA;
 		cmd[5] = 0; // len
@@ -418,7 +420,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 1; // len
@@ -441,7 +443,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_STANDARD_SENSOR_DATA;
 		cmd[5] = 1; // len
@@ -464,7 +466,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_CUSTOM_SENSOR_DATA;
 		cmd[5] = 1; // len
@@ -487,7 +489,7 @@ public class PMS5005
 		
 		cmd[0] = STX0;
 		cmd[1] = STX1;
-		cmd[2] = RID_ROBOT;
+		cmd[2] = RID_PMS5005;
 		cmd[3] = RESERVED;
 		cmd[4] = GET_ALL_SENSOR_DATA;
 		cmd[5] = 1; // len
@@ -612,7 +614,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = PARAM_SET; // DID
 		packet[5] = 3; // LEN
@@ -642,7 +644,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
@@ -671,7 +673,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
@@ -696,7 +698,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
@@ -723,7 +725,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
@@ -759,7 +761,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = PARAM_SET; // DID
 		packet[5] = 11; // LEN
@@ -787,7 +789,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = PARAM_SET; // DID
 		packet[5] = 11; // LEN
@@ -852,7 +854,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = PARAM_SET; // DID
 		packet[5] = 3; // LEN
@@ -887,7 +889,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = PARAM_SET; // DID
 		packet[5] = 3; // LEN
@@ -921,7 +923,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = POSITION_CTRL; // DID
 		packet[5] = 5; // LEN
@@ -965,7 +967,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = POSITION_CTRL; // DID
 		packet[5] = 3; // LEN
@@ -1009,7 +1011,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = PWM_CTRL; // DID
 		packet[5] = 6; // LEN
@@ -1056,7 +1058,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = PWM_CTRL; // DID
 		packet[5] = 3; // LEN
@@ -1111,7 +1113,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = ALL_POSITION_CTRL; // DID
 		packet[5] = 14; // LEN
@@ -1176,7 +1178,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = ALL_POSITION_CTRL; // DID
 		packet[5] = 12; // LEN
@@ -1238,7 +1240,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = ALL_VELOCITY_CTRL; // DID
 		packet[5] = 14; // LEN
@@ -1301,7 +1303,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = ALL_VELOCITY_CTRL; // DID
 		packet[5] = 12; // LEN
@@ -1364,7 +1366,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = ALL_PWM_CTRL; // DID
 		packet[5] = 14; // LEN
@@ -1426,7 +1428,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = ALL_PWM_CTRL; // DID
 		packet[5] = 12; // LEN
@@ -1466,7 +1468,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
@@ -1496,7 +1498,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = TOGGLE_DC_MOTORS; // DID
 		packet[5] = 2; // LEN
@@ -1539,7 +1541,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = SERVO_CTRL; // DID
 		packet[5] = 6; // LEN
@@ -1575,7 +1577,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = SERVO_CTRL; // DID
 		packet[5] = 4; // LEN
@@ -1623,7 +1625,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = ALL_SERVO_CTRL; // DID
 		packet[5] = 14; // LEN
@@ -1680,7 +1682,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = ALL_SERVO_CTRL; // DID
 		packet[5] = 12; // LEN
@@ -1718,7 +1720,7 @@ public class PMS5005
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
-		packet[2] = RID_ROBOT;
+		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = LCD_CTRL;
 		packet[5] = 65; // LEN

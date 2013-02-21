@@ -93,9 +93,6 @@ public class APLite implements Runnable
 		power[X80Pro.R] /= Math.PI/2; // get percentage output.
 		//}
 		
-		power[X80Pro.L] *= 1.5;
-		power[X80Pro.R] *= 1.5;
-		
 		robot.setBothDCMotorPulsePercentages((int) power[X80Pro.L], (int) power[X80Pro.R]);
 		System.err.println("APLite.directRobot(): end");
 	}
