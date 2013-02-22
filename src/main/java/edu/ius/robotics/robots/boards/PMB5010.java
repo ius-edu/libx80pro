@@ -420,22 +420,23 @@ public class PMB5010
     	
     	byte[] msg = new byte[sample.length+8];
     	byte[] encodedSample = adpcm.encodeADPCM(sample);
+    	int z = encodedSample.length;
     	
     	msg[0] = STX0;
     	msg[1] = STX1;
     	msg[2] = RID_PMB5010;
     	msg[3] = 0;
     	msg[4] = AUDIO_PACKET;
-    	msg[5] = (byte) (encodedSample.length & 0xff);
+    	msg[5] = (byte) (z & 0xff);
     	
-    	for (int i = 0; i < encodedSample.length; ++i)
+    	for (int i = 0; i < z; ++i)
     	{
     		msg[6+i] = encodedSample[i];
     	}
     	
-    	msg[sample.length+6] = calcCRC(msg);
-    	msg[sample.length+7] = ETX0;
-    	msg[sample.length+8] = ETX1;
+    	msg[6+z] = calcCRC(msg);
+    	msg[7+z] = ETX0;
+    	msg[8+z] = ETX1;
     	
     	return msg;
     }
