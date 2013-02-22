@@ -485,13 +485,12 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 					// Step 2: Assemble complete data in buffer.
 					if (0 == jpegBufferSize || previousSEQ + 1 == sensorData[PMB5010.SEQ_OFFSET])
 					{
-						byte[] jpegData = Arrays.copyOfRange(sensorData, PMB5010.PAYLOAD_OFFSET, sensorData.length - PMB5010.FOOTER_LENGTH);
-						for (int i = 0; i < jpegData.length; ++i)
+						for (int i = PMB5010.PAYLOAD_OFFSET; i < sensorData.length - PMB5010.FOOTER_LENGTH; ++i)
 						{
-							jpegBuffer[jpegBufferSize+i] = jpegData[i];
+							jpegBuffer[jpegBufferSize + (i - PMB5010.PAYLOAD_OFFSET)] = sensorData[i];
 						}
 						
-						jpegBufferSize += jpegData.length;
+						jpegBufferSize += sensorData.length - PMB5010.METADATA_SIZE;
 					}
 					
 					// Step 3: Decode complete data from buffer if we have finished receiving.
@@ -499,7 +498,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 					{
 						iRobotVideo.videoEvent(jpeg.decode(jpegBuffer, jpegBufferSize));
 					}
-				} // else if null == iRobotVideo (no delegate), we don't do anything with the data.
+				} // else if null == iRobotVideo (no delegate), we won't do anything with the data.
 			}
 		}
 	}

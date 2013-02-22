@@ -37,8 +37,8 @@ public class PMS5005
 	/* RESERVED */
 	public static final byte RESERVED = 0x00;
 	
-	/* FLAG */
-	public static final byte FLAG_VALUE = 0x06;
+	/* FLAGS */
+	public static final byte SINGLE_CHANNEL_TIMED_FLAG = 0x06;
 	
 	/* LCD Display */
 	public static final byte FRAME_LENGTH = 64;
@@ -1018,7 +1018,7 @@ public class PMS5005
 		packet[6] = channel; // Channel 0-5
 		packet[7] = (byte) (pulseWidth & 0xff); // cmdValue
 		packet[8] = (byte) (pulseWidth >>> 8 & 0xff);
-		packet[9] = (byte) FLAG_VALUE; // we have a flag
+		packet[9] = (byte) SINGLE_CHANNEL_TIMED_FLAG; // we have a flag
 		packet[10] = (byte) (timePeriod & 0xff); // time
 		packet[11] = (byte) (timePeriod >>> 8 & 0xff);
 		packet[12] = calcCRC(packet); // Checksum
@@ -1548,7 +1548,7 @@ public class PMS5005
 		packet[6] = channel; // channel
 		packet[7] = (byte) (pulseWidth & 0xff); // command value low 8 bit
 		packet[8] = (byte) ((pulseWidth >>> 8) & 0xff); // high 8 bit
-		packet[9] = FLAG_VALUE; // flag
+		packet[9] = SINGLE_CHANNEL_TIMED_FLAG; // flag
 		packet[10] = (byte) (timePeriod & 0xff); // time low 8 bit
 		packet[11] = (byte) ((timePeriod >>> 8) & 0xff); // high 8 bit
 		packet[12] = calcCRC(packet); // Checksum
@@ -1584,7 +1584,7 @@ public class PMS5005
 		packet[6] = channel; // channel
 		packet[7] = (byte) (pulseWidth & 0xff); // command value low 8 bit
 		packet[8] = (byte) ((pulseWidth >>> 8) & 0xff); // high 8 bit
-		packet[9] = FLAG_VALUE; // flag
+		packet[9] = SINGLE_CHANNEL_TIMED_FLAG; // flag
 		packet[10] = calcCRC(packet); // Checksum
 		packet[11] = ETX0;
 		packet[12] = ETX1;

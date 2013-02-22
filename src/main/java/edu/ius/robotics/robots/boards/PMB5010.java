@@ -14,6 +14,7 @@ public class PMB5010
 	public static final int LENGTH_OFFSET = 5;
 	public static final int SEQ_OFFSET = 3;
 	public static final int RESERVED_OFFSET = 3;
+	public static final int METADATA_SIZE = 9;
 	
 	/* Start transmission, End transmission */
 	public static final byte STX0 = 94; // 0x5e
