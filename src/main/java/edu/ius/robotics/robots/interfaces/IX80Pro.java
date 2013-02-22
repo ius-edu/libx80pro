@@ -1,4 +1,4 @@
-package edu.ius.robotics.robots;
+package edu.ius.robotics.robots.interfaces;
 
 /* 
  * Java implmentation written by Jesse Riddle, with significant documentation 
@@ -8,7 +8,7 @@ package edu.ius.robotics.robots;
  * program.
  */
 
-interface IX80Pro 
+public interface IX80Pro 
 {
     /**
      * Sends a request command to the Sensing and Motion Controller (PMS5005) 

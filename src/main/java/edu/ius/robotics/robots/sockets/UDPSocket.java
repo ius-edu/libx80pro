@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import edu.ius.robotics.robots.IRobot;
 import edu.ius.robotics.robots.boards.PMS5005;
+import edu.ius.robotics.robots.interfaces.IRobot;
 
 public class UDPSocket implements Runnable
 {

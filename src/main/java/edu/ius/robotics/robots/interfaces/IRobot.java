@@ -1,4 +1,4 @@
-package edu.ius.robotics.robots;
+package edu.ius.robotics.robots.interfaces;
 
 public interface IRobot
 {

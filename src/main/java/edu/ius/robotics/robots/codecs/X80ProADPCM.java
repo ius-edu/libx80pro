@@ -1,5 +1,7 @@
 package edu.ius.robotics.robots.codecs;
 
+import java.util.Arrays;
+
 public class X80ProADPCM
 {
 	public static int[] indexTable = 
@@ -36,15 +38,9 @@ public class X80ProADPCM
 		adpcmState.index = 0;
 	}
 	
-	// lpInData points to msg[6], nLen = Data_Len
-	public short[] dealWithAudio(byte[] input)
+	public short[] decode(byte[] input, byte length)
 	{
-		return decode(input);
-	}
-	
-	public short[] decode(byte[] input)
-	{
-		int outputLength = 2*input.length;
+		int outputLength = 2*length;
 		short[] output = new short[outputLength];
 		
 		short predictedOutput = adpcmState.previousOutput;
@@ -141,19 +137,19 @@ public class X80ProADPCM
 		return output;
 	}
 	
-	public byte[] encode(short[] input)
+	public byte[] encode(short[] input, short length)
 	{
-		int outputLength = 2*input.length;
+		int outputLength = 2*length;
 		byte[] output = new byte[outputLength];
 		short predictedOutput = adpcmState.previousOutput;
 		char index = adpcmState.index;
 		int step = stepsizeTable[index];
-		
 		int outputHolder = 0;
+		
 		boolean bufferStep = true;
 		int inputIndex = 0;
 		int outputIndex = 0;
-		for (int i = 2*input.length; 0 < i; --i)
+		for (int i = outputLength; 0 < i; --i)
 		{
 			short inputValue = input[inputIndex++];
 			

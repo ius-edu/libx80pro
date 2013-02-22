@@ -12,6 +12,8 @@ public class PMB5010
 	public static final int HEADER_LENGTH = 6;
 	public static final int FOOTER_LENGTH = 3;
 	public static final int DID_OFFSET = 4;
+	public static final int PAYLOAD_OFFSET = 6;
+	public static final int LENGTH_OFFSET = 5;
 	
 	/* Start transmission, End transmission */
 	public static final byte STX0 = 94; // 0x5e
@@ -30,14 +32,14 @@ public class PMB5010
 	public static final byte FLAG_VALUE = 0x06;
 	
 	/* DID Listing */
+	public static final byte VIDEO_PACKET = 0x09;
 	public static final byte AUDIO_PACKET = 0x0A;
 	public static final byte START_AUDIO_RECORDING = 0x0B;
 	public static final byte STOP_AUDIO_RECORDING = 0x0C;
 	public static final byte START_AUDIO_PLAYBACK = 0x0D;
 	public static final byte STOP_AUDIO_PLAYBACK = 0x0E;
 	public static final byte TAKE_PHOTO = 0x20;
-	
-	public static X80ProADPCM adpcm;
+	public static final byte ADPCM_RESET = 0x33;
 	
     /*
      * calcCRC method comes directly from PMB5010 Protocol documentation.
@@ -74,11 +76,6 @@ public class PMB5010
 		}
 		
 		return shift_reg;
-    }
-    
-    public static void initCodec()
-    {
-    	adpcm.init();
     }
     
     public static byte[] startAudioRecording(byte voiceSegmentLength)
@@ -166,9 +163,8 @@ public class PMB5010
     	return msg;
     }
     
-    public static byte[] continueAudioPlayback(short[] audioSample)
+    public static byte[] continueAudioPlayback(byte[] encodedAudioSample)
     {
-    	byte[] encodedAudioSample = adpcm.encode(audioSample);
     	int z = encodedAudioSample.length;
     	
     	byte[] msg = new byte[8+z];
@@ -231,8 +227,13 @@ public class PMB5010
     	// ucLength is the effective date length
     	// nLen = ucLength + 9
     	// VIDEO_SEQ: this is the video date package sequences number for one image, for one JPEG image Data
-    	// is bigger than the max package size, so it is divided into some packages, if the value is 0x00, it means the
-    	// start of one JPEG image data, if this value is 0xff 
+    	// is bigger than the max package size, so it is divided into some packages, if the value is 0x00, it is the
+    	// start of JPEG image transmission. If this value is 0xff, it means it is the end of JPEG transmission.
+    	// VIDEO_DATA_LEN: this is the length of the JPEG image data in this package
+    	// Host receives video data. If it finds that any of the VIDEO_SEQ are missing, the host must discard the 
+    	// rest of the video data, because JPEG is a compressed format, and it cannot be decoded without the complete 
+    	// JPEG data.
+    	// After receiving the last package of one image (VIDEO_SEQ = 0xff), the host will decode the JPEG data. 
     	*/
     	return msg;
     }

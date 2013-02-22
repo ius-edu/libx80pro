@@ -2,8 +2,17 @@ package edu.ius.robotics.robots;
 
 import java.io.IOException;
 import java.lang.Runtime;
+import java.util.Arrays;
 
 import edu.ius.robotics.robots.boards.PMS5005;
+import edu.ius.robotics.robots.boards.PMB5010;
+import edu.ius.robotics.robots.codecs.X80ProADPCM;
+import edu.ius.robotics.robots.codecs.X80ProJPEG;
+import edu.ius.robotics.robots.interfaces.IRobot;
+import edu.ius.robotics.robots.interfaces.IRobotAudio;
+import edu.ius.robotics.robots.interfaces.IRobotVideo;
+import edu.ius.robotics.robots.interfaces.IX80Pro;
+
 import edu.ius.robotics.robots.sockets.UDPSocket;
 
 public class X80Pro implements IX80Pro, IRobot, Runnable
@@ -145,10 +154,16 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	//private boolean[] lockIRRange;
 	
 	private UDPSocket socket;
+	private X80ProADPCM pcm;
+	private X80ProJPEG jpeg;
+	private IRobotAudio iRobotAudio;
+	private IRobotVideo iRobotVideo;
 
 	private X80Pro()
 	{
 		//lockIRRange = new boolean[NUM_IR_SENSORS];
+		iRobotAudio = null;
+		iRobotVideo = null;
 		
 		this.motorSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.MOTOR_SENSOR_DATA_LENGTH];
 		this.customSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.CUSTOM_SENSOR_DATA_LENGTH];
@@ -327,7 +342,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 			// here is a whole package (all sensor data)
 			// for first motor sensor data, please refer to the protocol
 			// documentation
-			if (sensorData[PMS5005.DID_OFFSET] == PMS5005.GET_MOTOR_SENSOR_DATA)
+			if (PMS5005.GET_MOTOR_SENSOR_DATA == sensorData[PMS5005.DID_OFFSET])
 			{
 //				System.err.println("-*- RECEIVED MOTOR SENSOR DATA -*-");
 //				System.err.println("length: " + z);
@@ -348,7 +363,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 //				}
 //				System.err.println();
 			}
-			else if (sensorData[PMS5005.DID_OFFSET] == PMS5005.GET_CUSTOM_SENSOR_DATA)
+			else if (PMS5005.GET_CUSTOM_SENSOR_DATA == sensorData[PMS5005.DID_OFFSET])
 			{
 //				System.err.println("-*- RECEIVED CUSTOM SENSOR DATA -*-");
 //				System.err.println("length: " + z);
@@ -383,7 +398,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 //				}
 //				System.err.println();
 			}
-			else if (sensorData[PMS5005.DID_OFFSET] == PMS5005.GET_STANDARD_SENSOR_DATA)
+			else if (PMS5005.GET_STANDARD_SENSOR_DATA == sensorData[PMS5005.DID_OFFSET])
 			{
 				//System.err.println("-*- RECEIVED STANDARD SENSOR DATA -*-");
 				//System.err.println("length: " + z);
@@ -414,6 +429,26 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 //					System.err.print(x + " ");
 //				}
 //				System.err.println();
+			}
+			else if (PMB5010.ADPCM_RESET == sensorData[PMB5010.DID_OFFSET])
+			{
+				pcm.init();
+				// respond with ACK? ... socket.send(PMB5010.ack());
+			}
+			else if (PMB5010.AUDIO_PACKET == sensorData[PMB5010.DID_OFFSET])
+			{
+				// we just received audio stream data, what do we do with it?
+				if (null != iRobotAudio)
+				{
+					iRobotAudio.audioEvent(pcm.decode(Arrays.copyOfRange(sensorData, PMB5010.PAYLOAD_OFFSET, sensorData.length - PMB5010.FOOTER_LENGTH), sensorData[PMB5010.LENGTH_OFFSET]));					
+				}
+			}
+			else if (PMB5010.VIDEO_PACKET == sensorData[PMB5010.DID_OFFSET])
+			{
+				if (null != iRobotVideo)
+				{
+					iRobotVideo.videoEvent(jpeg.decode(Arrays.copyOfRange(sensorData, PMB5010.PAYLOAD_OFFSET, sensorData.length - PMB5010.FOOTER_LENGTH), sensorData[PMB5010.LENGTH_OFFSET]));
+				}
 			}
 		}
 	}
