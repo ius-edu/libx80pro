@@ -426,7 +426,7 @@ public class PMB5010
     	msg[2] = RID_PMB5010;
     	msg[3] = 0;
     	msg[4] = AUDIO_PACKET;
-    	msg[5] = (byte) (sample.length & 0xff);
+    	msg[5] = (byte) (encodedSample.length & 0xff);
     	
     	for (int i = 0; i < encodedSample.length; ++i)
     	{
