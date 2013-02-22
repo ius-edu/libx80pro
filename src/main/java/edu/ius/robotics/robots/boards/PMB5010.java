@@ -1,268 +1,13 @@
 package edu.ius.robotics.robots.boards;
 
+import edu.ius.robotics.robots.codecs.X80ProADPCM;
+
 /* The following is taken pretty much directly from the 
  * PMB5010 serial protocol documentation
  */
 
 public class PMB5010
 {
-	public static class ADPCM 
-	{
-		public static int[] indexTable = 
-		{
-			-1, -1, -1, -1, 2, 4, 6, 8, 
-			-1, -1, -1, -1, 2, 4, 6, 8
-		};
-		
-		public static int[] stepsizeTable = 
-		{
-			7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 
-			19, 21, 23, 25, 28, 31, 34, 37, 41, 45, 
-			50, 55, 60, 66, 73, 80, 88, 97, 107, 118, 
-			130, 143, 157, 173, 190, 209, 230, 253, 279, 307, 
-			337, 371, 408, 449, 494, 544, 598, 658, 724, 796, 
-			876, 963, 1060, 1166, 1282, 1411, 1552, 1707, 1878, 2066, 
-			2272, 2499, 2749, 3024, 3327, 3660, 4026, 4428, 4871, 5358, 
-			5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487, 12635, 13899, 
-			15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767
-		};
-		
-		public static class ADPCMState 
-		{
-			/* ignoring the convention to wrap these with getters and setters */
-			public short previousOutput; /* previous output value */
-			public char index; /* index into step size table */
-		}
-		
-		ADPCMState adpcmState;
-		
-		public ADPCM()
-		{
-			adpcmState.previousOutput = 0;
-			adpcmState.index = 0;
-		}
-		
-		// lpInData points to msg[6], nLen = Data_Len
-		public short[] dealWithAudio(byte[] input)
-		{
-			return decodeADPCM(input);
-		}
-		
-		public short[] decodeADPCM(byte[] input)
-		{
-			int outputLength = 2*input.length;
-			short[] output = new short[outputLength];
-			
-			short predictedOutput = adpcmState.previousOutput;
-			char index = adpcmState.index;
-			int step = stepsizeTable[index];
-			
-			short predictedOutputDelta;
-			int sign;
-			int delta;
-			
-			boolean bufferStep = false;
-			int inputIndex = 0;
-			int outputIndex = 0;
-			
-			for (int i = output.length; 0 < i; i--)
-			{
-				/* Step 1: Get the data value */
-				if (bufferStep)
-				{
-					delta = (byte) (input[inputIndex] & 0xff);
-				}
-				else
-				{
-					delta = (byte) (input[++inputIndex] >>> 4 & 0xff);
-				}
-				bufferStep = !bufferStep;
-				
-				/* Step 2: Find new index value (for later) */
-				index += indexTable[delta];
-				if (index < 0)
-				{
-					index = 0;
-				}
-				else if (88 < index)
-				{
-					index = 88;
-				}
-				
-				/* Step 3: Separate sign and magnitude */
-				sign = delta & 0x08;
-				delta = delta & 0x07;
-				
-				/* Step 4: Combine difference and new predicted value */
-				/*
-				 * Computes predictedOutputDelta = (delta + 0.5)*step/4, but see comment
-				 * in encodeADPCM();
-				 */
-				
-				predictedOutputDelta = (short) (step >>> 3);
-				if (0 < (delta & 0x04))
-				{
-					predictedOutputDelta += step;
-				}
-				
-				if (0 < (delta & 0x02))
-				{
-					predictedOutputDelta += step >> 1;
-				}
-				
-				if (0 < (delta & 0x01))
-				{
-					predictedOutputDelta += step >> 2;
-				}
-				
-				if (0 < sign)
-				{
-					predictedOutput -= predictedOutputDelta;
-				}
-				else
-				{
-					predictedOutput += predictedOutputDelta;
-				}
-				
-				/* Step 5: Clamp output value */
-				if (32767 < predictedOutput)
-				{
-					predictedOutput = 32767;
-				}
-				else if (predictedOutput < -32768)
-				{
-					predictedOutput = -32768;
-				}
-				
-				/* Step 6: Update step value */
-				step = stepsizeTable[index];
-				
-				/* Step 7: Output value */
-				output[outputIndex++] = predictedOutput;
-			}
-			
-			adpcmState.previousOutput = predictedOutput;
-			adpcmState.index = index;
-			
-			return output;
-		}
-		
-		public byte[] encodeADPCM(short[] input)
-		{
-			int outputLength = 2*input.length;
-			byte[] output = new byte[outputLength];
-			short predictedOutput = adpcmState.previousOutput;
-			char index = adpcmState.index;
-			int step = stepsizeTable[index];
-			
-			int outputHolder = 0;
-			boolean bufferStep = true;
-			int inputIndex = 0;
-			int outputIndex = 0;
-			for (int i = 2*input.length; 0 < i; --i)
-			{
-				short inputValue = input[inputIndex++];
-				
-				/* Step 1: Compute difference with previous value */
-				int diff = inputValue - predictedOutput;
-				int sign = (diff < 0) ? 8 : 0;
-				if (0 < sign)
-				{
-					diff = -diff;
-				}
-				
-				/* Step 2: Divide and clamp */
-				/* Note
-				 * This code *approximately* computes:
-				 * 	delta = diff*4/step;
-				 * 	predictedOutputDelta = (0.5*delta)*step/4
-				 * but in shift step bits are dropped. The net results of this is
-				 * that even if you have fast mul/div hardware you cannot put it to
-				 * good use since the fixup would be too expensive.
-				 */
-				int delta = 0;
-				int predictedOutputDelta = step >>> 3;
-				
-				if (step <= diff)
-				{
-					delta = 4;
-					diff -= step;
-					predictedOutputDelta += step;
-				}
-				
-				step >>= 1;
-				if (step <= diff)
-				{
-					delta |= 2;
-					diff -= step;
-					predictedOutputDelta += step;
-				}
-				
-				step >>= 1;
-				if (step <= diff)
-				{
-					delta |= 1;
-					predictedOutputDelta += step;
-				}
-				
-				/* Step 3: Update previous value */
-				if (0 < sign)
-				{
-					predictedOutput -= predictedOutputDelta;
-				}
-				else
-				{
-					predictedOutput += predictedOutputDelta;
-				}
-				
-				/* Step 4: Clamp previous value to 16 bits */
-				if (32767 < predictedOutput)
-				{
-					predictedOutput = 32767;
-				}
-				else if (predictedOutput < -32768)
-				{
-					predictedOutput = -32768;
-				}
-				
-				/* Step 5: Assemble value, update index and step values */
-				delta |= sign;
-				
-				index += indexTable[delta];
-				if (index < 0)
-				{
-					index = 0;
-				}
-				else if (88 < index)
-				{
-					index = 88;
-				}
-				
-				/* Step 6: Output value */
-				if (bufferStep)
-				{
-					outputHolder = (delta << 4) & 0xf0;
-				}
-				else
-				{
-					output[outputIndex++] = (byte) (((delta & 0x0f) | outputHolder) & 0xff);
-				}
-				bufferStep = !bufferStep;
-			}
-			
-			/* Output last step, if needed */
-			if (!bufferStep)
-			{
-				output[outputIndex++] = (byte) outputHolder;
-			}
-			
-			adpcmState.previousOutput = predictedOutput;
-			adpcmState.index = index;
-			
-			return output;
-		}
-	}
-	
 	/* Packet Info */
 	public static final int HEADER_LENGTH = 6;
 	public static final int FOOTER_LENGTH = 3;
@@ -291,6 +36,8 @@ public class PMB5010
 	public static final byte START_AUDIO_PLAYBACK = 0x0D;
 	public static final byte STOP_AUDIO_PLAYBACK = 0x0E;
 	public static final byte TAKE_PHOTO = 0x20;
+	
+	public static X80ProADPCM adpcm;
 	
     /*
      * calcCRC method comes directly from PMB5010 Protocol documentation.
@@ -327,6 +74,11 @@ public class PMB5010
 		}
 		
 		return shift_reg;
+    }
+    
+    public static void initCodec()
+    {
+    	adpcm.init();
     }
     
     public static byte[] startAudioRecording(byte voiceSegmentLength)
@@ -386,7 +138,7 @@ public class PMB5010
     	msg[0] = STX0;
     	msg[1] = STX1;
     	msg[2] = RID_PMB5010;
-    	msg[3] = 0; // TODO SEQ
+    	msg[3] = RESERVED; // TODO SEQ
     	msg[4] = START_AUDIO_PLAYBACK;
     	msg[5] = 1;
     	msg[6] = (byte) (length & 0xff);
@@ -404,7 +156,7 @@ public class PMB5010
     	msg[0] = STX0;
     	msg[1] = STX1;
     	msg[2] = RID_PMB5010;
-    	msg[3] = 0;
+    	msg[3] = RESERVED;
     	msg[4] = STOP_AUDIO_PLAYBACK;
     	msg[5] = 0;
     	msg[6] = calcCRC(msg);
@@ -416,9 +168,7 @@ public class PMB5010
     
     public static byte[] continueAudioPlayback(short[] audioSample)
     {
-    	ADPCM adpcm = new ADPCM();
-    	
-    	byte[] encodedAudioSample = adpcm.encodeADPCM(audioSample);
+    	byte[] encodedAudioSample = adpcm.encode(audioSample);
     	int z = encodedAudioSample.length;
     	
     	byte[] msg = new byte[8+z];
@@ -426,7 +176,7 @@ public class PMB5010
     	msg[0] = STX0;
     	msg[1] = STX1;
     	msg[2] = RID_PMB5010;
-    	msg[3] = 0;
+    	msg[3] = RESERVED; // Not SEQ?
     	msg[4] = AUDIO_PACKET;
     	msg[5] = (byte) (z & 0xff);
     	
@@ -439,6 +189,51 @@ public class PMB5010
     	msg[7+z] = ETX0;
     	msg[8+z] = ETX1;
     	
+    	return msg;
+    }
+    
+    public static byte[] takePhoto()
+    {
+    	byte[] msg = new byte[9];
+    	
+    	msg[0] = STX0;
+    	msg[1] = STX1;
+    	msg[2] = RID_PMB5010;
+    	msg[3] = RESERVED;
+    	msg[4] = TAKE_PHOTO;
+    	msg[5] = 0; // len
+    	msg[6] = calcCRC(msg);
+    	msg[7] = ETX0;
+    	msg[8] = ETX1;
+    	
+    	return msg;
+    }
+    
+    public static byte[] videoDateFormat()
+    {
+    	byte[] msg = new byte[8];
+    	
+    	/*
+    	msg[0] = STX0;
+    	msg[1] = STX1;
+    	msg[2] = RID_PMB5010;
+    	msg[3] = RESERVED; // TODO SEQ
+    	msg[4] = COMTYPE_VIDEO;
+    	msg[5] = ucLength;
+    	msg[6] = VIDEO_SEQ;
+    	msg[7] = VIDEO_DATA_LEN;
+    	// ...
+    	msg[6+ucLength] = calcCRC(msg);
+    	msg[7+ucLength] = ETX0; // nLen-2
+    	msg[8+ucLength] = ETX1; // nLen-1
+    	
+    	// where nLen is the whole package length
+    	// ucLength is the effective date length
+    	// nLen = ucLength + 9
+    	// VIDEO_SEQ: this is the video date package sequences number for one image, for one JPEG image Data
+    	// is bigger than the max package size, so it is divided into some packages, if the value is 0x00, it means the
+    	// start of one JPEG image data, if this value is 0xff 
+    	*/
     	return msg;
     }
 }
