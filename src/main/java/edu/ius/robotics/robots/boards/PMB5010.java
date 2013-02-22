@@ -95,8 +95,8 @@ public class PMB5010
 				
 				/* Step 4: Combine difference and new predicted value */
 				/*
-				 * Computes vpDiff = (delta + 0.5)*step/4, but see comment
-				 * in adpcmCoder();
+				 * Computes predictedOutputDelta = (delta + 0.5)*step/4, but see comment
+				 * in encodeADPCM();
 				 */
 				
 				predictedOutputDelta = (short) (step >>> 3);
@@ -161,7 +161,7 @@ public class PMB5010
 			int outputIndex = 0;
 			for (int i = 2*input.length; 0 < i; --i)
 			{
-				short inputValue = input[i++];
+				short inputValue = input[inputIndex++];
 				
 				/* Step 1: Compute difference with previous value */
 				int diff = inputValue - predictedOutput;
