@@ -430,7 +430,7 @@ public class PMB5010
     	
     	for (int i = 0; i < encodedSample.length; ++i)
     	{
-    		msg[5+i] = encodedSample[i];
+    		msg[6+i] = encodedSample[i];
     	}
     	
     	msg[sample.length+6] = calcCRC(msg);
