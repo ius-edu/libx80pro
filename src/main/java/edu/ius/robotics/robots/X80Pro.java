@@ -152,6 +152,13 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	volatile private byte[][] oldCustomSensorData;
 	
 	//private boolean[] lockIRRange;
+	byte previousSEQ;
+	
+	byte[] audioBuffer;
+	byte[] jpegBuffer;
+	
+	int audioBufferSize;
+	int jpegBufferSize;
 	
 	private UDPSocket socket;
 	private X80ProADPCM pcm;
@@ -162,8 +169,14 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	private X80Pro()
 	{
 		//lockIRRange = new boolean[NUM_IR_SENSORS];
-		iRobotAudio = null;
-		iRobotVideo = null;
+		this.iRobotAudio = null;
+		this.iRobotVideo = null;
+		
+		this.jpegBuffer = new byte[16384]; // 16K
+		this.audioBuffer = new byte[16384]; // 16K
+		this.previousSEQ = 0;
+		this.jpegBufferSize = 0;
+		this.audioBufferSize = 0;
 		
 		this.motorSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.MOTOR_SENSOR_DATA_LENGTH];
 		this.customSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.CUSTOM_SENSOR_DATA_LENGTH];
@@ -200,6 +213,22 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	public X80Pro(String ipAddress, int port) throws IOException
 	{
 		this();
+		this.socket = new UDPSocket(this, ipAddress, port);
+	}
+	
+	public X80Pro(String ipAddress, IRobotAudio iRobotAudio, IRobotVideo iRobotVideo) throws IOException
+	{
+		this();
+		this.iRobotAudio = iRobotAudio;
+		this.iRobotVideo = iRobotVideo;
+		this.socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
+	}
+	
+	public X80Pro(String ipAddress, int port, IRobotAudio iRobotAudio, IRobotVideo iRobotVideo) throws IOException
+	{
+		this();
+		this.iRobotAudio = iRobotAudio;
+		this.iRobotVideo = iRobotVideo;
 		this.socket = new UDPSocket(this, ipAddress, port);
 	}
 	
@@ -447,8 +476,30 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 			{
 				if (null != iRobotVideo)
 				{
-					iRobotVideo.videoEvent(jpeg.decode(Arrays.copyOfRange(sensorData, PMB5010.PAYLOAD_OFFSET, sensorData.length - PMB5010.FOOTER_LENGTH), sensorData[PMB5010.LENGTH_OFFSET]));
-				}
+					// Step 1: Clear buffer sizes if we're receiving first JPEG packet.
+					if (PMB5010.SEQ_BEGIN == sensorData[PMB5010.SEQ_OFFSET])
+					{
+						jpegBufferSize = 0;
+					}
+					
+					// Step 2: Assemble complete data in buffer.
+					if (0 == jpegBufferSize || previousSEQ + 1 == sensorData[PMB5010.SEQ_OFFSET])
+					{
+						byte[] jpegData = Arrays.copyOfRange(sensorData, PMB5010.PAYLOAD_OFFSET, sensorData.length - PMB5010.FOOTER_LENGTH);
+						for (int i = 0; i < jpegData.length; ++i)
+						{
+							jpegBuffer[jpegBufferSize+i] = jpegData[i];
+						}
+						
+						jpegBufferSize += jpegData.length;
+					}
+					
+					// Step 3: Decode complete data from buffer if we have finished receiving.
+					if (PMB5010.SEQ_TERMINATE == sensorData[PMB5010.SEQ_OFFSET])
+					{
+						iRobotVideo.videoEvent(jpeg.decode(jpegBuffer, jpegBufferSize));
+					}
+				} // else if null == iRobotVideo (no delegate), we don't do anything with the data.
 			}
 		}
 	}

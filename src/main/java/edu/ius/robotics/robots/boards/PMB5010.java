@@ -1,7 +1,5 @@
 package edu.ius.robotics.robots.boards;
 
-import edu.ius.robotics.robots.codecs.X80ProADPCM;
-
 /* The following is taken pretty much directly from the 
  * PMB5010 serial protocol documentation
  */
@@ -14,6 +12,8 @@ public class PMB5010
 	public static final int DID_OFFSET = 4;
 	public static final int PAYLOAD_OFFSET = 6;
 	public static final int LENGTH_OFFSET = 5;
+	public static final int SEQ_OFFSET = 3;
+	public static final int RESERVED_OFFSET = 3;
 	
 	/* Start transmission, End transmission */
 	public static final byte STX0 = 94; // 0x5e
@@ -28,8 +28,10 @@ public class PMB5010
 	/* RESERVED */
 	public static final byte RESERVED = 0x00;
 	
-	/* FLAG */
+	/* FLAGS */
 	public static final byte FLAG_VALUE = 0x06;
+	public static final byte SEQ_BEGIN = 0x00;
+	public static final byte SEQ_TERMINATE = (byte) (0xff & 0xff);
 	
 	/* DID Listing */
 	public static final byte VIDEO_PACKET = 0x09;
@@ -202,39 +204,6 @@ public class PMB5010
     	msg[7] = ETX0;
     	msg[8] = ETX1;
     	
-    	return msg;
-    }
-    
-    public static byte[] videoDateFormat()
-    {
-    	byte[] msg = new byte[8];
-    	
-    	/*
-    	msg[0] = STX0;
-    	msg[1] = STX1;
-    	msg[2] = RID_PMB5010;
-    	msg[3] = RESERVED; // TODO SEQ
-    	msg[4] = COMTYPE_VIDEO;
-    	msg[5] = ucLength;
-    	msg[6] = VIDEO_SEQ;
-    	msg[7] = VIDEO_DATA_LEN;
-    	// ...
-    	msg[6+ucLength] = calcCRC(msg);
-    	msg[7+ucLength] = ETX0; // nLen-2
-    	msg[8+ucLength] = ETX1; // nLen-1
-    	
-    	// where nLen is the whole package length
-    	// ucLength is the effective date length
-    	// nLen = ucLength + 9
-    	// VIDEO_SEQ: this is the video date package sequences number for one image, for one JPEG image Data
-    	// is bigger than the max package size, so it is divided into some packages, if the value is 0x00, it is the
-    	// start of JPEG image transmission. If this value is 0xff, it means it is the end of JPEG transmission.
-    	// VIDEO_DATA_LEN: this is the length of the JPEG image data in this package
-    	// Host receives video data. If it finds that any of the VIDEO_SEQ are missing, the host must discard the 
-    	// rest of the video data, because JPEG is a compressed format, and it cannot be decoded without the complete 
-    	// JPEG data.
-    	// After receiving the last package of one image (VIDEO_SEQ = 0xff), the host will decode the JPEG data. 
-    	*/
     	return msg;
     }
 }
