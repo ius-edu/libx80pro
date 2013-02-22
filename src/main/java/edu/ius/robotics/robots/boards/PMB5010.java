@@ -414,13 +414,14 @@ public class PMB5010
     	return msg;
     }
     
-    public static byte[] continueAudioPlayback(short[] sample)
+    public static byte[] continueAudioPlayback(short[] audioSample)
     {
     	ADPCM adpcm = new ADPCM();
     	
-    	byte[] msg = new byte[sample.length+8];
-    	byte[] encodedSample = adpcm.encodeADPCM(sample);
-    	int z = encodedSample.length;
+    	byte[] encodedAudioSample = adpcm.encodeADPCM(audioSample);
+    	int z = encodedAudioSample.length;
+    	
+    	byte[] msg = new byte[8+z];
     	
     	msg[0] = STX0;
     	msg[1] = STX1;
@@ -431,7 +432,7 @@ public class PMB5010
     	
     	for (int i = 0; i < z; ++i)
     	{
-    		msg[6+i] = encodedSample[i];
+    		msg[6+i] = encodedAudioSample[i];
     	}
     	
     	msg[6+z] = calcCRC(msg);
