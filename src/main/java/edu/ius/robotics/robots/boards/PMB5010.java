@@ -35,14 +35,19 @@ public class PMB5010
 	public static final byte SEQ_TERMINATE = (byte) (0xff & 0xff);
 	
 	/* DID Listing */
+	public static final byte RX_PING = 0x00;
+	public static final byte TX_ACK = 0x01;
+	public static final byte RX_ACK = 0x01;
 	public static final byte VIDEO_PACKET = 0x09;
 	public static final byte AUDIO_PACKET = 0x0A;
 	public static final byte START_AUDIO_RECORDING = 0x0B;
 	public static final byte STOP_AUDIO_RECORDING = 0x0C;
 	public static final byte START_AUDIO_PLAYBACK = 0x0D;
 	public static final byte STOP_AUDIO_PLAYBACK = 0x0E;
+	public static final byte AUDIO_SLOW_DOWN = 0x10;
 	public static final byte TAKE_PHOTO = 0x20;
 	public static final byte ADPCM_RESET = 0x33;
+	public static final byte TX_PING = (byte) (0xFF & 0xff);
 	
     /*
      * calcCRC method comes directly from PMB5010 Protocol documentation.
@@ -81,6 +86,42 @@ public class PMB5010
 		return shift_reg;
     }
     
+    public static byte[] ping(byte seq)
+    {
+    	byte[] msg = new byte[10];
+    	
+    	msg[0] = STX0;
+    	msg[1] = STX1;
+    	msg[2] = RID_PMB5010;
+    	msg[3] = (byte) (seq & 0xff);
+    	msg[4] = (byte) (TX_PING & 0xff);
+    	msg[5] = 1;
+    	msg[6] = 0;
+    	msg[7] = calcCRC(msg);
+    	msg[8] = ETX0;
+    	msg[9] = ETX1;
+    	
+    	return msg;
+    }
+    
+    public static byte[] ack(byte seq)
+    {
+    	byte[] msg = new byte[10];
+    	
+    	msg[0] = STX0;
+    	msg[1] = STX1;
+    	msg[2] = RID_PMB5010;
+    	msg[3] = (byte) (seq & 0xff);
+    	msg[4] = TX_ACK;
+    	msg[5] = 1;
+    	msg[6] = 1;
+    	msg[7] = calcCRC(msg);
+    	msg[8] = ETX0;
+    	msg[9] = ETX1;
+    	
+    	return msg;
+    }
+    
     public static byte[] startAudioRecording(byte voiceSegmentLength)
     {
     	byte[] msg = new byte[10];
@@ -91,7 +132,7 @@ public class PMB5010
     	msg[3] = RESERVED;
     	msg[4] = START_AUDIO_RECORDING;
     	msg[5] = 1; // len
-    	msg[6] = voiceSegmentLength;
+    	msg[6] = (byte) (voiceSegmentLength & 0xff);
     	msg[7] = calcCRC(msg);
     	msg[8] = ETX0;
     	msg[9] = ETX1;
@@ -116,7 +157,7 @@ public class PMB5010
     	return msg;
     }
     
-    public static byte[] startAudioPlayback(short sampleLength)
+    public static byte[] startAudioPlayback(short sampleLength, byte seq)
     {
     	byte[] msg = new byte[10];
     	
@@ -138,7 +179,7 @@ public class PMB5010
     	msg[0] = STX0;
     	msg[1] = STX1;
     	msg[2] = RID_PMB5010;
-    	msg[3] = RESERVED; // TODO SEQ
+    	msg[3] = (byte) (seq & 0xff);
     	msg[4] = START_AUDIO_PLAYBACK;
     	msg[5] = 1;
     	msg[6] = (byte) (length & 0xff);

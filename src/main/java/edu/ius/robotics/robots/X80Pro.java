@@ -361,7 +361,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		this.dcMotorVol = 0;
 	}
 	
-	public void sensorEvent(byte[] sensorData)
+	public void sensorEvent(String robotIP, int robotPort, byte[] sensorData)
 	{
 		int z = sensorData.length;
 		
@@ -469,7 +469,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 				// we just received audio stream data, what do we do with it?
 				if (null != iRobotAudio)
 				{
-					iRobotAudio.audioEvent(pcm.decode(Arrays.copyOfRange(sensorData, PMB5010.PAYLOAD_OFFSET, sensorData.length - PMB5010.FOOTER_LENGTH), sensorData[PMB5010.LENGTH_OFFSET]));					
+					iRobotAudio.audioEvent(robotIP, robotPort, pcm.decode(Arrays.copyOfRange(sensorData, PMB5010.PAYLOAD_OFFSET, sensorData.length - PMB5010.FOOTER_LENGTH), sensorData[PMB5010.LENGTH_OFFSET]));					
 				}
 			}
 			else if (PMB5010.VIDEO_PACKET == sensorData[PMB5010.DID_OFFSET])
@@ -496,7 +496,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 					// Step 3: Decode complete data from buffer if we have finished receiving.
 					if (PMB5010.SEQ_TERMINATE == sensorData[PMB5010.SEQ_OFFSET])
 					{
-						iRobotVideo.videoEvent(jpeg.decode(jpegBuffer, jpegBufferSize));
+						iRobotVideo.videoEvent(robotIP, robotPort, jpeg.decode(jpegBuffer, jpegBufferSize));
 					}
 				} // else if null == iRobotVideo (no delegate), we won't do anything with the data.
 			}
@@ -1050,7 +1050,37 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		socket.send(PMS5005.setAllServoPulses((short) p0, (short) -p1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
 	}
 	
-	void turnThetaRadians(double theta)
+	public void startAudioRecording(byte voiceSegmentLength)
+	{
+		socket.send(PMB5010.startAudioRecording(voiceSegmentLength));
+	}
+	
+	public void stopAudioRecording(byte voiceSegmentLength)
+	{
+		socket.send(PMB5010.stopAudioRecording(voiceSegmentLength));
+	}
+	
+	public void startAudioPlayback(short sampleLength)
+	{
+		for (byte seq = 0; seq < sampleLength / 0xff; ++seq)
+		{
+			socket.send(PMB5010.startAudioPlayback(sampleLength, seq));
+		}
+		
+		socket.send(PMB5010.startAudioPlayback(sampleLength, (byte) (0xff & 0xff)));
+	}
+	
+	public void stopAudioPlayback()
+	{
+		socket.send(PMB5010.stopAudioPlayback());
+	}
+	
+	public void continueAudioPlayback(short[] audioSample)
+	{
+		socket.send(PMB5010.continueAudioPlayback(pcm.encode(audioSample, (short) audioSample.length)));
+	}
+	
+	public void turnThetaRadians(double theta)
 	{
 		//@ post: Robot has turned an angle theta in radians
 
