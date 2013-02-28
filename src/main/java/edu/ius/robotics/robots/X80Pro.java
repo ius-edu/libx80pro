@@ -496,7 +496,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 					// Step 3: Decode complete data from buffer if we have finished receiving.
 					if (PMB5010.SEQ_TERMINATE == sensorData[PMB5010.SEQ_OFFSET])
 					{
-						iRobotVideo.videoEvent(robotIP, robotPort, jpeg.decode(jpegBuffer, jpegBufferSize));
+						//iRobotVideo.videoEvent(robotIP, robotPort, jpeg.decode(jpegBuffer, jpegBufferSize));
 					}
 				} // else if null == iRobotVideo (no delegate), we won't do anything with the data.
 			}
@@ -571,7 +571,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	public void lowerHead()
 	{
 		System.err.println("Lower Head");
-		socket.send(PMS5005.setAllServoPulses((short) (SERVO0_INI/2), (short) (SERVO1_INI/2), (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
+		socket.send(PMS5005.setAllServoPulses((short) (SERVO0_INI/2), (short) (SERVO1_INI), (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
 	}
 	
 	public void resumeAllSensors()
@@ -665,17 +665,17 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		socket.send(PMS5005.setAllSensorPeriod((short) timePeriod));
 	}
 	
-//	public int getSensorSonar(int channel)
+//	public int getSonar(int channel)
 //	{
 //		return (byte) (standardSensorData[channel + PMS5005.ULTRASONIC_OFFSET] & 0xff);
 //	}
 	
-	synchronized public double getSensorSonarRange(int channel)
+	public double getSonarRange(int channel)
 	{
 		return AD2Dis ((byte) (standardSensorData[channel + PMS5005.ULTRASONIC_OFFSET_WITH_HEADER] & 0xff));
 	}
 	
-	public double getSensorIRRange(int channel)
+	public double getIRRange(int channel)
 	{
 		double result = -1;
 		
@@ -693,40 +693,40 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		return result;
 	}
 	
-	public int getSensorHumanAlarm(int channel)
+	public int getHumanAlarm(int channel)
 	{
 		int offset = 2 * channel + PMS5005.HUMAN_ALARM_OFFSET_WITH_HEADER;
 		return (short) (((standardSensorData[offset + 1] & 0xff) << 8) | (standardSensorData[offset] & 0xff));
 	}
 	
-	public int getSensorHumanMotion(int channel)
+	public int getHumanMotion(int channel)
 	{
 		int offset = 2 * channel + PMS5005.HUMAN_MOTION_OFFSET_WITH_HEADER;
 		return (short) (((standardSensorData[offset+1] & 0xff) << 8) | (standardSensorData[offset] & 0xff));
 	}
 	
-	public int getSensorTiltingX(int channel)
+	public int getTiltingX(int channel)
 	{
 		return (short) (((standardSensorData[PMS5005.TILTING_X_OFFSET_WITH_HEADER+1] & 0xff) << 8) | (standardSensorData[PMS5005.TILTING_X_OFFSET_WITH_HEADER] & 0xff));
 	}
 	
-	public int getSensorTiltingY(int channel)
+	public int getTiltingY(int channel)
 	{
 		return (short) (((standardSensorData[PMS5005.TILTING_Y_OFFSET_WITH_HEADER+1] & 0xff) << 8) | (standardSensorData[PMS5005.TILTING_Y_OFFSET_WITH_HEADER] & 0xff));
 	}
 	
-	public int getSensorOverheat(int channel)
+	public int getOverheat(int channel)
 	{
 		int offset = 2*channel + PMS5005.OVERHEAT_SENSOR_OFFSET_WITH_HEADER;
 		return (short) (((standardSensorData[offset+1] & 0xff) << 8) | (standardSensorData[offset] & 0xff));
 	}
 	
-	public int getSensorTemperature()
+	public int getAmbientTemperature()
 	{
 		return (short) (((standardSensorData[PMS5005.TEMPERATURE_AD_OFFSET_WITH_HEADER+1] & 0xff) << 8) | (standardSensorData[PMS5005.TEMPERATURE_AD_OFFSET_WITH_HEADER] & 0xff));
 	}
 	
-	public int getSensorIRCode(int index)
+	public int getIRCode(int index)
 	{
 		return (short) standardSensorData[PMS5005.INFRARED_COMMAND_OFFSET_WITH_HEADER + index];
 	}
@@ -736,23 +736,23 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		//PMS5005.setInfraredControlOutput((short) lowWord, (short) highWord);
 	}
 	
-	public int getSensorBatteryAD(int channel)
+	public int getBatteryAD(int channel)
 	{
 		return (short) (((standardSensorData[2 * channel + PMS5005.BATTERY_SENSOR_OFFSET_WITH_HEADER+1] & 0xff) << 8 | standardSensorData[2*channel + PMS5005.BATTERY_SENSOR_OFFSET_WITH_HEADER] & 0xff));
 
 	}
 	
-	public int getSensorRefVoltage()
+	public int getReferenceVoltage()
 	{
 		return (short) (((standardSensorData[PMS5005.REFERENCE_VOLTAGE_OFFSET_WITH_HEADER + 1] & 0xff) << 8 | standardSensorData[PMS5005.REFERENCE_VOLTAGE_OFFSET_WITH_HEADER] & 0xff));
 	}
 	
-	public int getSensorPotVoltage()
+	public int getPotentiometerVoltage()
 	{
 		return (short) (((standardSensorData[PMS5005.POTENTIOMETER_POWER_OFFSET_WITH_HEADER + 1] & 0xff) << 8 | standardSensorData[PMS5005.POTENTIOMETER_POWER_OFFSET_WITH_HEADER] & 0xff));
 	}
 	
-	public int getSensorPot(int channel)
+	public int getPotentiometerReading(int channel)
 	{
 		return (short) (((motorSensorData[2 * channel + PMS5005.POTENTIOMETER_SENSOR_OFFSET_WITH_HEADER + 1]) << 8 | motorSensorData[2 * channel + PMS5005.POTENTIOMETER_SENSOR_OFFSET_WITH_HEADER]));
 

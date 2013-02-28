@@ -131,25 +131,9 @@ public class UDPSocket implements Runnable
 //			}
 			
 			// wait synchronously for feedback from robot to be clear that we have established connection
-			try
-			{
-				socket.setSoTimeout(CONNECT_WAIT);
-				socket.receive(rxPkt);
-			}
-			catch (Exception ex)
-			{
-				try
-				{
-					Thread.sleep(2*CONNECT_WAIT);
-				}
-				catch (Exception ex2)
-				{
-					ex2.printStackTrace();
-				}
-				// wait synchronously for feedback from robot to be clear that we have established connection
-				socket.setSoTimeout(CONNECT_WAIT);
-				socket.receive(rxPkt);
-			}
+			socket.setSoTimeout(CONNECT_WAIT);
+			socket.receive(rxPkt);
+
 //			result = true;
 //		}
 //		catch (IOException ex)

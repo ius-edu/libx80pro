@@ -231,8 +231,7 @@ public interface IX80Pro
      * with the left-front sensor (robot first person perspective) at Sonar #1 
      * (channel 0).
      */
-    //int getSensorSonar(int channel);
-    double getSensorSonarRange(int channel);
+    double getSonarRange(int channel);
 
     /**
      * Returns the current distance measurement value between an infrared 
@@ -250,8 +249,7 @@ public interface IX80Pro
      * digital converter.  The output voltage of the sensor can be calculated 
      * from the following equation: sensorOutputVoltage = (ival)*3.0/4095(v)
      */
-    //int getSensorIRRange(int channel);
-    double getSensorIRRange(int channel);
+    double getIRRange(int channel);
 
     /**
      * Returns the current human alarm data from the DHM5150 Human Motion 
@@ -272,7 +270,7 @@ public interface IX80Pro
      * threshold determines the sensitivity of the sensor.  The higher the 
      * threshold, the lower the sensitivity will be.
      */
-    int getSensorHumanAlarm(int channel);
+    int getHumanAlarm(int channel);
 
     /**
      * Returns the current human motion value from the DHM5150 Human Motion 
@@ -292,7 +290,7 @@ public interface IX80Pro
      * human motion, the different patterns of the two sensor modules manifest 
      * the direction of motion.  The relationship can be obtained emperically.
      */
-    int getSensorHumanMotion(int channel);
+    int getHumanMotion(int channel);
 
     /**
      * Returns the current tilt angle value in the horizontal direction from 
@@ -314,7 +312,7 @@ public interface IX80Pro
      * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
      * ZeroGValue) is about 1250.
      */
-    int getSensorTiltingX(int channel);
+    int getTiltingX(int channel);
 
     /**
      * Returns the current tilt angle value in the vertical direction from 
@@ -336,7 +334,7 @@ public interface IX80Pro
      * Typical value of ZeroGValue is about 2048 and abs(90DegreeGValue - 
      * ZeroGValue) is about 1250.
      */
-    int getSensorTiltingY(int channel);
+    int getTiltingY(int channel);
 
     /**
      * Returns the current air temperature values near the relevant DC motor 
@@ -358,7 +356,7 @@ public interface IX80Pro
      * from the following equation: Temperature = 100 - (ival - 980)/11.6 
      * where Temperature is in degrees Celsius.
      */
-    int getSensorOverheat(int channel);
+    int getOverheat(int channel);
 
     /**
      * Returns the current temperature value from the 
@@ -367,7 +365,7 @@ public interface IX80Pro
      * @return Temperature = (ival - 1256) / 34.8, where Temperature is in 
      * degrees Celsius.
      */
-    int getSensorTemperature();
+    int getAmbientTemperature();
 
     /**
      * Returns the four parts of a two-16-bit-code infrared 
@@ -381,7 +379,7 @@ public interface IX80Pro
      * Repeat Code: byte[3]
      * Where the repeat byte would be 255 if the button is pressed continuously
      */
-    int getSensorIRCode(int index);
+    int getIRCode(int index);
 
     /**
      * Sends two 16-bit words of infrared communication output data to the 
@@ -428,7 +426,7 @@ public interface IX80Pro
      * 2) Power supply voltage of DC motors = 24v*(ival/4095)
      * 3) Power supply voltage of servo motors = 9v*(ival/4095)
      */
-    int getSensorBatteryAD(int channel);
+    int getBatteryAD(int channel);
 
     /**
      * Returns the current value of the reference voltage of the A/D converter 
@@ -439,7 +437,7 @@ public interface IX80Pro
      * The following equation can be used to calculate the actual voltage 
      * values: Voltage = 6v*(ival/4095)
      */
-    int getSensorRefVoltage();
+    int getReferenceVoltage();
 
     /**
      * Returns the current value of the reference voltage of the A/D converter 
@@ -450,7 +448,7 @@ public interface IX80Pro
      * The following equation can be used to calculate the actual voltage 
      * values: Voltage = 6v*(ival/4095)
      */
-    int getSensorPotVoltage();
+    int getPotentiometerVoltage();
 
     /**
      * Returns the current value of the specified potentiometer position sensor
@@ -460,7 +458,7 @@ public interface IX80Pro
      * @return The raw value given by the analog to digital converter 
      * indicating the output voltage of the sensor.  The data range is between 
      * 0 and 4095.  The angular position can be calculated as follows, with the 
-     * 180 degree position defind at the sensors' physical middle position.  
+     * 180 degree position defined at the sensors' physical middle position.  
      * Single sensor or dual sensor can be used for rotation measurement.
      *
      * Please note:
@@ -480,9 +478,9 @@ public interface IX80Pro
      *    4 would be combined instead.
      *      Angle position (degrees) = (ival - 2214)/2214*180 + 180
      *
-     * @see setDcMotorSensorUsage
+     * @see setDCMotorSensorUsage
      */
-    int getSensorPot(int channel);
+    int getPotentiometerReading(int channel);
 
     /**
      * Returns the sampling value of the selected motor current sensor.
@@ -545,7 +543,7 @@ public interface IX80Pro
      * voltage levels can be calculated from the following equation: 
      * Sensor output voltage = (ival) * 3.0v/4095
      *
-     * @see getSensorBatteryAd
+     * @see getBatteryAD
      */
     int getCustomAD(int channel);
 
@@ -711,7 +709,7 @@ public interface IX80Pro
      * 2) Each DC motor channel for dual potentiometer sensors utilizes two 
      *    potentiometer channels.  DC motor channel 0 
      *
-     * @see getSensorPot
+     * @see getPotentiometerReading
      */
     void setDCMotorSensorUsage(int channel, int sensorType);
 
@@ -761,7 +759,7 @@ public interface IX80Pro
      *    second when using dual potentiometer sensor for rotational postion 
      *    measurement and pulse/second when using quadrature encoder.
      * 
-     * @see getSensorPot
+     * @see getPotentiometerReading
      */
     void setDCMotorPosition(int channel, int pos);
     
@@ -830,8 +828,8 @@ public interface IX80Pro
      *    command is received.
      * 2) Target position value is the A/D sampling data range 0 to 4095 when 
      *    using single potentiometer, 0-4428 when using dual potentiometers.
-     * 3) Please refer to the description of getSensorPot for data conversion 
-     *    between angular values and the A/D sampling data values.
+     * 3) Please refer to the description of getPotentiometerReading for data 
+     *    conversion between angular values and the A/D sampling data values.
      * 4) When using the encoder as sensor input, the target position value is 
      *    the pulse count in the range of 0-32767.
      * 5) When omitting motor channels from control, the command value should 

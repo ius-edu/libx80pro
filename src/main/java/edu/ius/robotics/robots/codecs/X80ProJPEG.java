@@ -665,8 +665,12 @@ public class X80ProJPEG
 		for (x = 0; x < w; ++x)
 		{
 			cin = c.pixels[x];
-			cout = cout[x];
-			
+			cout = out[x];
+			cout = CF(CF2A * cin[0] + CF2B * cin[s1]);
+			cout += w;
+			cout = CF(CF3X * cin[0] + CF3Y * cin[s1] + CF3Z * cin[s2]);
+			cout += w;
+			cout = CF();
 		}
 	}
 	
