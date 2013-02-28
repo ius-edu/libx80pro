@@ -59,7 +59,7 @@ public class X80ProJPEG
 	
 	private byte clip(int x)
 	{
-		return (x < 0) ? (byte) 0 : ((0xFF < x) ? (byte) (0xFF & 0xFF) : (byte) (x & 0xFF));
+		return (x < 0) ? (byte) 0 : ((0xFF < x) ? (byte) (0xFF & 0xFF) : (byte) (0xFF & x));
 	}
 	
 	public static final int W1 = 2841;  
@@ -69,21 +69,67 @@ public class X80ProJPEG
 	public static final int W6 = 1108; 
 	public static final int W7 = 565;
 	
-	private void RotIDCT(int[] blk)
+//	private void RowIDCT(int[] blk)
+//	{
+//		int x0, x1, x2, x3, x4, x5, x6, x7, x8;
+//		if (0 == ((x1 = blk[4] << 11)
+//				| (x2 = blk[6])
+//				| (x3 = blk[2])
+//				| (x4 = blk[1])
+//				| (x5 = blk[7])
+//				| (x6 = blk[5])
+//				| (x7 = blk[3])))
+//		{
+//			blk[0] = blk[1] = blk[2] = blk[3] = blk[4] = blk[5] = blk[6] = blk[7] = blk[0] << 3;
+//			return;
+//		}
+//		 x0 = (blk[0] << 11) + 128;
+//         x8 = W7 * (x4 + x5);
+//         x4 = x8 + (W1 - W7) * x4;
+//         x5 = x8 - (W1 + W7) * x5;
+//         x8 = W3 * (x6 + x7);
+//         x6 = x8 - (W3 - W5) * x6;
+//         x7 = x8 - (W3 + W5) * x7;
+//         x8 = x0 + x1;
+//         x0 -= x1;
+//         x1 = W6 * (x3 + x2);
+//         x2 = x1 - (W2 + W6) * x2;
+//         x3 = x1 + (W2 - W6) * x3;
+//         x1 = x4 + x6;
+//         x4 -= x6;
+//         x6 = x5 + x7;
+//         x5 -= x7;
+//         x7 = x8 + x3;
+//         x8 -= x3;
+//         x3 = x0 + x2;
+//         x0 -= x2;
+//         x2 = (181 * (x4 + x5) + 128) >> 8;
+//         x4 = (181 * (x4 - x5) + 128) >> 8;
+//         blk[0] = (x7 + x1) >> 8;
+//         blk[1] = (x3 + x2) >> 8;
+//         blk[2] = (x0 + x4) >> 8;
+//         blk[3] = (x8 + x6) >> 8;
+//         blk[4] = (x8 - x6) >> 8;
+//         blk[5] = (x0 - x4) >> 8;
+//         blk[6] = (x3 - x2) >> 8;
+//         blk[7] = (x7 - x1) >> 8;
+//	}
+	
+	private void RowIDCT(int[] blk, int off)
 	{
 		int x0, x1, x2, x3, x4, x5, x6, x7, x8;
-		if (0 == ((x1 = blk[4] << 11)
-				| (x2 = blk[6])
-				| (x3 = blk[2])
-				| (x4 = blk[1])
-				| (x5 = blk[7])
-				| (x6 = blk[5])
-				| (x7 = blk[3])))
+		if (0 == ((x1 = blk[off + 4] << 11)
+				| (x2 = blk[off + 6])
+				| (x3 = blk[off + 2])
+				| (x4 = blk[off + 1])
+				| (x5 = blk[off + 7])
+				| (x6 = blk[off + 5])
+				| (x7 = blk[off + 3])))
 		{
-			blk[0] = blk[1] = blk[2] = blk[3] = blk[4] = blk[5] = blk[6] = blk[7] = blk[0] << 3;
+			blk[off + 0] = blk[off + 1] = blk[off + 2] = blk[off + 3] = blk[off + 4] = blk[off + 5] = blk[off + 6] = blk[off + 7] = blk[off + 0] << 3;
 			return;
 		}
-		 x0 = (blk[0] << 11) + 128;
+		 x0 = (blk[off + 0] << 11) + 128;
          x8 = W7 * (x4 + x5);
          x4 = x8 + (W1 - W7) * x4;
          x5 = x8 - (W1 + W7) * x5;
@@ -105,14 +151,14 @@ public class X80ProJPEG
          x0 -= x2;
          x2 = (181 * (x4 + x5) + 128) >> 8;
          x4 = (181 * (x4 - x5) + 128) >> 8;
-         blk[0] = (x7 + x1) >> 8;
-         blk[1] = (x3 + x2) >> 8;
-         blk[2] = (x0 + x4) >> 8;
-         blk[3] = (x8 + x6) >> 8;
-         blk[4] = (x8 - x6) >> 8;
-         blk[5] = (x0 - x4) >> 8;
-         blk[6] = (x3 - x2) >> 8;
-         blk[7] = (x7 - x1) >> 8;
+         blk[off + 0] = (x7 + x1) >> 8;
+         blk[off + 1] = (x3 + x2) >> 8;
+         blk[off + 2] = (x0 + x4) >> 8;
+         blk[off + 3] = (x8 + x6) >> 8;
+         blk[off + 4] = (x8 - x6) >> 8;
+         blk[off + 5] = (x0 - x4) >> 8;
+         blk[off + 6] = (x3 - x2) >> 8;
+         blk[off + 7] = (x7 - x1) >> 8;
 	}
 	
 	private void colIDCT(int[] blk, byte[] out, int stride)
@@ -157,7 +203,7 @@ public class X80ProJPEG
         x2 = (181 * (x4 + x5) + 128) >> 8;
         x4 = (181 * (x4 - x5) + 128) >> 8;
         int i = 0;
-        out[i += stride] = (byte) (clip(((x7 + x1) >> 14) + 128) & 0xff);
+        out[i += stride] = (byte) (0xFF & clip(((x7 + x1) >> 14) + 128));
         out[i += stride] = clip(((x3 + x2) >> 14) + 128);
         out[i += stride] = clip(((x0 + x4) >> 14) + 128);
         out[i += stride] = clip(((x8 + x6) >> 14) + 128);
@@ -198,11 +244,11 @@ public class X80ProJPEG
 					{
 					case 0:
 						break;
-					case (byte) (0xD9 & 0xff):
+					case (byte) (0xFF & 0xD9):
 						ctx.size = 0;
 						break;
 					default:
-						if (0xD0 != (byte) ((marker & 0xF8) & 0xFF))
+						if (0xD0 != (byte) (marker & 0xF8))
 						{
 							ctx.error = DecodeResult.SyntaxError;
 						}
@@ -522,7 +568,7 @@ public class X80ProJPEG
 			} while (coef < 63);
 			for (coef = 0; coef < 64; coef += 8)
 			{
-				rowIDCT(ctx.block[coef]);
+				rowIDCT(ctx.block, coef);
 			}
 			for (coef = 0; coef < 8; ++coef)
 			{
@@ -658,61 +704,170 @@ public class X80ProJPEG
 	
 	private void upsampleV(Component c)
 	{
-		int w = c.width, s1 = c.stride, s2 = s1 + s1;
+		int w = c.width, s1 = c.stride, s2 = s1 + s1, t = 0, i = 0;
 		byte[] out, cin, cout;
-		int x, y, cinoff = 0, coutoff = 0;
+		int x, y;
 		out = new byte[(c.width * c.height) << 1];
+		
+		cin = c.pixels; // c.pixels[x];
+		cout = out; // out[x];
 		for (x = 0; x < w; ++x)
 		{
-			cin = c.pixels[x];
-			cout = out[x];
-			cout = CF(CF2A * cin[0] + CF2B * cin[s1]);
-			cout += w;
-			cout = CF(CF3X * cin[0] + CF3Y * cin[s1] + CF3Z * cin[s2]);
-			cout += w;
-			cout = CF();
+			i = t = x;
+			cout[t += w] = CF(CF2A * cin[i + 0] + CF2B * cin[i + s1]);
+			cout[t += w] = CF(CF3X * cin[i + 0] + CF3Y * cin[i + s1] + CF3Z * cin[i + s2]);
+			cout[t += w] = CF(CF3A * cin[i + 0] + CF3B * cin[i + s1] + CF3C * cin[i + s2]);
+			i += s1; //cin += s1;
+			for (y = c.height - 3; 0 < y; --y)
+			{
+				cout[t += w] = CF(CF4A * cin[i - s1] + CF4B * cin[i + 0] + CF3C * cin[i + s1] + CF4D * cin[i + s2]);
+				cout[t += w] = CF(CF4D * cin[i - s1] + CF4C * cin[i + 0] + CF4B * cin[i + s1] + CF4A * cin[i + s2]);
+				i += s1;
+			}
+			i += s1;
+			cout[t += w] = CF(CF3A * cin[i + 0] + CF3B * cin[i - s1] + CF3C * cin[i - s2]);
+			cout[t += w] = CF(CF3X * cin[i + 0] + CF3Y * cin[i - s1] + CF3Z * cin[i - s2]);
+			cout[t] = CF(CF2A * cin[i + 0] + CF2B * cin[i - s1]);
+		}
+		c.height <<= 1;
+		c.stride = c.width;
+		c.pixels = null;
+		c.pixels = out;
+	}
+	
+	private void convert()
+	{
+		int i;
+		Component c;
+		for (i = 0; i < ctx.ncomp; ++i)
+		{
+			c = ctx.comp[i];
+			while ((c.width < ctx.width) || (c.height < ctx.height))
+			{
+				if (c.width < ctx.width)
+				{
+					upsampleH(c);
+				}
+				if (DecodeResult.OK != ctx.error)
+				{
+					return;
+				}
+				if (c.height < ctx.height)
+				{
+					upsampleV(c);
+				}
+				if (DecodeResult.OK != ctx.error)
+				{
+					return;
+				}
+			}
+		}
+		if (3 == ctx.ncomp)
+		{
+			// convert to RGB
+			int x, yy;
+			byte[] prgb = ctx.rgb;
+			byte[] py = ctx.comp[0].pixels;
+			byte[] pcb = ctx.comp[1].pixels;
+			byte[] pcr = ctx.comp[2].pixels;
+			int off = 0;
+			for (yy = ctx.height; 0 < yy; --yy)
+			{
+				for (x = 0; x < ctx.width; ++x)
+				{
+					int y = py[x] << 8;
+					int cb = pcb[x] - 128;
+					int cr = pcr[x] - 128;
+					prgb[off++] = clip((y + 359 * cr + 128) >> 8);
+					prgb[off++] = clip((y - 88 * cb - 183 * cr + 128) >> 8);
+					prgb[off++] = clip((y + 454 * cb + 128) >> 8);
+				}
+				py += ctx.comp[0].stride;
+				pcb += ctx.comp[1].stride;
+				pcr += ctx.comp[2].stride;
+			}
+		}
+		else if (ctx.comp[0].width != ctx.comp[0].stride)
+		{
+			// grayscale -> only remove stride
+			byte[] pin = ctx.comp[0].pixels[ctx.comp[0].stride];
+			byte[] pout = ctx.comp[0].pixels[ctx.comp[0].width];
+			int y;
+			for (y = ctx.comp[0].height - 1; 0 < y; --y)
+			{
+				memcpy(pout, pin, ctx.comp[0].width);
+				pin += ctx.comp[0].stride;
+				pout += ctx.comp[0].width;
+			}
+			ctx.comp[0].stride = ctx.comp[0].width;
 		}
 	}
 	
-	int[] DCT_COEFFICIENT_MATRIX = 
+	DecodeResult decode(byte[] jpeg, int size) throws JPEGDecoderException
 	{
-		-26, -3, -6, 2, 2, -1, 0, 0, 
-		0, -2, -4, 1, 1, 0, 0, 0, 
-		-3, 1, 5, -1, -1, 0, 0, 0, 
-		-4, 1, 2, -1, 0, 0, 0, 0, 
-		1, 0, 0, 0, 0, 0, 0, 0, 
-		0, 0, 0, 0, 0, 0, 0, 0, 
-		0, 0, 0, 0, 0, 0, 0, 0, 
-		0, 0, 0, 0, 0, 0, 0, 0
-	};
+		ctx.pos = jpeg;
+		ctx.size = size & 0x7FFFFFFF;
+		if (ctx.size < 2)
+		{
+			return DecodeResult.NotAJpeg;
+		}
+		if (0 != ((ctx.pos[ctx.posoff + 0] ^ 0xFF) | (ctx.pos[ctx.posoff + 1] ^ 0xD8)))
+		{
+			return DecodeResult.NotAJpeg;
+		}
+		skip(2);
+		while (DecodeResult.OK == ctx.error)
+		{
+			if ((ctx.size < 2) || (ctx.pos[ctx.posoff + 0] != 0xFF))
+			{
+				return DecodeResult.SyntaxError;
+			}
+			switch (ctx.pos[ctx.posoff - 1])
+			{
+			case (byte) (0xFF & 0xC0): decodeSOF();	break;
+			case (byte) (0xFF & 0xC4): decodeDHT();	break;
+			case (byte) (0xFF & 0xDB): decodeDQT(); break;
+			case (byte) (0xFF & 0xDD): decodeDRI(); break;
+			case (byte) (0xFF & 0xDA): decodeScan(); break;
+			case (byte) (0xFF & 0xFE): skipMarker(); break;
+			default:
+				if (0xE0 == (ctx.pos[ctx.posoff - 1] & 0xF0))
+				{
+					skipMarker();
+				}
+				else
+				{
+					return DecodeResult.Unsupported;
+				}
+			}
+		}
+		if (DecodeResult.Internal_Finished != ctx.error)
+		{
+			return ctx.error;
+		}
+		ctx.error = DecodeResult.OK;
+		return ctx.error;
+	}
 	
-	int[] PRODUCT_MATRIX =
+	public X80ProJPEG(byte[] data)
 	{
-		-416, -33, -60, 32, 48, -40, 0, 0, 
-		0, -24, -56, 19, 26, 0, 0, 0, 
-		-42, 13, 80, -24, -40, 0, 0, 0, 
-		-42, 17, 44, -29, 0, 0, 0, 0, 
-		18, 0, 0, 0, 0, 0, 0, 0, 
-		0, 0, 0, 0, 0, 0, 0, 0, 
-		0, 0, 0, 0, 0, 0, 0, 0, 
-		0, 0, 0, 0, 0, 0, 0, 0
-	};
-	
-	int compressionPercentage;
-	
-	public X80ProJPEG(int compressionPercentage)
-	{
-		
+		byte[] temp = { 0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18,
+		        11, 4, 5, 12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35,
+		        42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45,
+		        38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63 };
+	    memcpy(ZZ, temp, sizeof(ZZ));
+	    memset(&ctx, 0, sizeof(Context));
+	    decode(data, size);
 	}
 	
 	public int getHeight()
 	{
-		return 0;
+		return ctx.height;
 	}
 	
 	public int getWidth()
 	{
-		return 0;
+		return ctx.width;
 	}
 	
 	/**
@@ -722,21 +877,25 @@ public class X80ProJPEG
 	 */
 	public byte[] getImage(byte[] input, int length)
 	{
-		byte[] output = new byte[length]; // coefficient?
-		
-		
-		
-		return output;
+		return (ctx.ncomp == 1) ? ctx.comp[0].pixels : ctx.rgb;
 	}
 	
 	public int getImageSize()
 	{
-		return 0;
+		return ctx.width * ctx.height * ctx.ncomp;
 	}
 	
 	public boolean isColor()
 	{
-		return false;
+		if (ctx.ncomp != 1)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		}
 	}
 	
 }
