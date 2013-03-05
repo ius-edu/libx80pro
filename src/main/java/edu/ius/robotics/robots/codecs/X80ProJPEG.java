@@ -55,7 +55,7 @@ public class X80ProJPEG
 	}
 	
 	X80ProJPEG.Context ctx = new X80ProJPEG.Context();
-	char[] ZZ = new char[64];
+	byte[] ZZ = new byte[64];
 	
 	private byte clip(int x)
 	{
@@ -69,7 +69,7 @@ public class X80ProJPEG
 	public static final int W6 = 1108; 
 	public static final int W7 = 565;
 	
-//	private void RowIDCT(int[] blk)
+//	private void rowIDCT(int[] blk)
 //	{
 //		int x0, x1, x2, x3, x4, x5, x6, x7, x8;
 //		if (0 == ((x1 = blk[4] << 11)
@@ -115,7 +115,7 @@ public class X80ProJPEG
 //         blk[7] = (x7 - x1) >> 8;
 //	}
 	
-	private void RowIDCT(int[] blk, int off)
+	private void rowIDCT(int[] blk, int off)
 	{
 		int x0, x1, x2, x3, x4, x5, x6, x7, x8;
 		if (0 == ((x1 = blk[off + 4] << 11)
@@ -161,26 +161,26 @@ public class X80ProJPEG
          blk[off + 7] = (x7 - x1) >> 8;
 	}
 	
-	private void colIDCT(int[] blk, byte[] out, int stride)
+	private void colIDCT(int[] blk, byte[] out, int off, int stride)
 	{
 		int x0, x1, x2, x3, x4, x5, x6, x7, x8;
-        if (0 == ((x1 = blk[8*4] << 8)
-        		| (x2 = blk[8*6])
-        		| (x3 = blk[8*2])
-        		| (x4 = blk[8*1])
-        		| (x5 = blk[8*7])
-        		| (x6 = blk[8*5])
-        		| (x7 = blk[8*3])))
+        if (0 == ((x1 = blk[off + 8*4] << 8)
+        		| (x2 = blk[off + 8*6])
+        		| (x3 = blk[off + 8*2])
+        		| (x4 = blk[off + 8*1])
+        		| (x5 = blk[off + 8*7])
+        		| (x6 = blk[off + 8*5])
+        		| (x7 = blk[off + 8*3])))
         {
-            x1 = clip(((blk[0] + 32) >> 6) + 128);
+            x1 = clip(((blk[off + 0] + 32) >> 6) + 128);
             int i = 0;
             for (x0 = 8; 0 < x0; --x0) 
             {
-                out[i += stride] = (byte) (0xFF & x1);
+                out[off + (i += stride)] = (byte) (0xFF & x1);
             }
             return;
         }
-        x0 = (blk[0] << 8) + 8192;
+        x0 = (blk[off + 0] << 8) + 8192;
         x8 = W7 * (x4 + x5) + 4;
         x4 = (x8 + (W1 - W7) * x4) >> 3;
         x5 = (x8 - (W1 + W7) * x5) >> 3;
@@ -203,14 +203,14 @@ public class X80ProJPEG
         x2 = (181 * (x4 + x5) + 128) >> 8;
         x4 = (181 * (x4 - x5) + 128) >> 8;
         int i = 0;
-        out[i += stride] = (byte) (0xFF & clip(((x7 + x1) >> 14) + 128));
-        out[i += stride] = clip(((x3 + x2) >> 14) + 128);
-        out[i += stride] = clip(((x0 + x4) >> 14) + 128);
-        out[i += stride] = clip(((x8 + x6) >> 14) + 128);
-        out[i += stride] = clip(((x8 - x6) >> 14) + 128);
-        out[i += stride] = clip(((x0 - x4) >> 14) + 128);
-        out[i += stride] = clip(((x3 - x2) >> 14) + 128);
-        out[i] = clip(((x7 - x1) >> 14) + 128);
+        out[off + (i += stride)] = (byte) (0xFF & clip(((x7 + x1) >> 14) + 128));
+        out[off + (i += stride)] = clip(((x3 + x2) >> 14) + 128);
+        out[off + (i += stride)] = clip(((x0 + x4) >> 14) + 128);
+        out[off + (i += stride)] = clip(((x8 + x6) >> 14) + 128);
+        out[off + (i += stride)] = clip(((x8 - x6) >> 14) + 128);
+        out[off + (i += stride)] = clip(((x0 - x4) >> 14) + 128);
+        out[off + (i += stride)] = clip(((x3 - x2) >> 14) + 128);
+        out[off + i] = clip(((x7 - x1) >> 14) + 128);
 	}
 	
 	private int showBits(int bits)
@@ -511,7 +511,7 @@ public class X80ProJPEG
 		skip(ctx.length);
 	}
 	
-	private int getVLC(VlcCode[] vlc, Byte code) // TODO byte[] ?
+	private int getVLC(VlcCode[] vlc, Reference<Byte> code)
 	{
 		int value = showBits(16);
 		int bits = (byte) (0xFF & vlc[value].bits);
@@ -524,7 +524,7 @@ public class X80ProJPEG
 		value = (byte) (0xFF & vlc[value].code);
 		if (null != code)
 		{
-			code = (byte) (0xFF & value);
+			code.set((byte) (0xFF & value));
 		}
 		bits = (byte) (0xFF & (value & 15));
 		if (0 == bits)
@@ -539,9 +539,9 @@ public class X80ProJPEG
 		return value;
 	}
 	
-	private void decodeBlock(Component c, byte out)
+	private void decodeBlock(Component c, int pixoff) throws JPEGDecoderException
 	{
-		byte code;
+		Reference<Byte> code = new Reference<Byte>();
 		int value, coef = 0;
 		for (int i = 0, z = ctx.block.length; i < z; ++i)
 		{
@@ -551,15 +551,15 @@ public class X80ProJPEG
 			do
 			{
 				value = getVLC(ctx.vlctab[c.actabsel], code);
-				if (0 == code)
+				if (0 == code.get())
 				{
 					break; // EOB					
 				}
-				if (0 == (code & 0x0F) && (code != 0xF0))
+				if (0 == (code.get() & 0x0F) && (code.get() != 0xF0))
 				{
 					throw new JPEGDecoderException(DecodeResult.SyntaxError);
 				}
-				coef += (code >> 4) + 1;
+				coef += (code.get() >> 4) + 1;
 				if (63 < coef)
 				{
 					throw new JPEGDecoderException(DecodeResult.SyntaxError);
@@ -572,7 +572,7 @@ public class X80ProJPEG
 			}
 			for (coef = 0; coef < 8; ++coef)
 			{
-				colIDCT(ctx.block[coef], out[coef], c.stride);
+				colIDCT(ctx.block, c.pixels, pixoff + coef, c.stride); // colIDCT(ctx.block[coef], ...)
 			}
 		}
 	}
@@ -623,7 +623,7 @@ public class X80ProJPEG
 					{
 						for (sbx = 0; sbx < c.ssx; ++sbx)
 						{
-							decodeBlock(c, c.pixels[((mby * c.ssy + sby) * c.stride + mbx * c.ssx + sbx) << 3]);
+							decodeBlock(c, ((mby * c.ssy + sby) * c.stride + mbx * c.ssx + sbx) << 3);
 							if (DecodeResult.OK != ctx.error)
 							{
 								return;
@@ -739,6 +739,13 @@ public class X80ProJPEG
 	{
 		int i;
 		Component c;
+		int pyoff = 0;
+		int pcboff = 0;
+		int pcroff = 0;
+		int pinoff = 0;
+		int poutoff = 0;
+		int prgboff = 0;
+		
 		for (i = 0; i < ctx.ncomp; ++i)
 		{
 			c = ctx.comp[i];
@@ -770,34 +777,45 @@ public class X80ProJPEG
 			byte[] py = ctx.comp[0].pixels;
 			byte[] pcb = ctx.comp[1].pixels;
 			byte[] pcr = ctx.comp[2].pixels;
-			int off = 0;
 			for (yy = ctx.height; 0 < yy; --yy)
 			{
 				for (x = 0; x < ctx.width; ++x)
 				{
-					int y = py[x] << 8;
-					int cb = pcb[x] - 128;
-					int cr = pcr[x] - 128;
-					prgb[off++] = clip((y + 359 * cr + 128) >> 8);
-					prgb[off++] = clip((y - 88 * cb - 183 * cr + 128) >> 8);
-					prgb[off++] = clip((y + 454 * cb + 128) >> 8);
+					int y = py[pyoff + x] << 8;
+					int cb = pcb[pcboff + x] - 128;
+					int cr = pcr[pcroff + x] - 128;
+					prgb[prgboff++] = clip((y + 359 * cr + 128) >> 8);
+					prgb[prgboff++] = clip((y - 88 * cb - 183 * cr + 128) >> 8);
+					prgb[prgboff++] = clip((y + 454 * cb + 128) >> 8);
 				}
-				py += ctx.comp[0].stride;
-				pcb += ctx.comp[1].stride;
-				pcr += ctx.comp[2].stride;
+				//py += ctx.comp[0].stride;
+				//pcb += ctx.comp[1].stride;
+				//pcr += ctx.comp[2].stride;
+				pyoff += ctx.comp[0].stride;
+				pcboff += ctx.comp[1].stride;
+				pcroff += ctx.comp[2].stride;
 			}
 		}
 		else if (ctx.comp[0].width != ctx.comp[0].stride)
 		{
 			// grayscale -> only remove stride
-			byte[] pin = ctx.comp[0].pixels[ctx.comp[0].stride];
-			byte[] pout = ctx.comp[0].pixels[ctx.comp[0].width];
+			//byte[] pin = ctx.comp[0].pixels[ctx.comp[0].stride];
+			//byte[] pout = ctx.comp[0].pixels[ctx.comp[0].width];
+			pinoff = ctx.comp[0].stride;
+			byte[] pin = ctx.comp[0].pixels;
+			poutoff = ctx.comp[0].width;
+			byte[] pout = ctx.comp[0].pixels;
+			
 			int y;
 			for (y = ctx.comp[0].height - 1; 0 < y; --y)
 			{
-				memcpy(pout, pin, ctx.comp[0].width);
-				pin += ctx.comp[0].stride;
-				pout += ctx.comp[0].width;
+				//memcpy(pout, pin, ctx.comp[0].width);
+				for (int j = 0, z = ctx.comp[0].width; j < z; ++j)
+				{
+					pout[poutoff + j] = pin[pinoff + j];
+				}
+				pinoff += ctx.comp[0].stride;
+				poutoff += ctx.comp[0].width;
 			}
 			ctx.comp[0].stride = ctx.comp[0].width;
 		}
@@ -846,18 +864,24 @@ public class X80ProJPEG
 			return ctx.error;
 		}
 		ctx.error = DecodeResult.OK;
+		convert();
 		return ctx.error;
 	}
 	
-	public X80ProJPEG(byte[] data)
+	public X80ProJPEG(byte[] data) throws JPEGDecoderException
 	{
-		byte[] temp = { 0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18,
+		byte[] tmp = { 0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18,
 		        11, 4, 5, 12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35,
 		        42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45,
 		        38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63 };
-	    memcpy(ZZ, temp, sizeof(ZZ));
-	    memset(&ctx, 0, sizeof(Context));
-	    decode(data, size);
+	    //memcpy(ZZ, tmp, sizeof(ZZ));
+		for (int i = 0; i < ZZ.length; ++i)
+		{
+			ZZ[i] = tmp[i];
+		}
+	    //memset(&ctx, 0, sizeof(Context));
+	    //decode(data, size);
+		decode(data, data.length);
 	}
 	
 	public int getHeight()
@@ -895,7 +919,5 @@ public class X80ProJPEG
 		{
 			return false;
 		}
-		}
 	}
-	
 }
