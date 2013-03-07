@@ -46,12 +46,12 @@ public class APLite implements Runnable
 		//int count = 0;
 		for (i = 0; i < X80Pro.NUM_IR_SENSORS_FRONT; ++i) 
 		{
-			int irr = (int)(100*robot.getSensorIRRange(i)); // range in CM
+			int irr = (int)(100*robot.getIRRange(i)); // range in CM
 			System.err.println("robot.getSensorIRRange(" + i + "): " + irr);
 			if (irr <= X80Pro.RANGE)
 			{
 				//x = Sensors.thetaIR[i];
-				x = (int)(100*robot.getSensorIRRange(i));
+				x = (int)(100*robot.getIRRange(i));
 				System.err.println("too close, or wide open?");
 				System.err.println("in if statement: robot.getSensorIRRange(" + i + "): " + x); // range in CM
 				//++count;
