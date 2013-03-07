@@ -7,7 +7,7 @@ import java.util.Arrays;
 import edu.ius.robotics.robots.boards.PMS5005;
 import edu.ius.robotics.robots.boards.PMB5010;
 import edu.ius.robotics.robots.codecs.X80ProADPCM;
-import edu.ius.robotics.robots.codecs.X80ProJPEG;
+import edu.ius.robotics.robots.codecs.NanojpegCodec;
 import edu.ius.robotics.robots.interfaces.IRobot;
 import edu.ius.robotics.robots.interfaces.IRobotAudio;
 import edu.ius.robotics.robots.interfaces.IRobotVideo;
@@ -162,7 +162,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	
 	private UDPSocket socket;
 	private X80ProADPCM pcm;
-	private X80ProJPEG jpeg;
+	private NanojpegCodec jpeg;
 	private IRobotAudio iRobotAudio;
 	private IRobotVideo iRobotVideo;
 
