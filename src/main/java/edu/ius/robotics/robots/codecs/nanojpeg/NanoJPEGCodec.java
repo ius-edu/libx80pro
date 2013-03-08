@@ -906,7 +906,7 @@ public class NanoJPEGCodec
 		return ctx.error;
 	}
 	
-	public NanojpegCodec(byte[] data) throws NanojpegException
+	public NanoJPEGCodec(byte[] data) throws NanoJPEGException
 	{
 		byte[] tmp = { 0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18,
 		        11, 4, 5, 12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35,
