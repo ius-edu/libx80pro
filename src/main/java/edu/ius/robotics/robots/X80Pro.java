@@ -7,7 +7,7 @@ import java.util.Arrays;
 import edu.ius.robotics.robots.boards.PMS5005;
 import edu.ius.robotics.robots.boards.PMB5010;
 import edu.ius.robotics.robots.codecs.X80ProADPCM;
-import edu.ius.robotics.robots.codecs.NanojpegCodec;
+import edu.ius.robotics.robots.codecs.nanojpeg.NanoJPEGCodec;
 import edu.ius.robotics.robots.interfaces.IRobot;
 import edu.ius.robotics.robots.interfaces.IRobotAudio;
 import edu.ius.robotics.robots.interfaces.IRobotVideo;
@@ -162,11 +162,11 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	
 	private UDPSocket socket;
 	private X80ProADPCM pcm;
-	private NanojpegCodec jpeg;
+	private NanoJPEGCodec jpeg;
 	private IRobotAudio iRobotAudio;
 	private IRobotVideo iRobotVideo;
 
-	private X80Pro()
+	private void preInit()
 	{
 		//lockIRRange = new boolean[NUM_IR_SENSORS];
 		this.iRobotAudio = null;
@@ -182,6 +182,8 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		this.customSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.CUSTOM_SENSOR_DATA_LENGTH];
 		this.standardSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.STANDARD_SENSOR_DATA_LENGTH];
 		
+		// The following few lines are a bad hack to compare the last two sensor readings from each different type.
+		// This is to find out what the rate of change is, so that we can possibly correct weird sensor behavior.
 		this.oldMotorSensorData = new byte[2][];
 		this.oldCustomSensorData = new byte[2][];
 		this.oldStandardSensorData = new byte[2][];
@@ -189,7 +191,16 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		this.oldMotorSensorData[0] = this.motorSensorData;
 		this.oldCustomSensorData[0] = this.customSensorData;
 		this.oldStandardSensorData[0] = this.standardSensorData;
+	}
+	
+	private void postInit()
+	{
+		// Enable collection of all sensor data by default.
+		this.socket.send(PMS5005.enableMotorSensorSending());
+		this.socket.send(PMS5005.enableCustomSensorSending());
+		this.socket.send(PMS5005.enableStandardSensorSending());
 		
+		// This shutdown hook indicates other threads should terminate as well (i.e. sensor data collection thread).
 		this.attachShutdownHook();
 	}
 	
@@ -200,8 +211,9 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	 */
 	public X80Pro(String ipAddress) throws IOException
 	{
-		this();
+		preInit();
 		this.socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
+		postInit();
 	}
 	
 	/**
@@ -212,24 +224,27 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	 */
 	public X80Pro(String ipAddress, int port) throws IOException
 	{
-		this();
+		preInit();
 		this.socket = new UDPSocket(this, ipAddress, port);
+		postInit();
 	}
 	
 	public X80Pro(String ipAddress, IRobotAudio iRobotAudio, IRobotVideo iRobotVideo) throws IOException
 	{
-		this();
+		preInit();
 		this.iRobotAudio = iRobotAudio;
 		this.iRobotVideo = iRobotVideo;
 		this.socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
+		postInit();
 	}
 	
 	public X80Pro(String ipAddress, int port, IRobotAudio iRobotAudio, IRobotVideo iRobotVideo) throws IOException
 	{
-		this();
+		preInit();
 		this.iRobotAudio = iRobotAudio;
 		this.iRobotVideo = iRobotVideo;
 		this.socket = new UDPSocket(this, ipAddress, port);
+		postInit();
 	}
 	
 	/**
