@@ -8,9 +8,9 @@ public class NanoJPEGException extends Exception
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	DecodeResult decodeResult;
+	NanoJPEGDecodeResult decodeResult;
 	
-	public NanoJPEGException(DecodeResult decodeResult)
+	public NanoJPEGException(NanoJPEGDecodeResult decodeResult)
 	{
 		this.decodeResult = decodeResult;
 	}
