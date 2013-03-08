@@ -63,7 +63,7 @@ public class NanoJPEGCodec
 	
 	private static class Context
 	{
-		public DecodeResult error;
+		public NanoJPEGDecodeResult error;
 		public byte[] pos;
 		public int posoff;
 		public int size;
@@ -288,7 +288,7 @@ public class NanoJPEGCodec
 					default:
 						if (0xD0 != (byte) (marker & 0xF8))
 						{
-							ctx.error = DecodeResult.SyntaxError;
+							ctx.error = NanoJPEGNanoJPEGDecodeResult.SyntaxError;
 						}
 						else
 						{
@@ -299,7 +299,7 @@ public class NanoJPEGCodec
 				}
 				else
 				{
-					ctx.error = DecodeResult.SyntaxError;
+					ctx.error = NanoJPEGNanoJPEGDecodeResult.SyntaxError;
 				}
 			}
 		}
@@ -335,7 +335,7 @@ public class NanoJPEGCodec
 		ctx.length -= count;
 		if (ctx.size < 0)
 		{
-			ctx.error = DecodeResult.SyntaxError;
+			ctx.error = NanoJPEGNanoJPEGDecodeResult.SyntaxError;
 		}
 	}
 	
@@ -349,7 +349,7 @@ public class NanoJPEGCodec
 		ctx.length = decode16(ctx.pos, 0);
 		if (ctx.size < ctx.length)
 		{
-			throw new NanojpegException(DecodeResult.SyntaxError); // TODO check this
+			throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError); // TODO check this
 		}
 		skip(2);
 	}
@@ -367,11 +367,11 @@ public class NanoJPEGCodec
 		decodeLength();
 		if (ctx.length < 9)
 		{
-			throw new NanojpegException(DecodeResult.SyntaxError);
+			throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 		}
 		if (8 != ctx.pos[ctx.posoff])
 		{
-			throw new NanojpegException(DecodeResult.Unsupported);
+			throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.Unsupported);
 		}
 		ctx.height = decode16(ctx.pos, 1);
 		ctx.width = decode16(ctx.pos, 3);
@@ -383,11 +383,11 @@ public class NanoJPEGCodec
 		case 3:
 			break;
 		default:
-			throw new NanojpegException(DecodeResult.Unsupported);
+			throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.Unsupported);
 		}
 		if (ctx.length < 3*ctx.ncomp)
 		{
-			throw new NanojpegException(DecodeResult.SyntaxError);
+			throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 		}
 		for (i = 0; i < ctx.ncomp; ++i)
 		{
@@ -395,23 +395,23 @@ public class NanoJPEGCodec
 			c.cid = ctx.pos[ctx.posoff]; // ctx.pos[0]
 			if (0 == (c.ssx = ctx.pos[ctx.posoff + 1] >> 4)) // ctx.pos[1];
 			{
-				throw new NanojpegException(DecodeResult.SyntaxError);
+				throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 			}
 			if (0 < (c.ssx & (c.ssx - 1))) // non-power of two
 			{
-				throw new NanojpegException(DecodeResult.Unsupported);
+				throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.Unsupported);
 			}
 			if (0 == (c.ssy = ctx.pos[ctx.posoff + 1] & 15)) // ctx.pos[1];
 			{
-				throw new NanojpegException(DecodeResult.SyntaxError);
+				throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 			}
 			if (0 < (c.ssy & (c.ssy - 1))) // non-power of two
 			{
-				throw new NanojpegException(DecodeResult.Unsupported);
+				throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.Unsupported);
 			}
 			if (0 < ((c.qtsel = ctx.pos[ctx.posoff + 2]) & 0xFC)) // ctx.pos[2];
 			{
-				throw new NanojpegException(DecodeResult.SyntaxError);
+				throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 			}
 			skip(3);
 			ctx.qtused |= 1 << c.qtsel;
@@ -437,7 +437,7 @@ public class NanoJPEGCodec
 			c.stride = ctx.mbwidth * ctx.mbsizex * c.ssx / ssxmax;
 			if (((c.width < 3) && (c.ssx != ssxmax)) || ((c.height < 3) && (c.ssy != ssymax)))
 			{
-				throw new NanojpegException(DecodeResult.Unsupported);
+				throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.Unsupported);
 			}
 			c.pixels = new byte[c.stride * (ctx.mbheight * ctx.mbsizey * c.ssy / ssymax)];
 		}
@@ -459,11 +459,11 @@ public class NanoJPEGCodec
 			i = ctx.pos[ctx.posoff];
 			if (0 < (i & 0xEC))
 			{
-				throw new NanojpegException(DecodeResult.SyntaxError);
+				throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 			}
 			if (0 < (i & 0x02))
 			{
-				throw new NanojpegException(DecodeResult.Unsupported);
+				throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.Unsupported);
 			}
 			i = (i | (i >> 3)) & 3; // combined DC/AC + tableid value
 			for (codelen = 0; codelen < 16; ++codelen)
@@ -483,12 +483,12 @@ public class NanoJPEGCodec
 				}
 				if (ctx.length < count)
 				{
-					throw new NanojpegException(DecodeResult.SyntaxError);
+					throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 				}
 				remain -= count << (16 - codelen);
 				if (remain < 0)
 				{
-					throw new NanojpegException(DecodeResult.SyntaxError);
+					throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 				}
 				for (i = 0; i < count; ++i)
 				{
@@ -512,7 +512,7 @@ public class NanoJPEGCodec
 		}
 		if (0 < ctx.length)
 		{
-			throw new NanojpegException(DecodeResult.SyntaxError);
+			throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 		}
 	}
 	
@@ -526,7 +526,7 @@ public class NanoJPEGCodec
 			i = ctx.pos[ctx.posoff];
 			if (0 < ((byte) (0xFF & i) & 0xFC))
 			{
-				throw new NanojpegException(DecodeResult.SyntaxError);
+				throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 			}
 			ctx.qtavail |= 1 << i;
 			t = ctx.qtab[i];
@@ -543,7 +543,7 @@ public class NanoJPEGCodec
 		decodeLength();
 		if (ctx.length < 2)
 		{
-			throw new NanojpegException(DecodeResult.SyntaxError);
+			throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 		}
 		ctx.rstinterval = decode16(ctx.pos, 0);
 		skip(ctx.length);
@@ -555,7 +555,7 @@ public class NanoJPEGCodec
 		int bits = (byte) (0xFF & vlc[value].bits);
 		if (0 == bits)
 		{
-			ctx.error = DecodeResult.SyntaxError;
+			ctx.error = NanoJPEGNanoJPEGDecodeResult.SyntaxError;
 			return 0;
 		}
 		skipBits(bits);
@@ -595,12 +595,12 @@ public class NanoJPEGCodec
 				}
 				if (0 == (code.get() & 0x0F) && (code.get() != 0xF0))
 				{
-					throw new NanojpegException(DecodeResult.SyntaxError);
+					throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 				}
 				coef += (code.get() >> 4) + 1;
 				if (63 < coef)
 				{
-					throw new NanojpegException(DecodeResult.SyntaxError);
+					throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 				}
 				ctx.block[(int) ZZ[coef]] = value * ctx.qtab[c.qtsel][coef];
 			} while (coef < 63);
@@ -623,11 +623,11 @@ public class NanoJPEGCodec
 		decodeLength();
 		if (ctx.length < (4 + 2*ctx.ncomp))
 		{
-			throw new NanojpegException(DecodeResult.SyntaxError);
+			throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 		}
 		if (ctx.pos[ctx.posoff] != ctx.ncomp)
 		{
-			throw new NanojpegException(DecodeResult.Unsupported);
+			throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.Unsupported);
 		}
 		skip(1);
 		for (i = 0; i < ctx.ncomp; ++i)
@@ -635,11 +635,11 @@ public class NanoJPEGCodec
 			c = ctx.comp[i];
 			if (ctx.pos[ctx.posoff] != c.cid)
 			{
-				throw new NanojpegException(DecodeResult.SyntaxError);
+				throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 			}
 			if (0 != (ctx.pos[ctx.posoff + 1] & 0xEE))
 			{
-				throw new NanojpegException(DecodeResult.SyntaxError);
+				throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 			}
 			c.dctabsel = ctx.pos[ctx.posoff + 1] >> 4;
 			c.actabsel = (ctx.pos[ctx.posoff + 1] & 1) | 2;
@@ -647,7 +647,7 @@ public class NanoJPEGCodec
 		}
 		if (0 != ctx.pos[ctx.posoff] || 63 != ctx.pos[ctx.posoff + 1] || 0 != ctx.pos[ctx.posoff + 2])
 		{
-			throw new NanojpegException(DecodeResult.Unsupported);
+			throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.Unsupported);
 		}
 		skip(ctx.length);
 		for (mby = 0; mby < ctx.mbheight; ++mby)
@@ -662,7 +662,7 @@ public class NanoJPEGCodec
 						for (sbx = 0; sbx < c.ssx; ++sbx)
 						{
 							decodeBlock(c, ((mby * c.ssy + sby) * c.stride + mbx * c.ssx + sbx) << 3);
-							if (DecodeResult.OK != ctx.error)
+							if (NanoJPEGNanoJPEGDecodeResult.OK != ctx.error)
 							{
 								return;
 							}
@@ -675,7 +675,7 @@ public class NanoJPEGCodec
 					i = getBits(16);
 					if (0xFFD0 != (i & 0xFFF8) || (i & 7) != nextrst)
 					{
-						throw new NanojpegException(DecodeResult.SyntaxError);
+						throw new NanojpegException(NanoJPEGNanoJPEGDecodeResult.SyntaxError);
 					}
 					nextrst = (nextrst + 1) & 7;
 					rstcount = ctx.rstinterval;
@@ -686,7 +686,7 @@ public class NanoJPEGCodec
 				}
 			}
 		}
-		ctx.error = DecodeResult.Internal_Finished;
+		ctx.error = NanoJPEGNanoJPEGDecodeResult.Internal_Finished;
 	}
 	
 	public static int CF4A = -9;
@@ -793,7 +793,7 @@ public class NanoJPEGCodec
 				{
 					upsampleH(c);
 				}
-				if (DecodeResult.OK != ctx.error)
+				if (NanoJPEGNanoJPEGDecodeResult.OK != ctx.error)
 				{
 					return;
 				}
@@ -801,7 +801,7 @@ public class NanoJPEGCodec
 				{
 					upsampleV(c);
 				}
-				if (DecodeResult.OK != ctx.error)
+				if (NanoJPEGNanoJPEGDecodeResult.OK != ctx.error)
 				{
 					return;
 				}
@@ -859,24 +859,24 @@ public class NanoJPEGCodec
 		}
 	}
 	
-	DecodeResult decode(byte[] jpeg, int size) throws NanojpegException
+	NanoJPEGNanoJPEGDecodeResult decode(byte[] jpeg, int size) throws NanojpegException
 	{
 		ctx.pos = jpeg;
 		ctx.size = size & 0x7FFFFFFF;
 		if (ctx.size < 2)
 		{
-			return DecodeResult.NotAJpeg;
+			return NanoJPEGNanoJPEGDecodeResult.NotAJpeg;
 		}
 		if (0 != ((ctx.pos[ctx.posoff + 0] ^ 0xFF) | (ctx.pos[ctx.posoff + 1] ^ 0xD8)))
 		{
-			return DecodeResult.NotAJpeg;
+			return NanoJPEGNanoJPEGDecodeResult.NotAJpeg;
 		}
 		skip(2);
-		while (DecodeResult.OK == ctx.error)
+		while (NanoJPEGNanoJPEGDecodeResult.OK == ctx.error)
 		{
 			if ((ctx.size < 2) || (ctx.pos[ctx.posoff + 0] != 0xFF))
 			{
-				return DecodeResult.SyntaxError;
+				return NanoJPEGNanoJPEGDecodeResult.SyntaxError;
 			}
 			switch (ctx.pos[ctx.posoff - 1])
 			{
@@ -893,15 +893,15 @@ public class NanoJPEGCodec
 				}
 				else
 				{
-					return DecodeResult.Unsupported;
+					return NanoJPEGNanoJPEGDecodeResult.Unsupported;
 				}
 			}
 		}
-		if (DecodeResult.Internal_Finished != ctx.error)
+		if (NanoJPEGNanoJPEGDecodeResult.Internal_Finished != ctx.error)
 		{
 			return ctx.error;
 		}
-		ctx.error = DecodeResult.OK;
+		ctx.error = NanoJPEGNanoJPEGDecodeResult.OK;
 		convert();
 		return ctx.error;
 	}
