@@ -687,7 +687,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	
 	public double getSonarRange(int channel)
 	{
-		return AD2Dis ((byte) (standardSensorData[channel + PMS5005.ULTRASONIC_OFFSET_WITH_HEADER] & 0xff));
+		return (standardSensorData[channel + PMS5005.ULTRASONIC_OFFSET_WITH_HEADER] & 0xff) / 100.0;
 	}
 	
 	public double getIRRange(int channel)
