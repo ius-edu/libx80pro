@@ -3,7 +3,7 @@
  * This was posted by Mark Peters
  */
 
-package edu.ius.robotics.robots.codecs;
+package edu.ius.robotics.robots.codecs.nanojpeg;
 
 public class Reference<T> 
 {
