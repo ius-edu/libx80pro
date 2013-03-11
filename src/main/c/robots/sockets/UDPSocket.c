@@ -1,18 +1,19 @@
 #include <stdio.h>
+#include <time.h>
 #include <pthread.h>
 #include "UDPSocket.h"
 
 UDPSocket sock;
 
-static int connectRobot(UDPSocket *self, char *ip, int port)
+static int connect(UDPSocket *self, char *ip, int port)
 {
 	int result = 0;
 	
 	self->ip = ip;
 	self->port = port;
-
-	fprintf(stderr, "robotIP: %s", ip);
-	fprintf(stderr, "robotPort: %d", port);
+	
+	fprintf(stderr, "ip: %s", ip);
+	fprintf(stderr, "port: %d", port);
 	/* fprintf(stderr, "delay = %d", delay); */
 
 	struct addrinfo hints;
@@ -46,20 +47,28 @@ static int connectRobot(UDPSocket *self, char *ip, int port)
 	return socket;
 }
 
-static int send(Buffer *buf)
+static int send(UDPSocket *self, Buffer *buf)
 {
 	int result;
-
+	struct timespec tsi, tsf;
+#if defined(_POSIX_TIMERS) && 0 < _POSIX_TIMERS
+    clock_gettime(CLOCK_REALTIME, &ts);
+#else
+    struct timeval tvi;
+    gettimeofday(&tvi, NULL);
+    tsi.tv_sec = tvi.tv_sec;
+    tsi.tv_nsec = 1000*tvi.tv_usec;
+#endif
 	if (-1 == (result = sendto(sock->sock, buf.data, buf.length, 0, sock->ai_addr, sock->ai_addr->ai_addrlen)))
 	{
 		perror("talker: sendto");
 		exit(1);
 	}
-
+	nanosleep(tf.tv_nsec - (uint)ts.tv_nsec);
 	return result;
 }
 
-void *recv()
+void *recv(UDPSocket *self)
 {
 	
 }
@@ -72,8 +81,8 @@ void close(UDPSocket *self)
 
 extern UDPSocket_init(UDPSocket *self)
 {
-	self->DEFAULT_ROBOT_PORT = DEFAULT_ROBOT_PORT;
-	self->DEFAULT_TIME_STEP_IN_MS = DEFAULT_TIME_STEP_IN_MS;
+	self->DEFAULT_PORT = DEFAULT_PORT;
+	self->DEFAULT_DELAY = DEFAULT_DELAY;
 	self->CONNECT_WAIT = CONNECT_WAIT;
 	
 	/* methods */

@@ -94,7 +94,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	
 	public static class Sensors 
 	{
-		public static Double[] thetaIR = new Double[4]; 
+		public static Double[] thetaIR = new Double[4]; // Sensor displacements in radians
 		
 		static 
 		{
@@ -112,14 +112,14 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	// private BufferedReader reader;
 	// private String command;
 	/** wheel distance */
-	public static final double WHEEL_CIR = 0.265;
-	public static final double WHEEL_DISPLACEMENT = 2.0; // TODO: Fix this (incorrect value)
-
+	public static final double WHEEL_CIRCUMFERENCE = 0.265; // meters
+	public static final double WHEEL_DISPLACEMENT = 0.305; // meters
+	
 	/** wheel radius */
-	public static final double WHEEL_RADIUS = 0.0825;
+	public static final double WHEEL_RADIUS = 0.0825; // meters
 	
 	/** encoder one circle count */
-	public static final int CIRCLE_CNT = 1200;
+	public static final int CIRCLE_ENCODER_COUNT = 1200;
 	
 	/** meh */
 	public int[] encoderPos;
