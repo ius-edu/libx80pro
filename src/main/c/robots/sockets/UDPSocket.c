@@ -3,8 +3,6 @@
 #include <pthread.h>
 #include "UDPSocket.h"
 
-UDPSocket sock;
-
 static int connect(UDPSocket *self, char *ip, int port)
 {
 	int result = 0;
@@ -43,7 +41,7 @@ static int connect(UDPSocket *self, char *ip, int port)
 		}
 	}
 	
-	pthread_create();
+	/* pthread_create(); */
 	return socket;
 }
 

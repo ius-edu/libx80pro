@@ -216,38 +216,32 @@ public interface IX80Pro
      * @see allSensorRequest
      */
     void setAllSensorPeriod(int timePeriod);
-
+    
     /**
      * Returns the current distance value between the relevant ultrasonic 
      * range sensor module (DUR5200) and the object in front of it.
      *
      * @param channel 0, 1, 2, 3, 4 or 5 for Sonar #1 through #6.
      *
-     * @return 4 means a distance of 0 to 4 cm to object.
-     * 4 to 254 means a distance of 4 to 254 cm to object.
-     * 255 means 255 cm or longer distance to object.
+     * @return 0.04 means a distance of 0.00 to 0.04 meters to object.
+     * 0.04 to 2.54 means a distance of 0.04 to 2.54 meters to object.
+     * 2.55 means 2.55 meters or longer distance to object.
      *
      * Please note: By default, the sensors are indexed clockwise, starting 
      * with the left-front sensor (robot first person perspective) at Sonar #1 
      * (channel 0).
      */
     double getSonarRange(int channel);
-
+    
     /**
      * Returns the current distance measurement value between an infrared 
      * sensor and the object in front of it.
      *
      * @param channel 0, 1, 2, 3, 4 or 5 for IR #1 through #6.
      *
-     * @return <= 585 means a distance of 80 cm or longer to object.
-     * 585 to 3446 means a distance of 80 to 8 cm to object.
-     * >= 3446 means a distance of 0 to 8 cm to object.
-     *
-     * Please Note: The relationship between the return data and the distance 
-     * is not linear.  Please refer to the sensor's datashee for distance-
-     * voltage curve.  The data returned is the raw data of the analog to 
-     * digital converter.  The output voltage of the sensor can be calculated 
-     * from the following equation: sensorOutputVoltage = (ival)*3.0/4095(v)
+     * @return distance measurement in meters. 0.09 means 0.00 to 0.09 meters to 
+     * object, 0.10 through 0.80 means a distance of 0.10 to 0.80 to object, 
+     * 0.81 means 0.81 meters or longer distance to object.
      */
     double getIRRange(int channel);
 

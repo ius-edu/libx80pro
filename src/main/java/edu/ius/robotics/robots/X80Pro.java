@@ -113,7 +113,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	// private String command;
 	/** wheel distance */
 	public static final double WHEEL_CIRCUMFERENCE = 0.265; // meters
-	public static final double WHEEL_DISPLACEMENT = 0.305; // meters
+	public static final double WHEEL_DISPLACEMENT = 0.2897; // meters (default: 0.305)
 	
 	/** wheel radius */
 	public static final double WHEEL_RADIUS = 0.0825; // meters
@@ -539,6 +539,8 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	
 	public void run()
 	{
+		this.suspendAllDCMotors();
+		this.lowerHead();
 		socket.close();
 	}
 	
@@ -710,13 +712,13 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	
 	public int getHumanAlarm(int channel)
 	{
-		int offset = 2 * channel + PMS5005.HUMAN_ALARM_OFFSET_WITH_HEADER;
+		int offset = 2*channel + PMS5005.HUMAN_ALARM_OFFSET_WITH_HEADER;
 		return (short) (((standardSensorData[offset + 1] & 0xff) << 8) | (standardSensorData[offset] & 0xff));
 	}
 	
 	public int getHumanMotion(int channel)
 	{
-		int offset = 2 * channel + PMS5005.HUMAN_MOTION_OFFSET_WITH_HEADER;
+		int offset = 2*channel + PMS5005.HUMAN_MOTION_OFFSET_WITH_HEADER;
 		return (short) (((standardSensorData[offset+1] & 0xff) << 8) | (standardSensorData[offset] & 0xff));
 	}
 	
@@ -911,7 +913,13 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		socket.send(PMS5005.setDCMotorSensorUsage((byte) 0, (byte) sensorType));
 		socket.send(PMS5005.setDCMotorSensorUsage((byte) 0, (byte) sensorType));
 	}
-		
+	
+	public void setBothDCMotorControlModes(int controlMode)
+	{
+		socket.send(PMS5005.setDCMotorControlMode((byte) 0, (byte) controlMode));
+		socket.send(PMS5005.setDCMotorControlMode((byte) 1, (byte) controlMode));
+	}
+	
 	public void setDCMotorControlMode(int channel, int controlMode)
 	{
 		socket.send(PMS5005.setDCMotorControlMode((byte) channel, (byte) controlMode));
@@ -1095,14 +1103,61 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		socket.send(PMB5010.continueAudioPlayback(pcm.encode(audioSample, (short) audioSample.length)));
 	}
 	
-	public void turnThetaRadians(double theta)
+	/**
+	 * Method sets Position Control Mode, and turns robot through theta radians in time seconds
+	 * @param theta angle to turn through in radians
+	 * @param time time to turn in seconds
+	 */
+	public void turn(double theta, int time)
+	{
+		socket.send(PMS5005.setDCMotorSensorUsage((byte) L, (byte) X80Pro.SENSOR_USAGE_ENCODER));
+		socket.send(PMS5005.setDCMotorSensorUsage((byte) R, (byte) X80Pro.SENSOR_USAGE_ENCODER));
+		
+	    socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) X80Pro.CONTROL_MODE_POSITION));
+	    socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) X80Pro.CONTROL_MODE_POSITION));
+	    
+	    int diffEncoder = (int)((WHEEL_ENCODER_2PI*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
+	    
+	    int leftPosition = getEncoderPulse(0) - diffEncoder;
+	    if (leftPosition < 0) 
+	    {
+	    	leftPosition = 32767 + leftPosition;
+	    }
+	    else if (leftPosition > 32767)
+	    {
+	    	leftPosition = leftPosition - 32767;
+	    }
+	    
+	    int rightPosition = getEncoderPulse(1) - diffEncoder;
+	    if (rightPosition < 0)
+	    {
+	    	rightPosition = 32767 + rightPosition;
+	    }
+	    else if (rightPosition > 32767)
+	    {
+	    	rightPosition = rightPosition - 32767;
+	    }
+	    
+	    setDCMotorPositionControlPID(L, 1000, 5, 10000);
+	    setDCMotorPositionControlPID(R, 1000, 5, 10000);
+	    
+	    setAllDCMotorPositions((short)leftPosition, (short)rightPosition, 
+	    		NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL, 1000*time);
+	    
+	    
+	}
+	
+	public int turnThetaRadians(double theta)
 	{
 		//@ post: Robot has turned an angle theta in radians
-
+		
+		socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) CONTROL_MODE_PWM));
+		socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) CONTROL_MODE_PWM));
+		
 	    int diffEncoder = (int)((WHEEL_ENCODER_2PI*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
-
+	    
 	    // TODO: cross calling
-	    int leftPulseWidth = getEncoderPulse(0) - diffEncoder;
+	    int leftPulseWidth = getEncoderPulse(L) - diffEncoder;
 		if (leftPulseWidth < 0)
 		{
 			leftPulseWidth = 32767 + leftPulseWidth;
@@ -1113,7 +1168,7 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		}
 		
 		// TODO: cross calling
-		int rightPulseWidth = getEncoderPulse(1) - diffEncoder;
+		int rightPulseWidth = getEncoderPulse(R) - diffEncoder;
 		if (rightPulseWidth < 0) 
 		{
 			rightPulseWidth = 32767 + rightPulseWidth;
@@ -1127,6 +1182,8 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		socket.send(PMS5005.setDCMotorPositionControlPID((byte) R, (short) 1000, (short) 5, (short) 10000));
 		
 		socket.send(PMS5005.setAllDCMotorPulses((short) leftPulseWidth, (short) -rightPulseWidth, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
+		
+		return leftPulseWidth;
 	}
 	
 	public void setBothDCMotorPulsePercentages(int leftPulseWidth, int rightPulseWidth)

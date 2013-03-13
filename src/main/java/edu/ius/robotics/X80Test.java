@@ -13,7 +13,7 @@ public class X80Test
 		
 		try
 		{
-			robot = new X80Pro("192.168.0.202");
+			robot = new X80Pro("192.168.0.201");
 			//otherRobot = new X80Pro("192.168.0.202");
 		}
 		catch (IOException ex)
@@ -32,10 +32,10 @@ public class X80Test
 		robot.resumeAllSensors();
 		robot.resetHead();
 		
-		//robot.setBothDCMotorControlModes(X80Pro.PWM_CONTROL_MODE, X80Pro.PWM_CONTROL_MODE);
-		robot.setBothDCMotorSensorUsages(X80Pro.SENSOR_USAGE_ENCODER, X80Pro.SENSOR_USAGE_ENCODER);
-		robot.setBothDCMotorControlModes(X80Pro.CONTROL_MODE_PWM, X80Pro.CONTROL_MODE_PWM);
+		robot.setBothDCMotorSensorUsages(X80Pro.SENSOR_USAGE_ENCODER);
+		robot.setBothDCMotorControlModes(X80Pro.CONTROL_MODE_VELOCITY);
 		
+		robot.setBothDCMotorVelocities(0, 0);
 		robot.resumeBothDCMotors();
 		
 		//robot.setBothDCMotorPulsePercentages(100, 100);
@@ -87,17 +87,74 @@ public class X80Test
 //			e.printStackTrace();
 //		}
 		
-		APLite aplite = new APLite(robot);
-		aplite.run();
+//		APLite aplite = new APLite(robot);
+//		aplite.run();
+//		
+//		try
+//		{
+//			Thread.sleep(10000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+//		int leftCmd[] = new int[3];
+//		//int turn_t;
+//		
+//		leftCmd[0] = robot.getEncoderPulse(0);
+//		double theta = Math.PI/2;
+//		//turn_t = (int)(4*(theta/Math.PI/2));
+//		leftCmd[1] = robot.turnThetaRadians(theta);
+//		int encoderValue = robot.getEncoderPulse(0);
+//		if (encoderValue <= leftCmd[1])
+//		{
+//			while (robot.getEncoderPulse(0) < leftCmd[1] - 3)
+//			{
+//				try
+//				{
+//					Thread.sleep(50);
+//				}
+//				catch (InterruptedException e)
+//				{
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+//		else
+//		{
+//			while (leftCmd[1] < robot.getEncoderPulse(0) - 3)
+//			{
+//				try
+//				{
+//					Thread.sleep(50);
+//				}
+//				catch (InterruptedException e)
+//				{
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+//		leftCmd[2] = robot.getEncoderPulse(0);
+//		robot.suspendBothDCMotors();
+//		theta = (4*Math.PI*X80Pro.WHEEL_RADIUS*(leftCmd[2] - leftCmd[0]))/(X80Pro.WHEEL_ENCODER_2PI*X80Pro.WHEEL_DISPLACEMENT);
+//		if (leftCmd[0] < leftCmd[2])
+//		{
+//			theta *= -1;
+//		}
+		
+		robot.turn(Math.PI, 5);
 		
 		try
 		{
 			Thread.sleep(10000);
 		}
-		catch (InterruptedException e)
+		catch (Exception ex)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ex.printStackTrace();
 		}
 		
 		robot.lowerHead();
