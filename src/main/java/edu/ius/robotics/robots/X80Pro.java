@@ -200,6 +200,12 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		this.socket.send(PMS5005.enableCustomSensorSending());
 		this.socket.send(PMS5005.enableStandardSensorSending());
 		
+		this.socket.send(PMS5005.setDCMotorSensorUsage((byte) L, (byte) X80Pro.SENSOR_USAGE_ENCODER));
+		this.socket.send(PMS5005.setDCMotorSensorUsage((byte) R, (byte) X80Pro.SENSOR_USAGE_ENCODER));
+		
+		this.socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) X80Pro.CONTROL_MODE_PWM));
+		this.socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) X80Pro.CONTROL_MODE_PWM));		
+		
 		// This shutdown hook indicates other threads should terminate as well (i.e. sensor data collection thread).
 		this.attachShutdownHook();
 	}
@@ -1110,9 +1116,6 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 	 */
 	public void turn(double theta, int time)
 	{
-		socket.send(PMS5005.setDCMotorSensorUsage((byte) L, (byte) X80Pro.SENSOR_USAGE_ENCODER));
-		socket.send(PMS5005.setDCMotorSensorUsage((byte) R, (byte) X80Pro.SENSOR_USAGE_ENCODER));
-		
 	    socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) X80Pro.CONTROL_MODE_POSITION));
 	    socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) X80Pro.CONTROL_MODE_POSITION));
 	    
