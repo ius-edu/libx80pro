@@ -5,7 +5,7 @@ import java.io.IOException;
 import edu.ius.robotics.robots.X80Pro;
 import edu.ius.robotics.robots.interfaces.*;
 
-public class X80PCMTest implements IRobotAudio 
+public class X80ProPCMTest implements IRobotAudio 
 {
 	private X80Pro robot;
 	
@@ -16,12 +16,12 @@ public class X80PCMTest implements IRobotAudio
 
 	public static void main(String[] args)
 	{
-		X80PCMTest pcmtest = new X80PCMTest();
+		X80ProPCMTest pcmtest = new X80ProPCMTest();
 		pcmtest.getRobot().startAudioRecording((byte) (0xFF & 255));
 		pcmtest.getRobot().stopAudioRecording();
 	}
 	
-	public X80PCMTest()
+	public X80ProPCMTest()
 	{
 		try
 		{
