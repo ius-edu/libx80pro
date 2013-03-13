@@ -122,7 +122,7 @@ public class PMB5010
     	return msg;
     }
     
-    public static byte[] startAudioRecording(byte voiceSegmentLength)
+    public static byte[] startAudioRecording(short voiceSegmentLength)
     {
     	byte[] msg = new byte[10];
     	
@@ -140,7 +140,7 @@ public class PMB5010
     	return msg;
     }
     
-    public static byte[] stopAudioRecording(byte voiceSegmentLength)
+    public static byte[] stopAudioRecording()
     {
     	byte[] msg = new byte[9];
     	

@@ -146,11 +146,11 @@ public class X80Test
 //			theta *= -1;
 //		}
 		
-		robot.turn(Math.PI, 5);
+		robot.turn(Math.PI/4, 4);
 		
 		try
 		{
-			Thread.sleep(10000);
+			Thread.sleep(20000);
 		}
 		catch (Exception ex)
 		{

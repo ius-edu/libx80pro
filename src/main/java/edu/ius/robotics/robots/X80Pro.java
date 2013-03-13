@@ -1079,14 +1079,14 @@ public class X80Pro implements IX80Pro, IRobot, Runnable
 		socket.send(PMS5005.setAllServoPulses((short) p0, (short) -p1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
 	}
 	
-	public void startAudioRecording(byte voiceSegmentLength)
+	public void startAudioRecording(short voiceSegmentLength)
 	{
 		socket.send(PMB5010.startAudioRecording(voiceSegmentLength));
 	}
 	
-	public void stopAudioRecording(byte voiceSegmentLength)
+	public void stopAudioRecording()
 	{
-		socket.send(PMB5010.stopAudioRecording(voiceSegmentLength));
+		socket.send(PMB5010.stopAudioRecording());
 	}
 	
 	public void startAudioPlayback(short sampleLength)
