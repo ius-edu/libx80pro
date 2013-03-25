@@ -71,8 +71,8 @@ public class X80Pro implements IRobot, Runnable
 	public static final int BIG_DELAY = 1000;
 	public static final int UBER_DELAY = 5000;
 	
-	public static final int MAX_PWM_L = 32767; // 32767;
-	public static final int MAX_PWM_R = -0; // 0;
+	public static final int MAX_PWM_L = 32767;
+	public static final int MAX_PWM_R = 0;
 	
 	public static final int PWM_N = 16383;
 	public static final int PWM_O = 8000;
@@ -1423,7 +1423,49 @@ public class X80Pro implements IRobot, Runnable
 	    setDCMotorPositionControlPID(R, 1000, 5, 10000);
 	    
 	    setAllDCMotorPositions((short)leftPosition, (short)rightPosition, 
-	    		NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL, milliseconds);
+	    		(short) NO_CONTROL, (short) NO_CONTROL, (short) NO_CONTROL, (short) NO_CONTROL, (short) milliseconds);
+	}
+	
+	public void runStepPWM(double runDis, int milliseconds)
+	{
+        //the robot will go forward the rundistance
+        int diffEncoder = (int)((runDis / (2 * Math.PI * WHEEL_RADIUS)) * CIRCLE_ENCODER_COUNT);
+        
+        int LeftTarget = motorSensorData.encoderPulse[L] + diffEncoder;
+        if (LeftTarget < 0) 
+        {
+            LeftTarget = 32767 + LeftTarget;
+        }
+        else if (32767 < LeftTarget) 
+        {
+            LeftTarget = LeftTarget - 32767;
+        }
+        
+        int RightTarget = motorSensorData.encoderPulse[R] - diffEncoder;
+        if (32767 < RightTarget)
+        {
+            RightTarget = RightTarget - 32767;
+        }
+        else if(RightTarget < 0)
+        {
+            RightTarget = 32767 + RightTarget;
+        }
+        
+        socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) CONTROL_MODE_PWM));
+        socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) CONTROL_MODE_PWM));
+        
+        //socket.send(PMS5005.setDCMotorPositionControlPID((byte) L, (short) 1000, (short) 30, (short) 2000));
+        //socket.send(PMS5005.setDCMotorPositionControlPID((byte) R, (short) 1000, (short) 30, (short) 2000));
+        
+        socket.send(PMS5005.setAllDCMotorPulses(
+        		(short) (PWM_N + PWM_O + 8*DUTY_CYCLE_UNIT), 
+        		(short) -(PWM_N + PWM_O + 8*DUTY_CYCLE_UNIT), 
+        		(short) NO_CONTROL, (short) NO_CONTROL, (short) NO_CONTROL, (short) NO_CONTROL, (short) milliseconds));
+        while (motorSensorData.encoderPulse[L] < LeftTarget - X80Pro.ACCEPTABLE_ENCODER_DEVIATION || 
+        		motorSensorData.encoderPulse[R] < RightTarget - X80Pro.ACCEPTABLE_ENCODER_DEVIATION)
+        {
+        	// Busy wait
+        }
 	}
 	
 	/**
@@ -1470,16 +1512,13 @@ public class X80Pro implements IRobot, Runnable
 	{
 		//@ post: Robot has turned an angle theta in radians
 		
-		socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) CONTROL_MODE_PWM));
-		socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) CONTROL_MODE_PWM));
-		
 	    int diffEncoder = (int)((WHEEL_ENCODER_2PI*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
 	    
 	    // TODO: cross calling
 	    int leftPulseWidth = getEncoderPulse(L) - diffEncoder;
 		if (leftPulseWidth < 0)
 		{
-			leftPulseWidth = 32767 + leftPulseWidth;
+			leftPulseWidth = 32768 + leftPulseWidth;
 		}
 		else if (32767 < leftPulseWidth)
 		{
@@ -1490,17 +1529,21 @@ public class X80Pro implements IRobot, Runnable
 		int rightPulseWidth = getEncoderPulse(R) - diffEncoder;
 		if (rightPulseWidth < 0) 
 		{
-			rightPulseWidth = 32767 + rightPulseWidth;
+			rightPulseWidth = 32768 + rightPulseWidth;
 		}
 		else if (32767 < rightPulseWidth)
 		{
 			rightPulseWidth = rightPulseWidth - 32767;
 		}
 		
+		socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) CONTROL_MODE_PWM));
+		socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) CONTROL_MODE_PWM));
+		
 		socket.send(PMS5005.setDCMotorPositionControlPID((byte) L, (short) 1000, (short) 5, (short) 10000));
 		socket.send(PMS5005.setDCMotorPositionControlPID((byte) R, (short) 1000, (short) 5, (short) 10000));
 		
-		socket.send(PMS5005.setAllDCMotorPulses((short) leftPulseWidth, (short) -rightPulseWidth, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) milliseconds));
+		socket.send(PMS5005.setAllDCMotorPulses((short) leftPulseWidth, (short) -rightPulseWidth, 
+				(short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) milliseconds));
 		
 		return leftPulseWidth;
 	}
