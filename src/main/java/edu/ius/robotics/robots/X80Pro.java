@@ -377,7 +377,8 @@ public class X80Pro implements IRobot, Runnable
 	public static final double WHEEL_RADIUS = 0.0825; // meters
 	
 	/** encoder one circle count */
-	public static final int CIRCLE_ENCODER_COUNT = 1200;
+	//public static final int CIRCLE_ENCODER_COUNT = 1200;
+	public static final int CIRCLE_ENCODER_COUNT = 785;
 	
 //	private int motorSensorTimePeriod;
 //	private int standardSensorTimePeriod;
@@ -1391,7 +1392,7 @@ public class X80Pro implements IRobot, Runnable
 	 * @param theta angle to turn through in radians
 	 * @param time time to turn in seconds
 	 */
-	public void turnStep(double theta, int time)
+	public void turnStep(double theta, int milliseconds)
 	{
 	    socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) X80Pro.CONTROL_MODE_POSITION));
 	    socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) X80Pro.CONTROL_MODE_POSITION));
@@ -1422,7 +1423,7 @@ public class X80Pro implements IRobot, Runnable
 	    setDCMotorPositionControlPID(R, 1000, 5, 10000);
 	    
 	    setAllDCMotorPositions((short)leftPosition, (short)rightPosition, 
-	    		NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL, 1000*time);
+	    		NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL, milliseconds);
 	}
 	
 	/**
@@ -1430,7 +1431,7 @@ public class X80Pro implements IRobot, Runnable
 	 * 
 	 * @param runDis
 	 */
-    public void runStep(double runDis) 
+    public void runStep(double runDis, int milliseconds) 
     {
         //the robot will go forward the rundistance
         int diffEncoder = (int)((runDis / (2 * Math.PI * WHEEL_RADIUS)) * CIRCLE_ENCODER_COUNT);
@@ -1461,10 +1462,11 @@ public class X80Pro implements IRobot, Runnable
         socket.send(PMS5005.setDCMotorPositionControlPID((byte) L, (short) 1000, (short) 30, (short) 2000));
         socket.send(PMS5005.setDCMotorPositionControlPID((byte) R, (short) 1000, (short) 30, (short) 2000));
         
-        socket.send(PMS5005.setAllDCMotorPositions((short) LeftTarget, (short) RightTarget, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) 10000));
+        socket.send(PMS5005.setAllDCMotorPositions((short) LeftTarget, (short) RightTarget, 
+        		(short) NO_CONTROL, (short) NO_CONTROL, (short) NO_CONTROL, (short) NO_CONTROL, (short) milliseconds));
     }
 	
-	public int turnThetaRadianStep(double theta)
+	public int turnThetaRadianStep(double theta, int milliseconds)
 	{
 		//@ post: Robot has turned an angle theta in radians
 		
@@ -1498,7 +1500,7 @@ public class X80Pro implements IRobot, Runnable
 		socket.send(PMS5005.setDCMotorPositionControlPID((byte) L, (short) 1000, (short) 5, (short) 10000));
 		socket.send(PMS5005.setDCMotorPositionControlPID((byte) R, (short) 1000, (short) 5, (short) 10000));
 		
-		socket.send(PMS5005.setAllDCMotorPulses((short) leftPulseWidth, (short) -rightPulseWidth, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
+		socket.send(PMS5005.setAllDCMotorPulses((short) leftPulseWidth, (short) -rightPulseWidth, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) milliseconds));
 		
 		return leftPulseWidth;
 	}
