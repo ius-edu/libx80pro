@@ -131,25 +131,25 @@ public class X80Pro implements IRobot, Runnable
 				potentiometerAD[i] = motorSensorData[offset + i + 1] << 8 & 0x0F | motorSensorData[offset + i] & 0xFF;
 			}
 			
-			offset += i;
+			offset += 2*Sensors.NUM_POTENTIOMETER_AD_SENSORS;
 			for (i = 0; i < Sensors.NUM_MOTOR_CURRENT_AD_SENSORS; ++i) 
 			{
 				motorCurrentAD[i] = motorSensorData[offset + i + 1] << 8 & 0x0F | motorSensorData[offset + i] & 0xFF;
 			}
 			
-			offset += i;
+			offset += 2*Sensors.NUM_MOTOR_CURRENT_AD_SENSORS;
 			for (i = 0; i < Sensors.NUM_ENCODER_PULSE_SENSORS; ++i) 
 			{
 				encoderPulse[i] = motorSensorData[offset + 4*i + 1] << 8 & 0x0F | motorSensorData[offset + 4*i] & 0xFF;
 			}
 			
-			offset += i;
+			offset += 2;
 			for (i = 0; i < Sensors.NUM_ENCODER_SPEED_SENSORS; ++i) 
 			{
 				encoderSpeed[i] = motorSensorData[offset + 4*i + 1] << 8 & 0x0F | motorSensorData[offset + 4*i] & 0xFF;
 			}
 			
-			offset +=i;
+			offset += 6;
 			for (i = 0; i < Sensors.NUM_ENCODER_DIRECTION_SENSORS; ++i) 
 			{
 				encoderDirection[i] = motorSensorData[offset] & (i+1);
@@ -197,19 +197,19 @@ public class X80Pro implements IRobot, Runnable
 				ioPort[i] = (short) customSensorData[offset] & ((0x01 << i) & 0xFF);
 			}
 			
-			offset += i; 
+			offset += 1;
 			for (i = 0; i < Sensors.NUM_LEFT_CONSTELLATION_SENSORS; ++i)
 			{
 				mmDistanceToLeftConstellation[i] = customSensorData[offset + i + 1] << 8 & 0x0F | customSensorData[offset + i] & 0xFF;
 			}
 			
-			offset += i;
+			offset += 2*Sensors.NUM_LEFT_CONSTELLATION_SENSORS;
 			for (i = 0; i < Sensors.NUM_RIGHT_CONSTELLATION_SENSORS; ++i)
 			{
 				mmDistanceToRightConstellation[i] = customSensorData[offset + i + 1] << 8 & 0x0F | customSensorData[offset + i] & 0xFF; 
 			}
 			
-			offset += i;
+			offset += 2*Sensors.NUM_RIGHT_CONSTELLATION_SENSORS;
 			for (i = 0; i < Sensors.NUM_RELATIVE_CONSTELLATION_SENSORS; ++i)
 			{
 				mmDistanceToRelativeConstellation[i] = customSensorData[offset + i + 1] << 8 & 0x0F | customSensorData[offset + i] & 0xFF; 				
@@ -318,7 +318,7 @@ public class X80Pro implements IRobot, Runnable
 		public static final int NUM_MOTORS = 2;
 		public static final int NUM_INFRARED_SENSORS = 8;
 		public static final int NUM_INFRARED_SENSORS_FRONT = 4;
-		public static final int NUM_CUSTOM_AD_SENSORS = 9;
+		public static final int NUM_CUSTOM_AD_SENSORS = 8;
 		public static final int NUM_SONAR_SENSORS = 6;
 		public static final int NUM_SONAR_SENSORS_FRONT = 3;
 		public static final int NUM_HUMAN_SENSORS = 2;
@@ -487,20 +487,18 @@ public class X80Pro implements IRobot, Runnable
 		postInit();
 	}
 	
-	public X80Pro(String ipAddress, IRobotAudio iRobotAudio, IRobotImage iRobotImage) throws IOException
+	public X80Pro(String ipAddress, IRobotEventHandler iRobotEventHandler) throws IOException
 	{
 		preInit();
-		this.iRobotAudio = iRobotAudio;
-		this.iRobotImage = iRobotImage;
+		this.iRobotEventHandler = iRobotEventHandler;
 		this.socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
 		postInit();
 	}
 	
-	public X80Pro(String ipAddress, int port, IRobotAudio iRobotAudio, IRobotImage iRobotImage) throws IOException
+	public X80Pro(String ipAddress, int port, IRobotEventHandler iRobotEventHandler) throws IOException
 	{
 		preInit();
-		this.iRobotAudio = iRobotAudio;
-		this.iRobotImage = iRobotImage;
+		this.iRobotEventHandler = iRobotEventHandler;
 		this.socket = new UDPSocket(this, ipAddress, port);
 		postInit();
 	}
@@ -541,7 +539,7 @@ public class X80Pro implements IRobot, Runnable
 		else if (PMB5010.AUDIO_PACKAGE == pkgType)
 		{
 //			System.err.println("-*- Audio Data Package Received -*-");
-			if (null != iRobotAudio)
+			if (null != iRobotEventHandler)
 			{
 				//iRobotAudio.audioEvent(robotIP, robotPort, pcm.decode(Arrays.copyOfRange(pkg, 0, pkgLen), pkgLen));					
 			}
@@ -549,7 +547,7 @@ public class X80Pro implements IRobot, Runnable
 		else if (PMB5010.VIDEO_PACKAGE == pkgType)
 		{
 			System.err.println("-*- Image Data Package Received -*-");
-			if (null != iRobotImage)
+			if (null != iRobotEventHandler)
 			{
 				// Step 1: Clear buffer sizes if we're receiving first JPEG packet.
 				if (PMB5010.SEQ_BEGIN == (byte) (0xFF & pkg[PMB5010.VIDEO_SEQ_OFFSET]))
