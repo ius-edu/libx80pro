@@ -128,31 +128,31 @@ public class X80Pro implements IRobot, Runnable
 			int offset = 0, i;
 			for (i = 0; i < Sensors.NUM_POTENTIOMETER_AD_SENSORS; ++i) 
 			{
-				potentiometerAD[i] = motorSensorData[offset + i + 1] << 8 & 0x0F | motorSensorData[offset + i] & 0xFF;
+				potentiometerAD[i] = (short) ((motorSensorData[offset + 2*i + 1] & 0x0F) << 8 | motorSensorData[offset + 2*i] & 0xFF);
 			}
 			
 			offset += 2*Sensors.NUM_POTENTIOMETER_AD_SENSORS;
 			for (i = 0; i < Sensors.NUM_MOTOR_CURRENT_AD_SENSORS; ++i) 
 			{
-				motorCurrentAD[i] = motorSensorData[offset + i + 1] << 8 & 0x0F | motorSensorData[offset + i] & 0xFF;
+				motorCurrentAD[i] = (short) ((motorSensorData[offset + 2*i + 1] & 0x0F) << 8 | motorSensorData[offset + 2*i] & 0xFF);
 			}
 			
 			offset += 2*Sensors.NUM_MOTOR_CURRENT_AD_SENSORS;
 			for (i = 0; i < Sensors.NUM_ENCODER_PULSE_SENSORS; ++i) 
 			{
-				encoderPulse[i] = motorSensorData[offset + 4*i + 1] << 8 & 0x0F | motorSensorData[offset + 4*i] & 0xFF;
+				encoderPulse[i] = (short) ((motorSensorData[offset + 4*i + 1] & 0xFF) << 8 | motorSensorData[offset + 4*i] & 0xFF);
 			}
 			
 			offset += 2;
 			for (i = 0; i < Sensors.NUM_ENCODER_SPEED_SENSORS; ++i) 
 			{
-				encoderSpeed[i] = motorSensorData[offset + 4*i + 1] << 8 & 0x0F | motorSensorData[offset + 4*i] & 0xFF;
+				encoderSpeed[i] = (short) ((motorSensorData[offset + 4*i + 1] & 0xFF) << 8 | motorSensorData[offset + 4*i] & 0xFF);
 			}
 			
 			offset += 6;
 			for (i = 0; i < Sensors.NUM_ENCODER_DIRECTION_SENSORS; ++i) 
 			{
-				encoderDirection[i] = motorSensorData[offset] & (i+1);
+				encoderDirection[i] = (byte) (motorSensorData[offset] & (i+1));
 			}
 		}
 	}
@@ -194,25 +194,25 @@ public class X80Pro implements IRobot, Runnable
 			offset += 2*Sensors.NUM_CUSTOM_AD_SENSORS;
 			for (i = 0; i < Sensors.NUM_IO_PORT_SENSORS; ++i)
 			{
-				ioPort[i] = (short) customSensorData[offset] & ((0x01 << i) & 0xFF);
+				ioPort[i] = (byte) customSensorData[offset] & ((0x01 << i) & 0xFF);
 			}
 			
 			offset += 1;
 			for (i = 0; i < Sensors.NUM_LEFT_CONSTELLATION_SENSORS; ++i)
 			{
-				mmDistanceToLeftConstellation[i] = customSensorData[offset + i + 1] << 8 & 0x0F | customSensorData[offset + i] & 0xFF;
+				mmDistanceToLeftConstellation[i] = (short) (customSensorData[offset + 2*i + 1] << 8 & 0x0F | customSensorData[offset + 2*i] & 0xFF);
 			}
 			
 			offset += 2*Sensors.NUM_LEFT_CONSTELLATION_SENSORS;
 			for (i = 0; i < Sensors.NUM_RIGHT_CONSTELLATION_SENSORS; ++i)
 			{
-				mmDistanceToRightConstellation[i] = customSensorData[offset + i + 1] << 8 & 0x0F | customSensorData[offset + i] & 0xFF; 
+				mmDistanceToRightConstellation[i] = (short) (customSensorData[offset + 2*i + 1] << 8 & 0x0F | customSensorData[offset + 2*i] & 0xFF); 
 			}
 			
 			offset += 2*Sensors.NUM_RIGHT_CONSTELLATION_SENSORS;
 			for (i = 0; i < Sensors.NUM_RELATIVE_CONSTELLATION_SENSORS; ++i)
 			{
-				mmDistanceToRelativeConstellation[i] = customSensorData[offset + i + 1] << 8 & 0x0F | customSensorData[offset + i] & 0xFF; 				
+				mmDistanceToRelativeConstellation[i] = (short) (customSensorData[offset + 2*i + 1] << 8 & 0x0F | customSensorData[offset + 2*i] & 0xFF); 				
 			}
 		}
 	}
@@ -258,7 +258,7 @@ public class X80Pro implements IRobot, Runnable
 				sonarDistance[i] = (byte) (standardSensorData[offset + i] & 0xFF);
 			}
 			
-			offset += 6;
+			offset += Sensors.NUM_SONAR_SENSORS;
 			for (i = 0; i < Sensors.NUM_HUMAN_SENSORS; ++i)
 			{
 				humanAlarm[i] = (short) ((standardSensorData[offset + 4*i + 1] & 0xF0) << 8 | standardSensorData[offset + 4*i] & 0xFF);
@@ -276,13 +276,13 @@ public class X80Pro implements IRobot, Runnable
 				tiltingAD[i] = (short) ((standardSensorData[offset + 2*i + 1] & 0xF0 ) << 8 | standardSensorData[offset + 2*i] & 0xFF);
 			}
 			
-			offset += 4;
+			offset += 2*Sensors.NUM_TILTING_SENSORS;
 			for (i = 0; i < Sensors.NUM_OVERHEAT_SENSORS; ++i)
 			{
 				overheatAD[i] = (short) ((standardSensorData[offset + 2*i + 1] & 0xF0) << 8 | standardSensorData[offset + 2*i] & 0xFF);
 			}
 			
-			offset += 4;
+			offset += 2*Sensors.NUM_OVERHEAT_SENSORS;
 			temperatureAD = (short) ((standardSensorData[offset + 1] & 0x0F) << 8 | standardSensorData[offset] & 0xFF);
 			
 			offset += 2;
@@ -294,20 +294,20 @@ public class X80Pro implements IRobot, Runnable
 				infraredCommand[i] = (byte) (standardSensorData[offset + i] & 0xFF);
 			}
 			
-			offset += 4;
-			mainboardBatteryVoltageAD_0to9V = (short) (standardSensorData[offset + 1] & 0x0F | standardSensorData[offset & 0xFF]);
+			offset += Sensors.NUM_INFRARED_RECEIVERS;
+			mainboardBatteryVoltageAD_0to9V = (short) ((standardSensorData[offset + 1] & 0x0F) << 8 | standardSensorData[offset & 0xFF]);
 			
 			offset += 2;
-			motorBatteryVoltageAD_0to24V = (short) (standardSensorData[offset + 1] & 0x0F | standardSensorData[offset] & 0xFF);
+			motorBatteryVoltageAD_0to24V = (short) ((standardSensorData[offset + 1] & 0x0F) << 8 | standardSensorData[offset] & 0xFF);
 			
 			offset += 2;
-			servoBatteryVoltageAD_0to9V = (short) (standardSensorData[offset + 1] & 0x0F | standardSensorData[offset] & 0xFF);
+			servoBatteryVoltageAD_0to9V = (short) ((standardSensorData[offset + 1] & 0x0F) << 8 | standardSensorData[offset] & 0xFF);
 			
 			offset += 2;
-			referenceVoltageAD_Vcc = (short) (standardSensorData[offset + 1] & 0x0F | standardSensorData[offset] & 0xFF);
+			referenceVoltageAD_Vcc = (short) ((standardSensorData[offset + 1] & 0x0F) << 8 | standardSensorData[offset] & 0xFF);
 			
 			offset += 2;
-			potentiometerVoltageAD_Vref = (short) (standardSensorData[offset + 1] & 0x0F | standardSensorData[offset] & 0xFF);
+			potentiometerVoltageAD_Vref = (short) ((standardSensorData[offset + 1] & 0x0F) << 8 | standardSensorData[offset] & 0xFF);
 		}
 	}
 	
@@ -329,7 +329,7 @@ public class X80Pro implements IRobot, Runnable
 		public static final int NUM_TILTING_SENSORS = 2;
 		public static final int NUM_OVERHEAT_SENSORS = 2;
 		public static final int NUM_TEMPERATURE_SENSORS = 2;
-		public static final int NUM_INFRARED_RECEIVERS = 2;
+		public static final int NUM_INFRARED_RECEIVERS = 4;
 		
 		// Motor Sensors
 		public static final int NUM_POTENTIOMETER_AD_SENSORS = 6;
