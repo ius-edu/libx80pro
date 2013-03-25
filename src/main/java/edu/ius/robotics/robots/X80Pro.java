@@ -16,8 +16,7 @@ import edu.ius.robotics.robots.boards.PMS5005;
 import edu.ius.robotics.robots.boards.PMB5010;
 import edu.ius.robotics.robots.codecs.X80ProADPCM;
 import edu.ius.robotics.robots.interfaces.IRobot;
-import edu.ius.robotics.robots.interfaces.IRobotAudio;
-import edu.ius.robotics.robots.interfaces.IRobotImage;
+import edu.ius.robotics.robots.interfaces.IRobotEventHandler;
 
 import edu.ius.robotics.robots.sockets.UDPSocket;
 
@@ -402,8 +401,7 @@ public class X80Pro implements IRobot, Runnable
 	private ByteArrayOutputStream imageBuffer;
 	//private List<Integer> imageSEQs;
 	private int[] imageSEQs;
-	private IRobotAudio iRobotAudio;
-	private IRobotImage iRobotImage;
+	private IRobotEventHandler iRobotEventHandler;
 	
 	private byte[] currentPackage;
 	private int currentPackageLength;
@@ -416,8 +414,7 @@ public class X80Pro implements IRobot, Runnable
 		ImageIO.setUseCache(false);
 		//lockIRRange = new boolean[NUM_IR_SENSORS];
 		
-		this.iRobotAudio = null;
-		this.iRobotImage = null;
+		this.iRobotEventHandler = null;
 		//this.imageSEQs = new LinkedList<Integer>();
 		this.imageSEQs = new int[16384];
 		
