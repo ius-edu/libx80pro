@@ -1,7 +1,5 @@
 package edu.ius.robotics.robots.codecs;
 
-import java.util.Arrays;
-
 public class X80ProADPCM
 {
 	public static int[] indexTable = 

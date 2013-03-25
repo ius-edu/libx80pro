@@ -25,9 +25,9 @@ public class PMS5005
 	public static final int DID_OFFSET = 4;
 	
 	/* Start transmission, End transmission */
-	public static final byte STX0 = 94; // 0x5e
+	public static final byte STX0 = 94; // 0x5E
 	public static final byte STX1 = 2; // 0x02
-	public static final byte ETX0 = 94; // 0x5e
+	public static final byte ETX0 = 94; // 0x5E
 	public static final byte ETX1 = 13; // 0x13
 	
 	/* RID */
@@ -68,7 +68,7 @@ public class PMS5005
 	public static final byte GET_CUSTOM_SENSOR_DATA = 124;
 	public static final byte GET_STANDARD_SENSOR_DATA = 125;
 	public static final byte GET_ALL_SENSOR_DATA = 127;
-	// to use as ubyte: (byte)(SETUP_COM & 0xff)
+	// to use as ubyte: (byte)(SETUP_COM & 0xFF)
 	public static final short SETUP_COM = 255;
 	/* End Data ID (DID) descriptor listing */
 	
@@ -167,6 +167,22 @@ public class PMS5005
 		}
 		
 		return shift_reg;
+	}
+	
+	public static byte[] ack()
+	{
+		byte[] msg = new byte[9];
+		
+		msg[0] = STX0;
+		msg[1] = STX1;
+		msg[2] = RID_PMS5005;
+		msg[3] = RESERVED;
+		msg[4] = 0x01; // pong
+		msg[5] = calcCRC(msg);
+		msg[6] = ETX0;
+		msg[7] = ETX1;
+		
+		return msg;
 	}
 	
 	/**

@@ -1,10 +1,10 @@
-package edu.ius.robotics;
+package edu.ius.robotics.samples;
 
 import java.io.IOException;
 
 import edu.ius.robotics.robots.X80Pro;
 
-public class X80ProSonarTest
+public class X80ProIRTest
 {
 	
 	/**
@@ -38,7 +38,11 @@ public class X80ProSonarTest
 		
 		while (true)
 		{
-			System.err.println(robot.getSonarRange(1));
+			System.err.println("robot.getIRRange(0): " + robot.getIRRange(0));
+			System.err.println("robot.getIRRange(1): " + robot.getIRRange(1));
+			System.err.println("robot.getIRRange(2): " + robot.getIRRange(2));
+			System.err.println("robot.getIRRange(3): " + robot.getIRRange(3));
+			System.err.println();
 			try
 			{
 				Thread.sleep(100);

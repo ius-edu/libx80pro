@@ -1,10 +1,10 @@
-package edu.ius.robotics;
+package edu.ius.robotics.samples;
 
 import java.io.IOException;
 
 import edu.ius.robotics.robots.X80Pro;
 
-public class X80ProIRTest
+public class X80ProSonarTest
 {
 	
 	/**
@@ -17,7 +17,7 @@ public class X80ProIRTest
 		
 		try
 		{
-			robot = new X80Pro("192.168.0.201");
+			robot = new X80Pro("192.168.0.204");
 			//otherRobot = new X80Pro("192.168.0.202");
 		}
 		catch (IOException ex)
@@ -38,7 +38,7 @@ public class X80ProIRTest
 		
 		while (true)
 		{
-			System.err.println(robot.getIRRange(1));
+			System.err.println(robot.getSonarRange(1));
 			try
 			{
 				Thread.sleep(100);

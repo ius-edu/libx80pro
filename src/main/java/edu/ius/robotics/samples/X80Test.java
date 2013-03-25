@@ -1,4 +1,4 @@
-package edu.ius.robotics;
+package edu.ius.robotics.samples;
 
 import java.io.IOException;
 

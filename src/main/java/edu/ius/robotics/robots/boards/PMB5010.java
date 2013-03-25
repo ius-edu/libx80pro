@@ -14,6 +14,8 @@ public class PMB5010
 	public static final int LENGTH_OFFSET = 5;
 	public static final int SEQ_OFFSET = 3;
 	public static final int RESERVED_OFFSET = 3;
+	public static final int VIDEO_SEQ_OFFSET = 0;
+	public static final int VIDEO_LENGTH_OFFSET = 1;
 	public static final int METADATA_SIZE = 9;
 	
 	/* Start transmission, End transmission */
@@ -38,8 +40,8 @@ public class PMB5010
 	public static final byte RX_PING = 0x00;
 	public static final byte TX_ACK = 0x01;
 	public static final byte RX_ACK = 0x01;
-	public static final byte VIDEO_PACKET = 0x09;
-	public static final byte AUDIO_PACKET = 0x0A;
+	public static final byte VIDEO_PACKAGE = 0x09;
+	public static final byte AUDIO_PACKAGE = 0x0A;
 	public static final byte START_AUDIO_RECORDING = 0x0B;
 	public static final byte STOP_AUDIO_RECORDING = 0x0C;
 	public static final byte START_AUDIO_PLAYBACK = 0x0D;
@@ -68,18 +70,18 @@ public class PMB5010
 		    for (int j = 0; j < 8; ++j) 
 		    {
 				// isolate least sign bit
-				data_bit = (byte) ((v & 0x01) & 0xff);
-				sr_lsb = (byte) ((shift_reg & 0x01) & 0xff);
+				data_bit = (byte) ((v & 0x01) & 0xFF);
+				sr_lsb = (byte) ((shift_reg & 0x01) & 0xFF);
 				// calculate the feed back bit
-				fb_bit = (byte) (((data_bit ^ sr_lsb) & 0x01) & 0xff);
-				shift_reg = (byte) ((shift_reg & 0xff) >>> 1);
+				fb_bit = (byte) (((data_bit ^ sr_lsb) & 0x01) & 0xFF);
+				shift_reg = (byte) ((shift_reg & 0xFF) >>> 1);
 				
 				if (fb_bit == 1)
 				{
-				    shift_reg = (byte) ((shift_reg ^ 0x8C) & 0xff);
+				    shift_reg = (byte) ((shift_reg ^ 0x8C) & 0xFF);
 				}
 				
-				v = (byte) ((v & 0xff) >>> 1);
+				v = (byte) ((v & 0xFF) >>> 1);
 		    }
 		}
 		
@@ -217,7 +219,7 @@ public class PMB5010
     	msg[1] = STX1;
     	msg[2] = RID_PMB5010;
     	msg[3] = RESERVED; // Not SEQ?
-    	msg[4] = AUDIO_PACKET;
+    	msg[4] = AUDIO_PACKAGE;
     	msg[5] = (byte) (z & 0xff);
     	
     	for (int i = 0; i < z; ++i)

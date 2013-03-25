@@ -42,7 +42,7 @@ static int connect(UDPSocket *self, char *ip, int port)
 	}
 	
 	/* pthread_create(); */
-	return socket;
+	self->socket = socket;
 }
 
 static int send(UDPSocket *self, Buffer *buf)
@@ -63,6 +63,7 @@ static int send(UDPSocket *self, Buffer *buf)
 		exit(1);
 	}
 	nanosleep(tf.tv_nsec - (uint)ts.tv_nsec);
+	
 	return result;
 }
 

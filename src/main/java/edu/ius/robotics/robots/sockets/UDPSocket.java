@@ -13,7 +13,7 @@ public class UDPSocket implements Runnable
 	private IRobot iRobot;
 	
 	public static final int DEFAULT_PORT = 10001;
-	public static final int DEFAULT_DELAY = 70;
+	public static final int DEFAULT_DELAY = 100;
 	public static final int CONNECT_WAIT = 5000;
 	
 	private DatagramSocket socket;
@@ -100,17 +100,18 @@ public class UDPSocket implements Runnable
 		this.socket = new DatagramSocket();
 		this.socket.setSoTimeout(delay);
 
-		this.rxBuf = new byte[1024];
+		this.rxBuf = new byte[4097];
 		this.rxPkt = new DatagramPacket(this.rxBuf, this.rxBuf.length);
 		
-		this.txBuf = new byte[256];
+		//this.txBuf = new byte[256];
+		this.txBuf = new byte[65];
 		this.txPkt = new DatagramPacket(this.txBuf, this.txBuf.length, this.server, this.port);
 		
 		this.socket.send(this.txPkt);
 		
 		// wait synchronously for feedback from robot to be clear that we have established connection
-		this.socket.setSoTimeout(CONNECT_WAIT);
-		this.socket.receive(this.rxPkt);
+		//this.socket.setSoTimeout(CONNECT_WAIT);
+		//this.socket.receive(this.rxPkt);
 
 		new Thread(this).start(); // receive packet thread
 	}
@@ -160,13 +161,12 @@ public class UDPSocket implements Runnable
 	 */
 	public void run()
 	{
-		System.err.println("UDPSocket.run(): receive thread");
-		
 		while (!this.isFinished)
 		{
+			//long beginTime = System.currentTimeMillis();
 			try
 			{
-				this.socket.setSoTimeout(40);
+				this.socket.setSoTimeout(17);
 				this.socket.receive(this.rxPkt);
 			}
 			catch (IOException ex)
@@ -174,28 +174,23 @@ public class UDPSocket implements Runnable
 				//ex.printStackTrace();
 				//System.err.println("did not receive sensor data");
 			}
-			
-			int z = this.rxPkt.getLength();
-			
-			if (0 < z)
+			//int z = this.rxPkt.getLength();
+			if (0 < this.rxPkt.getLength()) // 0 < z
 			{
 				// decode here
-				byte[] sensorData = new byte[z];
-				
+				//byte[] sensorData = new byte[z];
 				//System.err.println("DEBUG: raw packet: ");
-				for (int i = 0; i < z; ++i)
-				{
-					sensorData[i] = (byte) (this.rxBuf[i] & 0xff);
+				//for (int i = 0; i < z; ++i)
+				//{
+					//sensorData[i] = (byte) (this.rxBuf[i] & 0xFF);
 					//System.err.print("DEBUG: " + sensorData[i] + " ");
-				}
+				//}
 				//System.err.println("DEBUG: ");
-				
 				// callback
-				this.iRobot.sensorEvent(this.ip, this.port, sensorData);
-				this.rxPkt.setLength(this.rxBuf.length);
+				this.iRobot.sensorEvent(this.ip, this.port, this.rxBuf, this.rxPkt.getLength());
+				//this.rxPkt.setLength(this.rxBuf.length);
 			}
+			//System.out.println("sensorEvent took " + (System.currentTimeMillis() - beginTime) + "ms to complete");
 		}
-		
-		System.err.println("UDPSocket.run(): terminated");
 	}
 }
