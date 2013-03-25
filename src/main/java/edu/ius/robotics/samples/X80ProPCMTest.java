@@ -1,11 +1,12 @@
 package edu.ius.robotics.samples;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import edu.ius.robotics.robots.X80Pro;
 import edu.ius.robotics.robots.interfaces.*;
 
-public class X80ProPCMTest implements IRobotAudio 
+public class X80ProPCMTest implements IRobotEventHandler
 {
 	private X80Pro robot;
 	
@@ -25,7 +26,7 @@ public class X80ProPCMTest implements IRobotAudio
 	{
 		try
 		{
-			robot = new X80Pro("192.168.0.201", this, null);
+			robot = new X80Pro("192.168.0.201", this);
 		}
 		catch (IOException e)
 		{
@@ -39,6 +40,20 @@ public class X80ProPCMTest implements IRobotAudio
 	{
 		
 		// Do something with raw pcm waveform?
+	}
+
+	@Override
+	public void imageEvent(String robotIP, int robotPort, BufferedImage imageData)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sensorEvent(String robotIP, int robotPort, byte[] sensorData, int dataLength)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

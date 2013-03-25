@@ -34,7 +34,7 @@ public class APLite implements Runnable
 		//heading = heading; // current heading
 		
 		//int count = 0;
-		for (i = 0; i < X80Pro.NUM_INFRARED_SENSORS_FRONT; ++i) 
+		for (i = 0; i < X80Pro.Sensors.NUM_INFRARED_SENSORS_FRONT; ++i) 
 		{
 			int irr = (int) (100*robot.getIRRange(i));
 			System.err.println("robot.getSensorIRRange(" + i + "): " + irr);

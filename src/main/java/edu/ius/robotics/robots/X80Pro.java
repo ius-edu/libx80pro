@@ -51,7 +51,7 @@ public class X80Pro implements IRobot, Runnable
 	public static final int TARGET = 1;
 	public static final int INITIAL = 0;
 	public static final int TURN_QUAD_T = 4;
-
+	
 	public static final int MODE_SINGLEPOT = 0;
 	public static final int MODE_DUALPOT = 1;
 	public static final int MODE_QUADRATURE = 2;
@@ -1385,11 +1385,13 @@ public class X80Pro implements IRobot, Runnable
 	}
 	
 	/**
+	 * This method is taken directly from the DrRobot Java Demo Project
+	 * 
 	 * Method sets Position Control Mode, and turns robot through theta radians in time seconds
 	 * @param theta angle to turn through in radians
 	 * @param time time to turn in seconds
 	 */
-	public void turn(double theta, int time)
+	public void turnStep(double theta, int time)
 	{
 	    socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) X80Pro.CONTROL_MODE_POSITION));
 	    socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) X80Pro.CONTROL_MODE_POSITION));
@@ -1423,7 +1425,46 @@ public class X80Pro implements IRobot, Runnable
 	    		NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL, 1000*time);
 	}
 	
-	public int turnThetaRadians(double theta)
+	/**
+	 * This method is taken directly from the DrRobot Java Demo Project
+	 * 
+	 * @param runDis
+	 */
+    public void runStep(double runDis) 
+    {
+        //the robot will go forward the rundistance
+        int diffEncoder = (int)((runDis / (2 * Math.PI * WHEEL_RADIUS)) * CIRCLE_ENCODER_COUNT);
+        
+        int LeftTarget = motorSensorData.encoderPulse[L] + diffEncoder;
+        if (LeftTarget < 0) 
+        {
+            LeftTarget = 32767 + LeftTarget;
+        }
+        else if (32767 < LeftTarget) 
+        {
+            LeftTarget = LeftTarget - 32767;
+        }
+        
+        int RightTarget = motorSensorData.encoderPulse[R] - diffEncoder;
+        if (32767 < RightTarget)
+        {
+            RightTarget = RightTarget - 32767;
+        }
+        else if(RightTarget < 0)
+        {
+            RightTarget = 32767 + RightTarget;
+        }
+        
+        socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) CONTROL_MODE_POSITION));
+        socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) CONTROL_MODE_POSITION));
+        
+        socket.send(PMS5005.setDCMotorPositionControlPID((byte) L, (short) 1000, (short) 30, (short) 2000));
+        socket.send(PMS5005.setDCMotorPositionControlPID((byte) R, (short) 1000, (short) 30, (short) 2000));
+        
+        socket.send(PMS5005.setAllDCMotorPositions((short) LeftTarget, (short) RightTarget, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) 10000));
+    }
+	
+	public int turnThetaRadianStep(double theta)
 	{
 		//@ post: Robot has turned an angle theta in radians
 		

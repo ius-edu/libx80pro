@@ -7,14 +7,14 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import edu.ius.robotics.robots.X80Pro;
-import edu.ius.robotics.robots.interfaces.IRobotImage;
+import edu.ius.robotics.robots.interfaces.IRobotEventHandler;
 
-public class X80ProImageTest implements IRobotImage
+public class X80ProImageTest implements IRobotEventHandler
 {
 	public static void main(String[] args) throws IOException
 	{
 		X80ProImageTest imageTest = new X80ProImageTest();
-		X80Pro robot = new X80Pro("192.168.0.204", null, imageTest);
+		X80Pro robot = new X80Pro("192.168.0.204", imageTest);
 		robot.resetHead();
 		
 		try
@@ -74,5 +74,19 @@ public class X80ProImageTest implements IRobotImage
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void audioEvent(String robotIP, int robotPort, short[] audioData)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sensorEvent(String robotIP, int robotPort, byte[] sensorData, int dataLength)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }

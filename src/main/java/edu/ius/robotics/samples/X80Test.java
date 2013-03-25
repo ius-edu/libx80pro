@@ -146,7 +146,7 @@ public class X80Test
 //			theta *= -1;
 //		}
 		
-		robot.turn(Math.PI/4, 4);
+		robot.turnStep(Math.PI/4, 4);
 		
 		try
 		{
