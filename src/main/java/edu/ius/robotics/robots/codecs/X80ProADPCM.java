@@ -63,11 +63,11 @@ public class X80ProADPCM
 			/* Step 1: Get the data value */
 			if (bufferStep)
 			{
-				delta = (byte) (input[inputIndex] & 0xFF);
+				delta = (byte) (input[inputIndex] & 0x0F);
 			}
 			else
 			{
-				delta = (byte) ((input[++inputIndex] & 0xFF) >> 4);
+				delta = (byte) ((input[++inputIndex] & 0x0F) >> 4);
 			}
 			bufferStep = !bufferStep;
 			
