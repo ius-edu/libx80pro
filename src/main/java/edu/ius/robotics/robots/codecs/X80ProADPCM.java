@@ -67,7 +67,7 @@ public class X80ProADPCM
 			}
 			else
 			{
-				delta = (byte) (((input[++inputIndex] & 0xFF) >>> 4) & 0xFF);
+				delta = (byte) ((input[++inputIndex] & 0xFF) >> 4);
 			}
 			bufferStep = !bufferStep;
 			
@@ -92,7 +92,7 @@ public class X80ProADPCM
 			 * in encodeADPCM();
 			 */
 			
-			predictedOutputDelta = (short) ((byte) (step & 0xFF) >>> 3);
+			predictedOutputDelta = (short) ((byte) (step & 0xFF) >> 3);
 			if (0 < (delta & 0x04))
 			{
 				predictedOutputDelta += step;
