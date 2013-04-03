@@ -542,7 +542,7 @@ public class X80Pro implements IRobot, Runnable
 //			System.err.println("-*- Audio Data Package Received -*-");
 			if (null != iRobotEventHandler)
 			{
-				iRobotEventHandler.audioEvent(robotIP, robotPort, pcm.decode(Arrays.copyOfRange(pkg, 0, pkgLen), (byte) pkgLen));					
+				iRobotEventHandler.audioEvent(robotIP, robotPort, pcm.decode(Arrays.copyOfRange(pkg, 0, pkgLen), (byte) (pkgLen & 0xFF)));					
 			}
 		}
 		else if (PMB5010.VIDEO_PACKAGE == pkgType)
