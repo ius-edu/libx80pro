@@ -36,6 +36,11 @@ public class X80ProADPCM
 		adpcmState.index = 0;
 	}
 	
+	public X80ProADPCM()
+	{
+		adpcmState = new ADPCMState();
+	}
+	
 	public short[] decode(byte[] input, byte length)
 	{
 		int outputLength = 2*length;
