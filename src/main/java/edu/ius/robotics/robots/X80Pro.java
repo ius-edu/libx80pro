@@ -415,6 +415,7 @@ public class X80Pro implements IRobot, Runnable
 		//lockIRRange = new boolean[NUM_IR_SENSORS];
 		
 		this.iRobotEventHandler = null;
+		this.pcm = new X80ProADPCM();
 		//this.imageSEQs = new LinkedList<Integer>();
 		this.imageSEQs = new int[16384];
 		
