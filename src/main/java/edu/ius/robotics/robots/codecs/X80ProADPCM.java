@@ -43,7 +43,7 @@ public class X80ProADPCM
 	
 	public short[] decode(byte[] input, byte length)
 	{
-		int outputLength = 2*length;
+		int outputLength = 2*(length & 0xFF);
 		short[] output = new short[outputLength];
 		
 		short predictedOutput = adpcmState.previousOutput;
@@ -142,7 +142,7 @@ public class X80ProADPCM
 	
 	public byte[] encode(short[] input, short length)
 	{
-		int outputLength = 2*length;
+		int outputLength = 2*(length & 0xFF);
 		byte[] output = new byte[outputLength];
 		short predictedOutput = adpcmState.previousOutput;
 		char index = adpcmState.index;
@@ -246,7 +246,7 @@ public class X80ProADPCM
 		/* Output last step, if needed */
 		if (!bufferStep)
 		{
-			output[outputIndex++] = (byte) outputHolder;
+			output[outputIndex++] = (byte) (outputHolder & 0xFF);
 		}
 		
 		adpcmState.previousOutput = predictedOutput;
