@@ -78,8 +78,6 @@ public class X80Pro implements IRobot, Runnable
 	public static final int PWM_O = 8000;
 	public static final int DUTY_CYCLE_UNIT = 8383;
 	
-	public static final short WHEEL_ENCODER_2PI = 800;
-	
 	public static final double MAX_IR_DIS = 0.81;
 	public static final double MIN_IR_DIS = 0.09;
 	
@@ -200,19 +198,19 @@ public class X80Pro implements IRobot, Runnable
 			offset += 1;
 			for (i = 0; i < Sensors.NUM_LEFT_CONSTELLATION_SENSORS; ++i)
 			{
-				mmDistanceToLeftConstellation[i] = (short) (customSensorData[offset + 2*i + 1] << 8 & 0x0F | customSensorData[offset + 2*i] & 0xFF);
+				mmDistanceToLeftConstellation[i] = (short) ((customSensorData[offset + 2*i + 1] & 0x0F) << 8 | customSensorData[offset + 2*i] & 0xFF);
 			}
 			
 			offset += 2*Sensors.NUM_LEFT_CONSTELLATION_SENSORS;
 			for (i = 0; i < Sensors.NUM_RIGHT_CONSTELLATION_SENSORS; ++i)
 			{
-				mmDistanceToRightConstellation[i] = (short) (customSensorData[offset + 2*i + 1] << 8 & 0x0F | customSensorData[offset + 2*i] & 0xFF); 
+				mmDistanceToRightConstellation[i] = (short) ((customSensorData[offset + 2*i + 1] & 0x0F) << 8 | customSensorData[offset + 2*i] & 0xFF); 
 			}
 			
 			offset += 2*Sensors.NUM_RIGHT_CONSTELLATION_SENSORS;
 			for (i = 0; i < Sensors.NUM_RELATIVE_CONSTELLATION_SENSORS; ++i)
 			{
-				mmDistanceToRelativeConstellation[i] = (short) (customSensorData[offset + 2*i + 1] << 8 & 0x0F | customSensorData[offset + 2*i] & 0xFF); 				
+				mmDistanceToRelativeConstellation[i] = (short) ((customSensorData[offset + 2*i + 1] & 0x0F) << 8 | customSensorData[offset + 2*i] & 0xFF); 				
 			}
 		}
 	}
@@ -370,15 +368,15 @@ public class X80Pro implements IRobot, Runnable
 	// private BufferedReader reader;
 	// private String command;
 	/** wheel distance */
+	public static final short WHEEL_CIRCUMFERENCE_ENCODER_COUNT = 800; // encoder units
 	public static final double WHEEL_CIRCUMFERENCE = 0.265; // meters
 	public static final double WHEEL_DISPLACEMENT = 0.2897; // meters (default: 0.305)
 	
 	/** wheel radius */
-	public static final double WHEEL_RADIUS = 0.0825; // meters
+	public static final double WHEEL_RADIUS = 0.085; // ~0.0825-0.085 meters
 	
 	/** encoder one circle count */
-	//public static final int CIRCLE_ENCODER_COUNT = 1200;
-	public static final int CIRCLE_ENCODER_COUNT = 785;
+	public static final int ROTATE_ROBOT_ENCODER_COUNT = 1200;
 	
 //	private int motorSensorTimePeriod;
 //	private int standardSensorTimePeriod;
@@ -409,6 +407,7 @@ public class X80Pro implements IRobot, Runnable
 	private int currentPackageType;
 	private int remain;
 	private int pkgi;
+	private int prevMsgi;
 	
 	private void preInit()
 	{
@@ -542,7 +541,7 @@ public class X80Pro implements IRobot, Runnable
 //			System.err.println("-*- Audio Data Package Received -*-");
 			if (null != iRobotEventHandler)
 			{
-				//iRobotAudio.audioEvent(robotIP, robotPort, pcm.decode(Arrays.copyOfRange(pkg, 0, pkgLen), pkgLen));					
+				iRobotEventHandler.audioEvent(robotIP, robotPort, pcm.decode(Arrays.copyOfRange(pkg, 0, pkgLen), (byte) pkgLen));					
 			}
 		}
 		else if (PMB5010.VIDEO_PACKAGE == pkgType)
@@ -674,7 +673,7 @@ public class X80Pro implements IRobot, Runnable
 	
 	public void sensorEvent(String robotIP, int robotPort, byte[] msg, int len)
 	{
-		int msgi = 0;
+            int msgi = 0;
 //		System.err.println("len: " + len);
 		// Assuming packets arrive in serial order. Not the best assumption, but it is easy to implement.
 //		System.err.println("remain: " + remain + " bytes");
@@ -727,6 +726,7 @@ public class X80Pro implements IRobot, Runnable
 			}
 			System.err.println("msgi after remain: " + msgi);
 		}
+		msgi = 0;
 		remain = 0;
 		pkgi = 0;
 		// While there are remaining packages...
@@ -776,6 +776,8 @@ public class X80Pro implements IRobot, Runnable
 //			{
 //				System.err.print((0xFF & msg[msgi + j]) + " ");
 //			}
+			// not always true... checksum, ETX0, ETX1 may be discontinuous (may cross packets), 
+			// as well as STX0, STX1 may cross packets to next package
 			if (currentPackageLength == pkgi && 
 					msgi + 2 <= len && 
 					PACKAGE_ETX0 == (0xFF & msg[msgi + 1]) && 
@@ -805,6 +807,7 @@ public class X80Pro implements IRobot, Runnable
 				System.err.println("pkgi: " + pkgi);
 				remain = currentPackageLength - pkgi;
 				System.err.println("Bytes Remaining: " + remain);
+                                prevMsgi = msgi;
 			}
 		}
 	}
@@ -1397,7 +1400,9 @@ public class X80Pro implements IRobot, Runnable
 	    socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) X80Pro.CONTROL_MODE_POSITION));
 	    socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) X80Pro.CONTROL_MODE_POSITION));
 	    
-	    int diffEncoder = (int)((WHEEL_ENCODER_2PI*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
+	    //int diffEncoder = (int)((1200*0.2875*theta)/(4*Math.PI*0.085));
+	    //int diffEncoder = (int)((WHEEL_ENCODER_CIRCUMFERENCE*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
+	    int diffEncoder = (int)((X80Pro.ROTATE_ROBOT_ENCODER_COUNT*WHEEL_DISPLACEMENT*theta)/(2*Math.PI*WHEEL_RADIUS));
 	    
 	    int leftPosition = getEncoderPulse(0) - diffEncoder;
 	    if (leftPosition < 0) 
@@ -1429,7 +1434,7 @@ public class X80Pro implements IRobot, Runnable
 	public void runStepPWM(double runDis, int milliseconds)
 	{
         //the robot will go forward the rundistance
-        int diffEncoder = (int)((runDis / (2 * Math.PI * WHEEL_RADIUS)) * CIRCLE_ENCODER_COUNT);
+        int diffEncoder = (int)((runDis / (2 * Math.PI * WHEEL_RADIUS)) * ROTATE_ROBOT_ENCODER_COUNT);
         
         int LeftTarget = motorSensorData.encoderPulse[L] + diffEncoder;
         if (LeftTarget < 0) 
@@ -1476,7 +1481,7 @@ public class X80Pro implements IRobot, Runnable
     public void runStep(double runDis, int milliseconds) 
     {
         //the robot will go forward the rundistance
-        int diffEncoder = (int)((runDis / (2 * Math.PI * WHEEL_RADIUS)) * CIRCLE_ENCODER_COUNT);
+        int diffEncoder = (int)((runDis / (2 * Math.PI * WHEEL_RADIUS)) * ROTATE_ROBOT_ENCODER_COUNT);
         
         int LeftTarget = motorSensorData.encoderPulse[L] + diffEncoder;
         if (LeftTarget < 0) 
@@ -1512,7 +1517,7 @@ public class X80Pro implements IRobot, Runnable
 	{
 		//@ post: Robot has turned an angle theta in radians
 		
-	    int diffEncoder = (int)((WHEEL_ENCODER_2PI*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
+	    int diffEncoder = (int)((WHEEL_CIRCUMFERENCE_ENCODER_COUNT*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
 	    
 	    // TODO: cross calling
 	    int leftPulseWidth = getEncoderPulse(L) - diffEncoder;
