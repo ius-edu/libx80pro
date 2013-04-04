@@ -1,10 +1,16 @@
 package edu.ius.robotics.robots.interfaces;
 
-import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 
 public interface IRobotEventHandler
 {
-	public void audioEvent(String robotIP, int robotPort, short[] audioData);
-	public void imageEvent(String robotIP, int robotPort, BufferedImage imageData);
-	public void sensorEvent(String robotIP, int robotPort, byte[] sensorData, int dataLength);
+//	public void standardSensorDataReceivedEvent(String robotIP, int robotPort);
+//	public void customSensorDataReceivedEvent(String robotIP, int robotPort);
+//	public void motorSensorDataReceivedEvent(String robotIP, int robotPort);
+//	public void powerSensorReceivedEvent(String robotIP, int robotPort);
+	
+	public void sensorDataReceivedEvent(String robotIP, int robotPort, int sensorDataType);
+	public void audioSegmentReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream audioBuffer);
+	public void audioCodecResetRequestReceivedEvent(String robotIP, int robotPort);
+	public void imageReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream imageBuffer);
 }

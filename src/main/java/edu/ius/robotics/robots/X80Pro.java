@@ -1,16 +1,9 @@
 package edu.ius.robotics.robots;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.lang.Runtime;
 import java.util.Arrays;
-import java.util.Iterator;
-
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.ImageOutputStream;
 
 import edu.ius.robotics.robots.boards.PMS5005;
 import edu.ius.robotics.robots.boards.PMB5010;
@@ -392,11 +385,10 @@ public class X80Pro implements IRobot, Runnable
 	
 	//private boolean[] lockIRRange;
 	byte previousSEQ;
-	byte[] audioBuffer;
-	int audioBufferSize;
 	
 	private UDPSocket socket;
 	private X80ProADPCM pcm;
+	private ByteArrayOutputStream audioBuffer;
 	private ByteArrayOutputStream imageBuffer;
 	//private List<Integer> imageSEQs;
 	private int[] imageSEQs;
@@ -407,11 +399,9 @@ public class X80Pro implements IRobot, Runnable
 	private int currentPackageType;
 	private int remain;
 	private int pkgi;
-	private int prevMsgi;
 	
 	private void preInit()
 	{
-		ImageIO.setUseCache(false);
 		//lockIRRange = new boolean[NUM_IR_SENSORS];
 		
 		this.iRobotEventHandler = null;
@@ -422,11 +412,10 @@ public class X80Pro implements IRobot, Runnable
 		this.currentPackage = new byte[16384];
 		this.remain = 0;
 		
+		this.audioBuffer = new ByteArrayOutputStream();
 		this.imageBuffer = new ByteArrayOutputStream();
 		
-		this.audioBuffer = new byte[16384]; // 16K
 		this.previousSEQ = 0;
-		this.audioBufferSize = 0;
 		
 		//this.motorSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.MOTOR_SENSOR_DATA_LENGTH];
 		//this.customSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.CUSTOM_SENSOR_DATA_LENGTH];
@@ -534,15 +523,21 @@ public class X80Pro implements IRobot, Runnable
 		else if (PMB5010.ADPCM_RESET == pkgType)
 		{
 //			System.err.println("-*- ADPCM Reset Command Package Received -*-");
-			pcm.init();
-			socket.send(PMB5010.ack((byte) 0)); // TODO insert actual sequence value here
+			//pcm.init();
+			//socket.send(PMB5010.ack((byte) 0)); // TODO insert actual sequence value here
+			if (null != iRobotEventHandler)
+			{
+				iRobotEventHandler.audioCodecResetRequestReceivedEvent(robotIP, robotPort);
+			}
 		}
 		else if (PMB5010.AUDIO_PACKAGE == pkgType)
 		{
 //			System.err.println("-*- Audio Data Package Received -*-");
 			if (null != iRobotEventHandler)
 			{
-				iRobotEventHandler.audioEvent(robotIP, robotPort, pcm.decode(Arrays.copyOfRange(pkg, 0, pkgLen), (byte) (pkgLen & 0xFF)));					
+				audioBuffer.reset();
+				audioBuffer.write(pkg, 0, pkgLen);
+				iRobotEventHandler.audioSegmentReceivedEvent(robotIP, robotPort, audioBuffer);
 			}
 		}
 		else if (PMB5010.VIDEO_PACKAGE == pkgType)
@@ -558,15 +553,7 @@ public class X80Pro implements IRobot, Runnable
 					System.err.println();
 					//this.numImagePkgs = 0xFF & currentPackage[X80Pro.PACKAGE_DATA_NUM_IMAGE_PKGS_OFFSET];
 					//System.err.println("numImagePkgs: " + numImagePkgs);
-					try
-					{
-						imageBuffer.flush();
-					}
-					catch (IOException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					imageBuffer.reset();
 					previousSEQ = pkg[PMB5010.VIDEO_SEQ_OFFSET];
 				}
 				
@@ -587,71 +574,7 @@ public class X80Pro implements IRobot, Runnable
 				if (PMB5010.SEQ_TERMINATE == (byte) (0xFF & pkg[PMB5010.VIDEO_SEQ_OFFSET])) // || this.numImagePkgs - 1 <= pkg[PMB5010.VIDEO_SEQ_OFFSET])
 				{
 					System.err.println("Finished jpeg image assembly");
-			        BufferedImage bi = new BufferedImage(176, 144, BufferedImage.TYPE_INT_ARGB);
-			        byte[] rawBytes = imageBuffer.toByteArray();
-					int count = 0; 
-		            for (int h = 0; h < 144; h++)
-		            {
-		                for (int w = 0; w < 176; w++)
-		                {
-		                    bi.setRGB(w, h, rawBytes[count++]);
-		                }
-		            }
-		            try
-		            {
-			            File outputFile = new File("/tmp/outputFile.jpeg");
-			            ImageOutputStream ios = ImageIO.createImageOutputStream(outputFile);
-			            Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByFormatName("jpeg");
-			            ImageWriter imageWriter = (ImageWriter) imageWriters.next();
-			            imageWriter.setOutput(ios);
-			            imageWriter.write(bi);
-			            ios.close();
-		            }
-		            catch (IOException ex)
-		            {
-		            	ex.printStackTrace();
-		            }
-//					Iterator<?> readers = ImageIO.getImageReadersByFormatName("jpeg");
-//					ImageReader reader = (ImageReader) readers.next();
-//					ImageInputStream iis = null;
-//					try
-//					{
-//						iis = ImageIO.createImageInputStream(new ByteArrayInputStream(imageBuffer.toByteArray()));
-//					}
-//					catch (IOException e)
-//					{
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//					
-//					if (null == iis)
-//					{
-//						System.err.println("ImageInputStream (iis) is null!");
-//						return;
-//					}
-//					
-//					reader.setInput(iis, true);
-//					ImageReadParam param = reader.getDefaultReadParam();
-//			        Image image = null;
-//					try
-//					{
-//						image = reader.read(0, param);
-//					}
-//					catch (IOException e)
-//					{
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//					
-//					if (null == image)
-//					{
-//						System.err.println("Image (image) is null!");
-//						return;
-//					}
-//					
-//			        //got an image file
-//			        BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
-					//iRobotImage.imageEvent(robotIP, robotPort, bufferedImage);
+					iRobotEventHandler.imageReceivedEvent(robotIP, robotPort, imageBuffer);
 				}
 			}
 			else
@@ -674,24 +597,43 @@ public class X80Pro implements IRobot, Runnable
 	
 	public void sensorEvent(String robotIP, int robotPort, byte[] msg, int len)
 	{
-            int msgi = 0;
+        int msgi = 0;
 //		System.err.println("len: " + len);
 		// Assuming packets arrive in serial order. Not the best assumption, but it is easy to implement.
 //		System.err.println("remain: " + remain + " bytes");
+        if (PACKAGE_DATA_HEADER_LENGTH <= remain) // remain too long (broken on header)
+        {
+        	int pkgbp = remain - currentPackageLength; // always negative value
+			if (0 < pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET && pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET < len)
+			{
+				currentPackageType = 0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET];
+				//System.err.println("currentPackageType: " + currentPackageType);
+			}
+			// if not out of bounds, read in the length
+			if (0 < pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET && pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET < len)
+			{
+				currentPackageLength = (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET]); // + X80Pro.PACKAGE_DATA_HEADER_LENGTH;
+				//System.err.println("currentPackageLength: " + currentPackageLength);
+			}
+			
+        	// consume the header
+        	pkgi = PACKAGE_DATA_HEADER_LENGTH;
+        	remain = currentPackageLength - PACKAGE_DATA_HEADER_LENGTH;
+        }
 		if (0 < remain)
 		{
-			if (pkgi < PACKAGE_DATA_DID_OFFSET)
-			{
-				System.err.println("Only read " + pkgi + " bytes before, need to read package type");
-				currentPackageType = msg[PACKAGE_DATA_DID_OFFSET - pkgi];
-				System.err.println("type: " + currentPackageType);
-			}
-			if (pkgi < PACKAGE_DATA_LENGTH_OFFSET)
-			{
-				System.err.println("Only read " + pkgi + " bytes previously, need to read package length");
-				currentPackageLength = msg[PACKAGE_DATA_LENGTH_OFFSET - pkgi];
-				System.err.println("length: " + currentPackageLength);
-			}
+//			if (pkgi < PACKAGE_DATA_DID_OFFSET)
+//			{
+//				System.err.println("Only read " + pkgi + " bytes before, need to read package type");
+//				currentPackageType = msg[PACKAGE_DATA_DID_OFFSET - pkgi];
+//				System.err.println("type: " + currentPackageType);
+//			}
+//			if (pkgi < PACKAGE_DATA_LENGTH_OFFSET)
+//			{
+//				System.err.println("Only read " + pkgi + " bytes previously, need to read package length");
+//				currentPackageLength = msg[PACKAGE_DATA_LENGTH_OFFSET - pkgi];
+//				System.err.println("length: " + currentPackageLength);
+//			}
 			System.err.println("Concatenating remaining (" + remain + ") bytes to previous package");
 			for (msgi = 0; msgi < remain; ++msgi)
 			{
@@ -727,11 +669,19 @@ public class X80Pro implements IRobot, Runnable
 			}
 			System.err.println("msgi after remain: " + msgi);
 		}
-		msgi = 0;
+//		else if (remain <= PACKAGE_DATA_FOOTER_LENGTH) // remain too short (broken on footer)
+//		{
+//			//pkgi += currentPackageLength - pkgi;
+//			// could check checksum here, if it resides here and 
+//			// consume ETX0, ETX1, if they reside here, then
+//			// reset current pacakge information.
+//			pkgi = 0;
+//			remain = 0;
+//		}
 		remain = 0;
 		pkgi = 0;
 		// While there are remaining packages...
-		while ((msgi + 1 < len - 1) && PACKAGE_STX0 == (0xFF & msg[msgi]) && PACKAGE_STX1 == (0xFF & msg[msgi + 1]))
+		while (msgi < len)
 		{
 			Arrays.fill(currentPackage, (byte) 0);
 			currentPackageLength = 0;
@@ -779,10 +729,8 @@ public class X80Pro implements IRobot, Runnable
 //			}
 			// not always true... checksum, ETX0, ETX1 may be discontinuous (may cross packets), 
 			// as well as STX0, STX1 may cross packets to next package
-			if (currentPackageLength == pkgi && 
-					msgi + 2 <= len && 
-					PACKAGE_ETX0 == (0xFF & msg[msgi + 1]) && 
-					PACKAGE_ETX1 == (0xFF & msg[msgi + 2]))
+			if (currentPackageLength == pkgi && msgi + 2 <= len && 
+					PACKAGE_ETX0 == (0xFF & msg[msgi + 1]) && PACKAGE_ETX1 == (0xFF & msg[msgi + 2]))
 			{
 				//int checksum = 0xFF & msg[pkgbp + pkgi];
 //				System.err.println("Read ETX0 and ETX1, Dispatching...");
@@ -792,11 +740,11 @@ public class X80Pro implements IRobot, Runnable
 			else // we've run out of packet from which to read the package
 			{
 				System.err.println("pkgi: " + pkgi + ", currentPackageLength: " + currentPackageLength);
-				System.err.print("postamble: ");
-				for (int j = 0; j < 12; ++j)
-				{
-					System.err.printf("%x ", msg[msgi + j] & 0xFF);
-				}
+//				System.err.print("postamble: ");
+//				for (int j = 0; j < 12; ++j)
+//				{
+//					System.err.printf("%x ", msg[msgi + j] & 0xFF);
+//				}
 				System.err.println();
 				System.err.println(msgi + " ?<= " + len);
 				System.err.println("Checksum: " + (0xFF & msg[pkgbp + pkgi + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET]));
@@ -808,7 +756,6 @@ public class X80Pro implements IRobot, Runnable
 				System.err.println("pkgi: " + pkgi);
 				remain = currentPackageLength - pkgi;
 				System.err.println("Bytes Remaining: " + remain);
-                                prevMsgi = msgi;
 			}
 		}
 	}
@@ -1354,9 +1301,9 @@ public class X80Pro implements IRobot, Runnable
 		socket.send(PMS5005.setAllServoPulses((short) p0, (short) -p1, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
 	}
 	
-	public void startAudioRecording(short voiceSegmentLength)
+	public void startAudioRecording(int voiceSegmentLength)
 	{
-		socket.send(PMB5010.startAudioRecording(voiceSegmentLength));
+		socket.send(PMB5010.startAudioRecording((short) voiceSegmentLength));
 	}
 	
 	public void stopAudioRecording()
@@ -1364,14 +1311,14 @@ public class X80Pro implements IRobot, Runnable
 		socket.send(PMB5010.stopAudioRecording());
 	}
 	
-	public void startAudioPlayback(short sampleLength)
+	public void startAudioPlayback(int sampleLength)
 	{
 		for (byte seq = 0; seq < sampleLength / 0xff; ++seq)
 		{
-			socket.send(PMB5010.startAudioPlayback(sampleLength, seq));
+			socket.send(PMB5010.startAudioPlayback((short) sampleLength, seq));
 		}
 		
-		socket.send(PMB5010.startAudioPlayback(sampleLength, (byte) (0xff & 0xff)));
+		socket.send(PMB5010.startAudioPlayback((short) sampleLength, (byte) (0xff & 0xff)));
 	}
 	
 	public void stopAudioPlayback()

@@ -166,7 +166,7 @@ public class UDPSocket implements Runnable
 			//long beginTime = System.currentTimeMillis();
 			try
 			{
-				this.socket.setSoTimeout(17);
+				this.socket.setSoTimeout(10);
 				this.socket.receive(this.rxPkt);
 			}
 			catch (IOException ex)

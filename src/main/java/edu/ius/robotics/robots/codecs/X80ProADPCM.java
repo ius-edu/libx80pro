@@ -54,11 +54,10 @@ public class X80ProADPCM
 		int sign;
 		int delta;
 		
-		boolean bufferStep = false;
-		int inputIndex = 0;
 		int outputIndex = 0;
-		
-		for (int i = output.length; 0 < i; i--)
+		int inputIndex = 0;
+		boolean bufferStep = false;
+		for (int i = output.length - 1; 0 <= i; i--)
 		{
 			/* Step 1: Get the data value */
 			if (bufferStep)
