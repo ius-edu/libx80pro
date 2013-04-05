@@ -111,7 +111,7 @@ public class X80Pro implements IRobot, Runnable
 		public static final int IMAGE_PKG_COUNT_RELATIVE_OFFSET = 1;
 		public static final int IMAGE_DATA_RELATIVE_OFFSET = 2;
 		
-		public static final int MAX_DATA_SIZE = 1500;
+		public static final int MAX_DATA_SIZE = 0xFF;
 		public static final int STX0 = 0x5e;
 		public static final int STX1 = 0x02;
 		public static final int ETX0 = 0x5e;
@@ -730,9 +730,10 @@ public class X80Pro implements IRobot, Runnable
 			}
 			if (i < len && Pkg.DATA_OFFSET <= pkg.offset && pkg.offset < pkg.length)
 			{
-				for (int j = pkg.offset - Pkg.HEADER_LENGTH; j < pkg.length; ++j)
+				int j = pkg.offset - Pkg.HEADER_LENGTH;
+				while (i < len && j < pkg.length)
 				{
-					pkg.data[j] = (byte) (msg[i++] & 0xFF);
+					pkg.data[j++] = (byte) (msg[i++] & 0xFF);
 					++pkg.offset;
 				}
 			}
