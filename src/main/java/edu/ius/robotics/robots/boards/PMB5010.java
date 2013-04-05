@@ -22,7 +22,7 @@ public class PMB5010
 	public static final byte STX0 = 94; // 0x5e
 	public static final byte STX1 = 2; // 0x02
 	public static final byte ETX0 = 94; // 0x5e
-	public static final byte ETX1 = 13; // 0x13
+	public static final byte ETX1 = 13; // 0x0d
 	
 	/* RID */
 	public static final byte RID_HOST = 0x00;

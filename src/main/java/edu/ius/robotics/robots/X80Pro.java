@@ -3,11 +3,9 @@ package edu.ius.robotics.robots;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.Runtime;
-import java.util.Arrays;
 
 import edu.ius.robotics.robots.boards.PMS5005;
 import edu.ius.robotics.robots.boards.PMB5010;
-import edu.ius.robotics.robots.codecs.X80ProADPCM;
 import edu.ius.robotics.robots.interfaces.IRobot;
 import edu.ius.robotics.robots.interfaces.IRobotEventHandler;
 
@@ -81,21 +79,114 @@ public class X80Pro implements IRobot, Runnable
 	public static final int Y = 1;
 	
 	public static final int MAX_SPEED = 32767;
+
+//	public static final int PACKAGE_STX0 = 0x5E;
+//	public static final int PACKAGE_STX1 = 0x02;
+//	public static final int PACKAGE_ETX0 = 0x5E;
+//	public static final int PACKAGE_ETX1 = 0x0D;
+//	
+//	public static final int PACKAGE_DATA_HEADER_LENGTH = 6;
+//	public static final int PACKAGE_DATA_FOOTER_LENGTH = 3;
+//	public static final int PACKAGE_DATA_DID_OFFSET = 4;
+//	public static final int PACKAGE_DATA_PAYLOAD_OFFSET = 6;
+//	public static final int PACKAGE_DATA_LENGTH_OFFSET = 5;
+//	public static final int PACKAGE_DATA_METADATA_SIZE = 9;
+//	
+//	public static final int PACKAGE_DATA_NUM_IMAGE_PKGS_OFFSET = 1;
+//	public static final int PACKAGE_DATA_IMAGE_VIDEO_DATA_OFFSET = 2;
 	
-	public static final int PACKAGE_STX0 = 0x5E;
-	public static final int PACKAGE_STX1 = 0x02;
-	public static final int PACKAGE_ETX0 = 0x5E;
-	public static final int PACKAGE_ETX1 = 0x0D;
-	
-	public static final int PACKAGE_DATA_HEADER_LENGTH = 6;
-	public static final int PACKAGE_DATA_FOOTER_LENGTH = 3;
-	public static final int PACKAGE_DATA_DID_OFFSET = 4;
-	public static final int PACKAGE_DATA_PAYLOAD_OFFSET = 6;
-	public static final int PACKAGE_DATA_LENGTH_OFFSET = 5;
-	public static final int PACKAGE_DATA_METADATA_SIZE = 9;
-	
-	public static final int PACKAGE_DATA_NUM_IMAGE_PKGS_OFFSET = 1;
-	public static final int PACKAGE_DATA_IMAGE_VIDEO_DATA_OFFSET = 2;
+	private class Pkg
+	{
+		public static final int STX0_OFFSET = 0;
+		public static final int STX1_OFFSET = 1;
+		public static final int RID_OFFSET = 2;
+		public static final int RESERVED_OFFSET = 3;
+		public static final int DID_OFFSET = 4;
+		public static final int LENGTH_OFFSET = 5;
+		public static final int DATA_OFFSET = 6;
+		public static final int CHECKSUM_RELATIVE_OFFSET = 0;
+		public static final int ETX0_RELATIVE_OFFSET = 1;
+		public static final int ETX1_RELATIVE_OFFSET = 2;
+		public static final int HEADER_LENGTH = 6;
+		public static final int IMAGE_PKG_COUNT_RELATIVE_OFFSET = 1;
+		public static final int IMAGE_DATA_RELATIVE_OFFSET = 2;
+		
+		public static final int MAX_DATA_SIZE = 1500;
+		public static final int STX0 = 0x5e;
+		public static final int STX1 = 0x02;
+		public static final int ETX0 = 0x5e;
+		public static final int ETX1 = 0x0d;
+		
+		public int offset;
+		
+		public int stx0;
+		public int stx1;
+		
+		public int destination;
+		public int serial;
+		public int type;
+		public int length;
+		public byte[] data;
+		
+		public int checksum;
+		public int etx0;
+		public int etx1;
+		
+		public void reset()
+		{
+			offset = 0;
+			stx0 = 0;
+			stx1 = 0;
+			destination = 0;
+			serial = 0;
+			type= 0;
+			length = 0;
+			checksum = 0;
+			etx0 = 0;
+			etx1 = 0;
+			
+			for (int i = 0; i < MAX_DATA_SIZE; ++i)
+			{
+				data[i] = 0;
+			}
+		}
+		
+		public Pkg()
+		{
+			data = new byte[MAX_DATA_SIZE];
+			reset();
+		}
+		
+		// This is from PMS5005 and PMB5010 protocol documentation
+		public byte checksum() // could, maybe should, be static (checksum(byte[] buf))
+		{
+			byte shift_reg, sr_lsb, data_bit, v;
+			byte fb_bit;
+			int z;
+			shift_reg = 0; // initialize the shift register
+			z = data.length - 5;
+			for (int i = 0; i < z; ++i) 
+			{
+			    v = (byte) (data[2 + i]); // start from RID
+			    // for each bit
+			    for (int j = 0; j < 8; ++j) 
+			    {
+					// isolate least sign bit
+					data_bit = (byte) ((v & 0x01) & 0xFF);
+					sr_lsb = (byte) ((shift_reg & 0x01) & 0xFF);
+					// calculate the feed back bit
+					fb_bit = (byte) (((data_bit ^ sr_lsb) & 0x01) & 0xFF);
+					shift_reg = (byte) ((shift_reg & 0xFF) >>> 1);
+					if (fb_bit == 1)
+					{
+					    shift_reg = (byte) ((shift_reg ^ 0x8C) & 0xFF);
+					}
+					v = (byte) ((v & 0xFF) >>> 1);
+			    }
+			}
+			return shift_reg;
+		}
+	}
 	
 	private class MotorSensorData
 	{
@@ -387,35 +478,32 @@ public class X80Pro implements IRobot, Runnable
 	byte previousSEQ;
 	
 	private UDPSocket socket;
-	private X80ProADPCM pcm;
+	//private X80ProADPCM pcm;
 	private ByteArrayOutputStream audioBuffer;
 	private ByteArrayOutputStream imageBuffer;
 	//private List<Integer> imageSEQs;
-	private int[] imageSEQs;
+	//private int[] imageSEQs;
 	private IRobotEventHandler iRobotEventHandler;
 	
-	private byte[] currentPackage;
-	private int currentPackageLength;
-	private int currentPackageType;
-	private int remain;
-	private int pkgi;
+//	private byte[] currentPackage;
+//	private int currentPackageLength;
+//	private int currentPackageType;
+//	private int remain;
+//	private int pkgi;
+	private Pkg pkg;
 	
 	private void preInit()
 	{
 		//lockIRRange = new boolean[NUM_IR_SENSORS];
+		this.pkg = new Pkg();
 		
 		this.iRobotEventHandler = null;
-		this.pcm = new X80ProADPCM();
+		//this.pcm = new X80ProADPCM();
 		//this.imageSEQs = new LinkedList<Integer>();
-		this.imageSEQs = new int[16384];
-		
-		this.currentPackage = new byte[16384];
-		this.remain = 0;
+		//this.imageSEQs = new int[16384];
 		
 		this.audioBuffer = new ByteArrayOutputStream();
 		this.imageBuffer = new ByteArrayOutputStream();
-		
-		this.previousSEQ = 0;
 		
 		//this.motorSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.MOTOR_SENSOR_DATA_LENGTH];
 		//this.customSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.CUSTOM_SENSOR_DATA_LENGTH];
@@ -503,24 +591,24 @@ public class X80Pro implements IRobot, Runnable
 		socket.send(command);
 	}
 	
-	private void dispatch(byte[] pkg, int pkgLen, int pkgType, String robotIP, int robotPort)
+	private void dispatch(Pkg pkg, String robotIP, int robotPort)
 	{
-		if (PMS5005.GET_MOTOR_SENSOR_DATA == pkgType)
+		if (PMS5005.GET_MOTOR_SENSOR_DATA == pkg.type)
 		{
 //			System.err.println("-*- Motor Sensor Data Package Received -*-");
-			motorSensorData.setMotorSensorData(pkg);
+			motorSensorData.setMotorSensorData(pkg.data);
 		}
-		else if (PMS5005.GET_CUSTOM_SENSOR_DATA == pkgType)
+		else if (PMS5005.GET_CUSTOM_SENSOR_DATA == pkg.type)
 		{
 //			System.err.println("-*- Custom Sensor Data Package Received -*-");
-			customSensorData.setCustomSensorData(pkg);
+			customSensorData.setCustomSensorData(pkg.data);
 		}
-		else if (PMS5005.GET_STANDARD_SENSOR_DATA == pkgType)
+		else if (PMS5005.GET_STANDARD_SENSOR_DATA == pkg.type)
 		{
 //			System.err.println("-*- Standard Sensor Data Package Received -*-");
-			standardSensorData.setStandardSensorData(pkg);
+			standardSensorData.setStandardSensorData(pkg.data);
 		}
-		else if (PMB5010.ADPCM_RESET == pkgType)
+		else if (PMB5010.ADPCM_RESET == pkg.type)
 		{
 //			System.err.println("-*- ADPCM Reset Command Package Received -*-");
 			//pcm.init();
@@ -530,23 +618,23 @@ public class X80Pro implements IRobot, Runnable
 				iRobotEventHandler.audioCodecResetRequestReceivedEvent(robotIP, robotPort);
 			}
 		}
-		else if (PMB5010.AUDIO_PACKAGE == pkgType)
+		else if (PMB5010.AUDIO_PACKAGE == pkg.type)
 		{
 //			System.err.println("-*- Audio Data Package Received -*-");
 			if (null != iRobotEventHandler)
 			{
 				audioBuffer.reset();
-				audioBuffer.write(pkg, 0, pkgLen);
+				audioBuffer.write(pkg.data, 0, pkg.length);
 				iRobotEventHandler.audioSegmentReceivedEvent(robotIP, robotPort, audioBuffer);
 			}
 		}
-		else if (PMB5010.VIDEO_PACKAGE == pkgType)
+		else if (PMB5010.VIDEO_PACKAGE == pkg.type)
 		{
 			System.err.println("-*- Image Data Package Received -*-");
 			if (null != iRobotEventHandler)
 			{
 				// Step 1: Clear buffer sizes if we're receiving first JPEG packet.
-				if (PMB5010.SEQ_BEGIN == (byte) (0xFF & pkg[PMB5010.VIDEO_SEQ_OFFSET]))
+				if (PMB5010.SEQ_BEGIN == (byte) (0xFF & pkg.data[PMB5010.VIDEO_SEQ_OFFSET]))
 				//if (0 == this.numImagePkgs)
 				{
 					System.err.println("Beginning jpeg image assembly");
@@ -554,16 +642,16 @@ public class X80Pro implements IRobot, Runnable
 					//this.numImagePkgs = 0xFF & currentPackage[X80Pro.PACKAGE_DATA_NUM_IMAGE_PKGS_OFFSET];
 					//System.err.println("numImagePkgs: " + numImagePkgs);
 					imageBuffer.reset();
-					previousSEQ = pkg[PMB5010.VIDEO_SEQ_OFFSET];
+					previousSEQ = pkg.data[PMB5010.VIDEO_SEQ_OFFSET];
 				}
 				
 				// Step 2: Assemble complete data in buffer.
-				if (0 == imageBuffer.size() || PMB5010.SEQ_TERMINATE == (byte) (0xFF & pkg[PMB5010.VIDEO_SEQ_OFFSET]) || 
-						previousSEQ == pkg[PMB5010.VIDEO_SEQ_OFFSET] - 1)
+				if (0 == imageBuffer.size() || PMB5010.SEQ_TERMINATE == (byte) (0xFF & pkg.data[PMB5010.VIDEO_SEQ_OFFSET]) || 
+						previousSEQ == pkg.data[PMB5010.VIDEO_SEQ_OFFSET] - 1)
 				{
 					System.err.println("Continuing jpeg image assembly");
-					imageBuffer.write(pkg, PACKAGE_DATA_IMAGE_VIDEO_DATA_OFFSET, pkgLen);
-					previousSEQ = pkg[PMB5010.VIDEO_SEQ_OFFSET];
+					imageBuffer.write(pkg.data, Pkg.IMAGE_DATA_RELATIVE_OFFSET, pkg.length);
+					previousSEQ = pkg.data[PMB5010.VIDEO_SEQ_OFFSET];
 				}
 				else
 				{
@@ -571,7 +659,7 @@ public class X80Pro implements IRobot, Runnable
 				}
 				
 				// Step 3: Decode complete data from buffer if we have finished receiving.
-				if (PMB5010.SEQ_TERMINATE == (byte) (0xFF & pkg[PMB5010.VIDEO_SEQ_OFFSET])) // || this.numImagePkgs - 1 <= pkg[PMB5010.VIDEO_SEQ_OFFSET])
+				if (PMB5010.SEQ_TERMINATE == (byte) (0xFF & pkg.data[PMB5010.VIDEO_SEQ_OFFSET])) // || this.numImagePkgs - 1 <= pkg[PMB5010.VIDEO_SEQ_OFFSET])
 				{
 					System.err.println("Finished jpeg image assembly");
 					iRobotEventHandler.imageReceivedEvent(robotIP, robotPort, imageBuffer);
@@ -579,11 +667,11 @@ public class X80Pro implements IRobot, Runnable
 			}
 			else
 			{
-				System.err.println("iRobotImage is null");
+				System.err.println("iRobotEventHandler is null");
 			}
-			// else if null == iRobotImage (no delegate), we won't do anything with the data.
+			// else if null == iRobotEventHandler (no delegate), we won't do anything with the data.
 		}
-		else if (PMS5005.SETUP_COM == pkgType)
+		else if (PMS5005.SETUP_COM == pkg.type)
 		{
 //			System.err.println("-*- SETUP_COM Command Received -*-");
 //			for (int i = 0; i < pkgLen; ++i)
@@ -597,168 +685,252 @@ public class X80Pro implements IRobot, Runnable
 	
 	public void sensorEvent(String robotIP, int robotPort, byte[] msg, int len)
 	{
-        int msgi = 0;
-//		System.err.println("len: " + len);
-		// Assuming packets arrive in serial order. Not the best assumption, but it is easy to implement.
-//		System.err.println("remain: " + remain + " bytes");
-        if (PACKAGE_DATA_HEADER_LENGTH <= remain) // remain too long (broken on header)
-        {
-        	int pkgbp = remain - currentPackageLength; // always negative value
-			if (0 < pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET && pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET < len)
-			{
-				currentPackageType = 0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET];
-				//System.err.println("currentPackageType: " + currentPackageType);
-			}
-			// if not out of bounds, read in the length
-			if (0 < pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET && pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET < len)
-			{
-				currentPackageLength = (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET]); // + X80Pro.PACKAGE_DATA_HEADER_LENGTH;
-				//System.err.println("currentPackageLength: " + currentPackageLength);
-			}
-			
-        	// consume the header
-        	pkgi = PACKAGE_DATA_HEADER_LENGTH;
-        	remain = currentPackageLength - PACKAGE_DATA_HEADER_LENGTH;
-        }
-		if (0 < remain)
+		System.err.println("-*- new message -*-");
+		System.err.println("-*- message len: " + len + " -*-");
+		int i = 0;
+		while (i < len)
 		{
-//			if (pkgi < PACKAGE_DATA_DID_OFFSET)
-//			{
-//				System.err.println("Only read " + pkgi + " bytes before, need to read package type");
-//				currentPackageType = msg[PACKAGE_DATA_DID_OFFSET - pkgi];
-//				System.err.println("type: " + currentPackageType);
-//			}
-//			if (pkgi < PACKAGE_DATA_LENGTH_OFFSET)
-//			{
-//				System.err.println("Only read " + pkgi + " bytes previously, need to read package length");
-//				currentPackageLength = msg[PACKAGE_DATA_LENGTH_OFFSET - pkgi];
-//				System.err.println("length: " + currentPackageLength);
-//			}
-			System.err.println("Concatenating remaining (" + remain + ") bytes to previous package");
-			for (msgi = 0; msgi < remain; ++msgi)
+			if (i < len && Pkg.STX0_OFFSET == pkg.offset)
 			{
-				currentPackage[pkgi + msgi] = msg[msgi];
-				System.err.printf("%x ", 0xFF & currentPackage[pkgi + msgi]);
-			}
-			pkgi += msgi;
-			System.err.println();
-			remain -= msgi;
-			if (0 == remain)
-			{
-				System.err.println("read all remaining bytes");
-			}
-			System.err.println("remain pkgi: " + pkgi + ", remain currentPackageLength: " + currentPackageLength);
-			System.err.print("postamble: ");
-			for (int j = 0; j < 12; ++j)
-			{
-				System.err.printf("%x ", msg[msgi + j] & 0xFF);
-			}
-			System.err.println();
-			System.err.println("remain " + msgi + " ?<= " + len);
-			System.err.println("remain Checksum: " + (0xFF & msg[msgi]));
-			System.err.println("remain ETX0: " + (0xFF & msg[msgi + 1]));
-			System.err.println("remain ETX1: " + (0xFF & msg[msgi + 2]));
-			System.err.println("remain len: " + len);
-			if (currentPackageLength == pkgi && 
-					msgi + pkgi + 2 <= len - 1 && 
-					PACKAGE_ETX0 == (0xFF & msg[msgi + 1]) && 
-					PACKAGE_ETX1 == (0xFF & msg[msgi + 2]))
-			{
-				dispatch(currentPackage, currentPackageLength, currentPackageType, robotIP, robotPort);
-				msgi += PACKAGE_DATA_FOOTER_LENGTH; // discard trailing metadata
-			}
-			System.err.println("msgi after remain: " + msgi);
-		}
-//		else if (remain <= PACKAGE_DATA_FOOTER_LENGTH) // remain too short (broken on footer)
-//		{
-//			//pkgi += currentPackageLength - pkgi;
-//			// could check checksum here, if it resides here and 
-//			// consume ETX0, ETX1, if they reside here, then
-//			// reset current pacakge information.
-//			pkgi = 0;
-//			remain = 0;
-//		}
-		remain = 0;
-		pkgi = 0;
-		// While there are remaining packages...
-		while (msgi < len)
-		{
-			Arrays.fill(currentPackage, (byte) 0);
-			currentPackageLength = 0;
-			currentPackageType = 0;
-			
-			int pkgbp = msgi; // acts as a base pointer to the start of the pkg
-			// if not out of bounds, read in the type
-			if (pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET < len)
-			{
-				currentPackageType = 0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET];
-				//System.err.println("currentPackageType: " + currentPackageType);
-			}
-			// if not out of bounds, read in the length
-			if (pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET < len)
-			{
-				currentPackageLength = (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET]); // + X80Pro.PACKAGE_DATA_HEADER_LENGTH;
-				//System.err.println("currentPackageLength: " + currentPackageLength);
-			}
-			// read data payload
-			// TODO enter loop, while less than msg len and package len, copy bytes from msg into a package, decrement tmp len
-			msgi += X80Pro.PACKAGE_DATA_HEADER_LENGTH;
-			if (currentPackageType == 0x09)
-			{
-				for (pkgi = 0; pkgbp + pkgi + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET < len && pkgi < currentPackageLength; ++pkgi)
+				if (Pkg.STX0 != (msg[i] & 0xFF)) 
 				{
-					currentPackage[pkgi] = (byte) (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET + pkgi]);
-					System.err.printf("%x ", 0xFF & currentPackage[pkgi]);
-					msgi++;
+					System.err.println("DEBUG: STX0 isn't where it is expected to be");
 				}
-				System.err.println();
+				pkg.stx0 = msg[i++];
+				++pkg.offset;
 			}
-			else
+			if (i < len && Pkg.STX1_OFFSET == pkg.offset)
 			{
-				for (pkgi = 0; msgi < len && pkgi < currentPackageLength; ++pkgi) // pkgbp + pkgi + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET
+				if (Pkg.STX1 != (msg[i] & 0xFF))
 				{
-					currentPackage[pkgi] = (byte) (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET + pkgi]);
-					msgi++;
+					System.err.println("DEBUG: STX1 isn't where it is expected to be");
+				}
+				pkg.stx1 = msg[i++];
+				++pkg.offset;
+			}
+			if (i < len && Pkg.RID_OFFSET == pkg.offset)
+			{
+				pkg.destination = (byte) (msg[i++] & 0xFF);
+				++pkg.offset;
+			}
+			if (i < len && Pkg.RESERVED_OFFSET == pkg.offset)
+			{
+				pkg.serial = (byte) (msg[i++] & 0xFF);
+				++pkg.offset;
+			}
+			if (i < len && Pkg.DID_OFFSET == pkg.offset)
+			{
+				pkg.type = (byte) (msg[i++] & 0xFF);
+				++pkg.offset;
+			}
+			if (i < len && Pkg.LENGTH_OFFSET == pkg.offset)
+			{
+				pkg.length = (byte) (msg[i++] & 0xFF);
+				++pkg.offset;
+			}
+			if (i < len && Pkg.DATA_OFFSET <= pkg.offset && pkg.offset < pkg.length)
+			{
+				for (int j = pkg.offset - Pkg.HEADER_LENGTH; j < pkg.length; ++j)
+				{
+					pkg.data[j] = (byte) (msg[i++] & 0xFF);
+					++pkg.offset;
 				}
 			}
-//			System.err.println();
-//			System.err.println("postamble: ");
-//			for (int j = 0; j < 3; ++j)
-//			{
-//				System.err.print((0xFF & msg[msgi + j]) + " ");
-//			}
-			// not always true... checksum, ETX0, ETX1 may be discontinuous (may cross packets), 
-			// as well as STX0, STX1 may cross packets to next package
-			if (currentPackageLength == pkgi && msgi + 2 <= len && 
-					PACKAGE_ETX0 == (0xFF & msg[msgi + 1]) && PACKAGE_ETX1 == (0xFF & msg[msgi + 2]))
+			if (i < len && pkg.length + Pkg.CHECKSUM_RELATIVE_OFFSET == pkg.offset)
 			{
-				//int checksum = 0xFF & msg[pkgbp + pkgi];
-//				System.err.println("Read ETX0 and ETX1, Dispatching...");
-				dispatch(currentPackage, currentPackageLength, currentPackageType, robotIP, robotPort);
-				msgi += PACKAGE_DATA_FOOTER_LENGTH; // discard trailing metadata
+				pkg.checksum = pkg.checksum();
+				if (pkg.checksum != (byte) (msg[i++] & 0xFF))
+				{
+					System.err.println("DEBUG: Incorrect package checksum");
+				}
+				++pkg.offset;
 			}
-			else // we've run out of packet from which to read the package
+			if (i < len && pkg.length + Pkg.ETX0_RELATIVE_OFFSET == pkg.offset)
 			{
-				System.err.println("pkgi: " + pkgi + ", currentPackageLength: " + currentPackageLength);
-//				System.err.print("postamble: ");
-//				for (int j = 0; j < 12; ++j)
-//				{
-//					System.err.printf("%x ", msg[msgi + j] & 0xFF);
-//				}
-				System.err.println();
-				System.err.println(msgi + " ?<= " + len);
-				System.err.println("Checksum: " + (0xFF & msg[pkgbp + pkgi + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET]));
-				System.err.println("ETX0: " + (0xFF & msg[pkgbp + pkgi + 1 + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET]));
-				System.err.println("ETX1: " + (0xFF & msg[pkgbp + pkgi + 2 + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET]));
-				System.err.println("len: " + len);
-				System.err.println("Package Overflowed Packet");
-				System.err.println("currentPackageLength: " + currentPackageLength);
-				System.err.println("pkgi: " + pkgi);
-				remain = currentPackageLength - pkgi;
-				System.err.println("Bytes Remaining: " + remain);
+				if (Pkg.ETX0 != msg[i])
+				{
+					System.err.println("DEBUG: ETX0 isn't where it is expected to be");
+				}
+				pkg.etx0 = msg[i++];
+				++pkg.offset;
+			}
+			if (i < len && pkg.length + Pkg.ETX1_RELATIVE_OFFSET == pkg.offset)
+			{
+				if (Pkg.ETX1 != msg[i++])
+				{
+					System.err.println("DEBUG: ETX1 isn't where it is expected to be");
+				}
+				pkg.etx1 = msg[i++];
+				dispatch(pkg, robotIP, robotPort);
+				pkg.reset();
 			}
 		}
 	}
+	
+	//public void sensorEvent(String robotIP, int robotPort, byte[] msg, int len)
+//	{
+//        int msgi = 0;
+////		System.err.println("len: " + len);
+//		// Assuming packets arrive in serial order. Not the best assumption, but it is easy to implement.
+////		System.err.println("remain: " + remain + " bytes");
+//        if (PACKAGE_DATA_HEADER_LENGTH <= remain) // remain too long (broken on header)
+//        {
+//        	int pkgbp = remain - currentPackageLength; // always negative value
+//			if (0 < pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET && pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET < len)
+//			{
+//				currentPackageType = 0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET];
+//				//System.err.println("currentPackageType: " + currentPackageType);
+//			}
+//			// if not out of bounds, read in the length
+//			if (0 < pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET && pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET < len)
+//			{
+//				currentPackageLength = (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET]); // + X80Pro.PACKAGE_DATA_HEADER_LENGTH;
+//				//System.err.println("currentPackageLength: " + currentPackageLength);
+//			}
+//			
+//        	// consume the header
+//        	pkgi = PACKAGE_DATA_HEADER_LENGTH;
+//        	remain = currentPackageLength - PACKAGE_DATA_HEADER_LENGTH;
+//        }
+//		if (0 < remain)
+//		{
+////			if (pkgi < PACKAGE_DATA_DID_OFFSET)
+////			{
+////				System.err.println("Only read " + pkgi + " bytes before, need to read package type");
+////				currentPackageType = msg[PACKAGE_DATA_DID_OFFSET - pkgi];
+////				System.err.println("type: " + currentPackageType);
+////			}
+////			if (pkgi < PACKAGE_DATA_LENGTH_OFFSET)
+////			{
+////				System.err.println("Only read " + pkgi + " bytes previously, need to read package length");
+////				currentPackageLength = msg[PACKAGE_DATA_LENGTH_OFFSET - pkgi];
+////				System.err.println("length: " + currentPackageLength);
+////			}
+//			System.err.println("Concatenating remaining (" + remain + ") bytes to previous package");
+//			for (msgi = 0; msgi < remain; ++msgi)
+//			{
+//				currentPackage[pkgi + msgi] = msg[msgi];
+//				System.err.printf("%x ", 0xFF & currentPackage[pkgi + msgi]);
+//			}
+//			pkgi += msgi;
+//			System.err.println();
+//			remain -= msgi;
+//			if (0 == remain)
+//			{
+//				System.err.println("read all remaining bytes");
+//			}
+//			System.err.println("remain pkgi: " + pkgi + ", remain currentPackageLength: " + currentPackageLength);
+//			System.err.print("postamble: ");
+//			for (int j = 0; j < 12; ++j)
+//			{
+//				System.err.printf("%x ", msg[msgi + j] & 0xFF);
+//			}
+//			System.err.println();
+//			System.err.println("remain " + msgi + " ?<= " + len);
+//			System.err.println("remain Checksum: " + (0xFF & msg[msgi]));
+//			System.err.println("remain ETX0: " + (0xFF & msg[msgi + 1]));
+//			System.err.println("remain ETX1: " + (0xFF & msg[msgi + 2]));
+//			System.err.println("remain len: " + len);
+//			if (currentPackageLength == pkgi && 
+//					msgi + pkgi + 2 <= len - 1 && 
+//					PACKAGE_ETX0 == (0xFF & msg[msgi + 1]) && 
+//					PACKAGE_ETX1 == (0xFF & msg[msgi + 2]))
+//			{
+//				dispatch(currentPackage, currentPackageLength, currentPackageType, robotIP, robotPort);
+//				msgi += PACKAGE_DATA_FOOTER_LENGTH; // discard trailing metadata
+//			}
+//			System.err.println("msgi after remain: " + msgi);
+//		}
+////		else if (remain <= PACKAGE_DATA_FOOTER_LENGTH) // remain too short (broken on footer)
+////		{
+////			//pkgi += currentPackageLength - pkgi;
+////			// could check checksum here, if it resides here and 
+////			// consume ETX0, ETX1, if they reside here, then
+////			// reset current pacakge information.
+////			pkgi = 0;
+////			remain = 0;
+////		}
+//		remain = 0;
+//		pkgi = 0;
+//		// While there are remaining packages...
+//		while (msgi < len)
+//		{
+//			Arrays.fill(currentPackage, (byte) 0);
+//			currentPackageLength = 0;
+//			currentPackageType = 0;
+//			
+//			int pkgbp = msgi; // acts as a base pointer to the start of the pkg
+//			// if not out of bounds, read in the type
+//			if (pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET < len)
+//			{
+//				currentPackageType = 0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET];
+//				//System.err.println("currentPackageType: " + currentPackageType);
+//			}
+//			// if not out of bounds, read in the length
+//			if (pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET < len)
+//			{
+//				currentPackageLength = (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET]); // + X80Pro.PACKAGE_DATA_HEADER_LENGTH;
+//				//System.err.println("currentPackageLength: " + currentPackageLength);
+//			}
+//			// read data payload
+//			// TODO enter loop, while less than msg len and package len, copy bytes from msg into a package, decrement tmp len
+//			msgi += X80Pro.PACKAGE_DATA_HEADER_LENGTH;
+//			if (currentPackageType == 0x09)
+//			{
+//				for (pkgi = 0; pkgbp + pkgi + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET < len && pkgi < currentPackageLength; ++pkgi)
+//				{
+//					currentPackage[pkgi] = (byte) (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET + pkgi]);
+//					System.err.printf("%x ", 0xFF & currentPackage[pkgi]);
+//					msgi++;
+//				}
+//				System.err.println();
+//			}
+//			else
+//			{
+//				for (pkgi = 0; msgi < len && pkgi < currentPackageLength; ++pkgi) // pkgbp + pkgi + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET
+//				{
+//					currentPackage[pkgi] = (byte) (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET + pkgi]);
+//					msgi++;
+//				}
+//			}
+////			System.err.println();
+////			System.err.println("postamble: ");
+////			for (int j = 0; j < 3; ++j)
+////			{
+////				System.err.print((0xFF & msg[msgi + j]) + " ");
+////			}
+//			// not always true... checksum, ETX0, ETX1 may be discontinuous (may cross packets), 
+//			// as well as STX0, STX1 may cross packets to next package
+//			if (currentPackageLength == pkgi && msgi + 2 <= len && 
+//					PACKAGE_ETX0 == (0xFF & msg[msgi + 1]) && PACKAGE_ETX1 == (0xFF & msg[msgi + 2]))
+//			{
+//				//int checksum = 0xFF & msg[pkgbp + pkgi];
+////				System.err.println("Read ETX0 and ETX1, Dispatching...");
+//				dispatch(currentPackage, currentPackageLength, currentPackageType, robotIP, robotPort);
+//				msgi += PACKAGE_DATA_FOOTER_LENGTH; // discard trailing metadata
+//			}
+//			else // we've run out of packet from which to read the package
+//			{
+//				System.err.println("pkgi: " + pkgi + ", currentPackageLength: " + currentPackageLength);
+////				System.err.print("postamble: ");
+////				for (int j = 0; j < 12; ++j)
+////				{
+////					System.err.printf("%x ", msg[msgi + j] & 0xFF);
+////				}
+//				System.err.println();
+//				System.err.println(msgi + " ?<= " + len);
+//				System.err.println("Checksum: " + (0xFF & msg[pkgbp + pkgi + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET]));
+//				System.err.println("ETX0: " + (0xFF & msg[pkgbp + pkgi + 1 + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET]));
+//				System.err.println("ETX1: " + (0xFF & msg[pkgbp + pkgi + 2 + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET]));
+//				System.err.println("len: " + len);
+//				System.err.println("Package Overflowed Packet");
+//				System.err.println("currentPackageLength: " + currentPackageLength);
+//				System.err.println("pkgi: " + pkgi);
+//				remain = currentPackageLength - pkgi;
+//				System.err.println("Bytes Remaining: " + remain);
+//			}
+//		}
+//	}
 	
 	public void attachShutdownHook()
 	{
@@ -1326,9 +1498,9 @@ public class X80Pro implements IRobot, Runnable
 		socket.send(PMB5010.stopAudioPlayback());
 	}
 	
-	public void continueAudioPlayback(short[] audioSample)
+	public void continueAudioPlayback(byte[] audioSegmentEncodedInPCM)
 	{
-		socket.send(PMB5010.continueAudioPlayback(pcm.encode(audioSample, (short) audioSample.length)));
+		socket.send(PMB5010.continueAudioPlayback(audioSegmentEncodedInPCM));
 	}
 	
 	public void takePhoto()
