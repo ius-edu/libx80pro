@@ -696,7 +696,7 @@ public class X80Pro implements IRobot, Runnable
 				{
 					System.err.println("DEBUG: STX0 isn't where it is expected to be");
 				}
-				pkg.stx0 = msg[i++];
+				pkg.stx0 = (byte) (msg[i++] & 0xFF);
 				++pkg.offset;
 			}
 			if (i < len && Pkg.STX1_OFFSET == pkg.offset)
@@ -705,7 +705,7 @@ public class X80Pro implements IRobot, Runnable
 				{
 					System.err.println("DEBUG: STX1 isn't where it is expected to be");
 				}
-				pkg.stx1 = msg[i++];
+				pkg.stx1 = (byte) (msg[i++] & 0xFF);
 				++pkg.offset;
 			}
 			if (i < len && Pkg.RID_OFFSET == pkg.offset)
@@ -751,7 +751,7 @@ public class X80Pro implements IRobot, Runnable
 				{
 					System.err.println("DEBUG: ETX0 isn't where it is expected to be");
 				}
-				pkg.etx0 = msg[i++];
+				pkg.etx0 = (byte) (msg[i++] & 0xFF);
 				++pkg.offset;
 			}
 			if (i < len && pkg.length + Pkg.ETX1_RELATIVE_OFFSET == pkg.offset)
@@ -760,7 +760,8 @@ public class X80Pro implements IRobot, Runnable
 				{
 					System.err.println("DEBUG: ETX1 isn't where it is expected to be");
 				}
-				pkg.etx1 = msg[i++];
+				pkg.etx1 = (byte) (msg[i++] & 0xFF);
+				
 				dispatch(pkg, robotIP, robotPort);
 				pkg.reset();
 			}
