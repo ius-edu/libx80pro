@@ -132,6 +132,9 @@ public class X80Pro implements IRobot, Runnable
 		public int etx0;
 		public int etx1;
 		
+		public String robotIP;
+		public int robotPort;
+		
 		public void reset()
 		{
 			offset = 0;
@@ -149,6 +152,9 @@ public class X80Pro implements IRobot, Runnable
 			{
 				data[i] = 0;
 			}
+			
+			robotIP = "";
+			robotPort = 0;
 		}
 		
 		public Pkg()
@@ -185,6 +191,28 @@ public class X80Pro implements IRobot, Runnable
 			    }
 			}
 			return shift_reg;
+		}
+		
+		public void print()
+		{
+			System.err.println("offset: " + offset);
+			System.err.println("stx0: " + stx0);
+			System.err.println("stx1: " + stx1);
+			System.err.println("destination: " + destination);
+			System.err.println("serial: " + serial);
+			System.err.println("type: " + type);
+			System.err.println("length: " + length);
+			System.err.println("checksum: " + checksum);
+			System.err.println("etx0: " + etx0);
+			System.err.println("etx1: "+ etx1);
+			System.err.print("data: ");
+			for (int i = 0; i < MAX_DATA_SIZE; ++i)
+			{
+				System.err.print(data[i] + " ");
+			}
+			System.err.println();
+			System.err.println("robotIP: " + robotIP);
+			System.err.println("robotPort: " + robotPort);
 		}
 	}
 	
@@ -763,8 +791,14 @@ public class X80Pro implements IRobot, Runnable
 				}
 				pkg.etx1 = (byte) (msg[i++] & 0xFF);
 				
-				dispatch(pkg, robotIP, robotPort);
+				dispatch(pkg, robotIP, robotPort); // or produce/enqueue
 				pkg.reset();
+			}
+			else
+			{
+				System.err.println("incomplete package: ");
+				pkg.print();
+				System.err.println();
 			}
 		}
 	}
