@@ -635,16 +635,25 @@ public class X80Pro implements IRobot, Runnable
 		{
 			System.err.println("-*- Motor Sensor Data Package Received -*-");
 			motorSensorData.setMotorSensorData(pkg.data);
+			if (null != iRobotEventHandler) {
+				iRobotEventHandler.sensorDataReceivedEvent(pkg.robotIP, pkg.robotPort, pkg.type);
+			}
 		}
 		else if (PMS5005.GET_CUSTOM_SENSOR_DATA == pkg.type)
 		{
 			System.err.println("-*- Custom Sensor Data Package Received -*-");
 			customSensorData.setCustomSensorData(pkg.data);
+			if (null != iRobotEventHandler) {
+				iRobotEventHandler.sensorDataReceivedEvent(pkg.robotIP, pkg.robotPort, pkg.type);
+			}
 		}
 		else if (PMS5005.GET_STANDARD_SENSOR_DATA == pkg.type)
 		{
 			System.err.println("-*- Standard Sensor Data Package Received -*-");
 			standardSensorData.setStandardSensorData(pkg.data);
+			if (null != iRobotEventHandler) {
+				iRobotEventHandler.sensorDataReceivedEvent(pkg.robotIP, pkg.robotPort, pkg.type);
+			}
 		}
 		else if (PMB5010.ADPCM_RESET == pkg.type)
 		{
