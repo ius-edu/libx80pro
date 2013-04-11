@@ -733,6 +733,7 @@ public class X80Pro implements IRobot, Runnable
 		}
 		System.err.println();
 		
+		int initialPkgOffset = pkg.offset;
 		int i = 0;
 		if (0 != (byte) (msg[0] & 0xFF))
 		{
@@ -844,15 +845,13 @@ public class X80Pro implements IRobot, Runnable
 					pkg.checksum = pkg.checksum();
 					if (pkg.checksum != msg[i])
 					{
-						System.err.println("DEBUG: Incorrect package checksum");
-//						System.err.println("DEBUG: Expected: " + pkg.checksum);
-//						System.err.println("DEBUG: Actual: " + msg[i]);
+						System.err.println("DEBUG: Incorrect package checksum (ignore for now)");
+						System.err.println("DEBUG: Expected: " + pkg.checksum);
+						System.err.println("DEBUG: Actual: " + msg[i]);
 					}
 					else
 					{
-						System.err.printf("DEBUG: Correct checksum: %x", pkg.checksum);
-//						System.err.println("DEBUG: Expected: " + pkg.checksum);
-//						System.err.println("DEBUG: Actual: " + msg[i]);
+						System.err.printf("DEBUG: Correct package checksum: %x", pkg.checksum);
 					}
 					++i;
 					++pkg.offset;
@@ -906,11 +905,14 @@ public class X80Pro implements IRobot, Runnable
 				}
 				else
 				{
-	//				System.err.println("incomplete package: ");
-	//				pkg.print();
-	//				System.err.println();
+					System.err.println("invalid package");
+					pkg.reset();
 				}
-				//pkg.reset();
+				if (initialPkgOffset == pkg.offset)
+				{
+					System.err.println("no progress through package in one pass, discard the invalid package");
+					pkg.reset();
+				}
 			}
 			System.err.println();
 		}
