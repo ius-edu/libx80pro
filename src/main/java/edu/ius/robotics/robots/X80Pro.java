@@ -742,8 +742,6 @@ public class X80Pro implements IRobot, Runnable
 			{
 				if (i < len && Pkg.STX0_OFFSET == pkg.offset)
 				{
-					System.err.printf("DEBUG: pkg[" + pkg.offset + "] Should be STX0 (5e): %2x\n", (byte) (msg[i] & 0xFF));
-					System.err.printf("DEBUG: pkg[" + (pkg.offset + 1) + "] Should be STX1 (02): %2x\n", (byte) (msg[i+1] & 0xFF));
 					pkg.raw[Pkg.STX0_OFFSET] = (byte) (msg[i] & 0xFF);
 					pkg.stx0 = (byte) (msg[i] & 0xFF);
 					if (Pkg.STX0 != (msg[i] & 0xFF)) 
@@ -903,18 +901,17 @@ public class X80Pro implements IRobot, Runnable
 					pkg.reset();
 					++i;
 				}
-				else
-				{
-					System.err.println("invalid package");
-					pkg.reset();
-				}
-				if (initialPkgOffset == pkg.offset)
-				{
-					System.err.println("no progress through package in one pass, discard the invalid package");
-					pkg.reset();
-				}
+//				else
+//				{
+//					System.err.println("invalid package");
+//					pkg.reset();
+//				}
+//				if (initialPkgOffset == pkg.offset)
+//				{
+//					System.err.println("no progress through package in one pass, discard the invalid package");
+//					pkg.reset();
+//				}
 			}
-			System.err.println();
 		}
 		else
 		{
