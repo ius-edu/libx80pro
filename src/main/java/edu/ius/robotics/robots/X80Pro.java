@@ -108,6 +108,8 @@ public class X80Pro implements IRobot, Runnable
 		public static final int ETX0_RELATIVE_OFFSET = 1;
 		public static final int ETX1_RELATIVE_OFFSET = 2;
 		public static final int HEADER_LENGTH = 6;
+		public static final int FOOTER_LENGTH = 3;
+		public static final int METADATA_SIZE = 9;
 		public static final int IMAGE_PKG_COUNT_RELATIVE_OFFSET = 1;
 		public static final int IMAGE_DATA_RELATIVE_OFFSET = 2;
 		
@@ -127,6 +129,7 @@ public class X80Pro implements IRobot, Runnable
 		public int type;
 		public int length;
 		public byte[] data;
+		public byte[] raw;
 		
 		public int checksum;
 		public int etx0;
@@ -142,7 +145,7 @@ public class X80Pro implements IRobot, Runnable
 			stx1 = 0;
 			destination = 0;
 			serial = 0;
-			type= 0;
+			type = 0;
 			length = 0;
 			checksum = 0;
 			etx0 = 0;
@@ -153,6 +156,11 @@ public class X80Pro implements IRobot, Runnable
 				data[i] = 0;
 			}
 			
+			for (int i = 0; i < MAX_DATA_SIZE + METADATA_SIZE; ++i)
+			{
+				raw[i] = 0;
+			}
+			
 			robotIP = "";
 			robotPort = 0;
 		}
@@ -160,6 +168,7 @@ public class X80Pro implements IRobot, Runnable
 		public Pkg()
 		{
 			data = new byte[MAX_DATA_SIZE];
+			raw = new byte[MAX_DATA_SIZE + METADATA_SIZE];
 			reset();
 		}
 		
@@ -170,10 +179,10 @@ public class X80Pro implements IRobot, Runnable
 			byte fb_bit;
 			int z;
 			shift_reg = 0; // initialize the shift register
-			z = data.length - 5;
+			z = raw.length - 5;
 			for (int i = 0; i < z; ++i) 
 			{
-			    v = (byte) (data[2 + i]); // start from RID
+			    v = (byte) (raw[2 + i]); // start from RID
 			    // for each bit
 			    for (int j = 0; j < 8; ++j) 
 			    {
@@ -488,7 +497,8 @@ public class X80Pro implements IRobot, Runnable
 	public static final double WHEEL_RADIUS = 0.085; // ~0.0825-0.085 meters
 	
 	/** encoder one circle count */
-	public static final int ROTATE_ROBOT_ENCODER_COUNT = 1200;
+	//public static final int ROTATE_ROBOT_ENCODER_COUNT = 1200;
+	public static final int ROTATE_ROBOT_ENCODER_COUNT = 800;
 	
 //	private int motorSensorTimePeriod;
 //	private int standardSensorTimePeriod;
@@ -619,41 +629,41 @@ public class X80Pro implements IRobot, Runnable
 		socket.send(command);
 	}
 	
-	private void dispatch(Pkg pkg, String robotIP, int robotPort)
+	private void dispatch(Pkg pkg)
 	{
 		if (PMS5005.GET_MOTOR_SENSOR_DATA == pkg.type)
 		{
-//			System.err.println("-*- Motor Sensor Data Package Received -*-");
+			System.err.println("-*- Motor Sensor Data Package Received -*-");
 			motorSensorData.setMotorSensorData(pkg.data);
 		}
 		else if (PMS5005.GET_CUSTOM_SENSOR_DATA == pkg.type)
 		{
-//			System.err.println("-*- Custom Sensor Data Package Received -*-");
+			System.err.println("-*- Custom Sensor Data Package Received -*-");
 			customSensorData.setCustomSensorData(pkg.data);
 		}
 		else if (PMS5005.GET_STANDARD_SENSOR_DATA == pkg.type)
 		{
-//			System.err.println("-*- Standard Sensor Data Package Received -*-");
+			System.err.println("-*- Standard Sensor Data Package Received -*-");
 			standardSensorData.setStandardSensorData(pkg.data);
 		}
 		else if (PMB5010.ADPCM_RESET == pkg.type)
 		{
-//			System.err.println("-*- ADPCM Reset Command Package Received -*-");
+			System.err.println("-*- ADPCM Reset Command Package Received -*-");
 			//pcm.init();
 			//socket.send(PMB5010.ack((byte) 0)); // TODO insert actual sequence value here
 			if (null != iRobotEventHandler)
 			{
-				iRobotEventHandler.audioCodecResetRequestReceivedEvent(robotIP, robotPort);
+				iRobotEventHandler.audioCodecResetRequestReceivedEvent(pkg.robotIP, pkg.robotPort);
 			}
 		}
 		else if (PMB5010.AUDIO_PACKAGE == pkg.type)
 		{
-//			System.err.println("-*- Audio Data Package Received -*-");
+			System.err.println("-*- Audio Data Package Received -*-");
 			if (null != iRobotEventHandler)
 			{
 				audioBuffer.reset();
 				audioBuffer.write(pkg.data, 0, pkg.length);
-				iRobotEventHandler.audioSegmentReceivedEvent(robotIP, robotPort, audioBuffer);
+				iRobotEventHandler.audioSegmentReceivedEvent(pkg.robotIP, pkg.robotPort, audioBuffer);
 			}
 		}
 		else if (PMB5010.VIDEO_PACKAGE == pkg.type)
@@ -690,7 +700,7 @@ public class X80Pro implements IRobot, Runnable
 				if (PMB5010.SEQ_TERMINATE == (byte) (0xFF & pkg.data[PMB5010.VIDEO_SEQ_OFFSET])) // || this.numImagePkgs - 1 <= pkg[PMB5010.VIDEO_SEQ_OFFSET])
 				{
 					System.err.println("Finished jpeg image assembly");
-					iRobotEventHandler.imageReceivedEvent(robotIP, robotPort, imageBuffer);
+					iRobotEventHandler.imageReceivedEvent(pkg.robotIP, pkg.robotPort, imageBuffer);
 				}
 			}
 			else
@@ -714,92 +724,199 @@ public class X80Pro implements IRobot, Runnable
 	public void sensorEvent(String robotIP, int robotPort, byte[] msg, int len)
 	{
 		System.err.println("-*- new message -*-");
-		System.err.println("-*- message len: " + len + " -*-");
-		int i = 0;
-		while (i < len)
+		System.err.println("message len: " + len);
+		System.err.println("pkg.offset: " + pkg.offset);
+		System.err.print("DEBUG message: ");
+		for (int i = 0; i < len; ++i)
 		{
-			if (i < len && Pkg.STX0_OFFSET == pkg.offset)
+			System.err.printf("%2x ", (byte) (msg[i] & 0xFF));
+		}
+		System.err.println();
+		
+		int i = 0;
+		if (0 != (byte) (msg[0] & 0xFF))
+		{
+			System.err.println("entering i < len loop:");
+			while (i < len)
 			{
-				if (Pkg.STX0 != (msg[i] & 0xFF)) 
+				if (i < len && Pkg.STX0_OFFSET == pkg.offset)
 				{
-					System.err.println("DEBUG: STX0 isn't where it is expected to be");
-				}
-				pkg.stx0 = (byte) (msg[i++] & 0xFF);
-				++pkg.offset;
-			}
-			if (i < len && Pkg.STX1_OFFSET == pkg.offset)
-			{
-				if (Pkg.STX1 != (msg[i] & 0xFF))
-				{
-					System.err.println("DEBUG: STX1 isn't where it is expected to be");
-				}
-				pkg.stx1 = (byte) (msg[i++] & 0xFF);
-				++pkg.offset;
-			}
-			if (i < len && Pkg.RID_OFFSET == pkg.offset)
-			{
-				pkg.destination = (byte) (msg[i++] & 0xFF);
-				++pkg.offset;
-			}
-			if (i < len && Pkg.RESERVED_OFFSET == pkg.offset)
-			{
-				pkg.serial = (byte) (msg[i++] & 0xFF);
-				++pkg.offset;
-			}
-			if (i < len && Pkg.DID_OFFSET == pkg.offset)
-			{
-				pkg.type = (byte) (msg[i++] & 0xFF);
-				++pkg.offset;
-			}
-			if (i < len && Pkg.LENGTH_OFFSET == pkg.offset)
-			{
-				pkg.length = (byte) (msg[i++] & 0xFF);
-				++pkg.offset;
-			}
-			if (i < len && Pkg.DATA_OFFSET <= pkg.offset && pkg.offset < pkg.length)
-			{
-				int j = pkg.offset - Pkg.HEADER_LENGTH;
-				while (i < len && j < pkg.length)
-				{
-					pkg.data[j++] = (byte) (msg[i++] & 0xFF);
+					System.err.printf("DEBUG: pkg[" + pkg.offset + "] Should be STX0 (5e): %2x\n", (byte) (msg[i] & 0xFF));
+					System.err.printf("DEBUG: pkg[" + (pkg.offset + 1) + "] Should be STX1 (02): %2x\n", (byte) (msg[i+1] & 0xFF));
+					pkg.raw[Pkg.STX0_OFFSET] = (byte) (msg[i] & 0xFF);
+					pkg.stx0 = (byte) (msg[i] & 0xFF);
+					if (Pkg.STX0 != (msg[i] & 0xFF)) 
+					{
+						System.err.println("DEBUG: pkg[" + pkg.offset + "] STX0 isn't where it is expected to be");
+					}
+					else
+					{
+						System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found STX0: %2x", (byte) (pkg.stx0 & 0xFF));
+						System.err.println();
+					}
+					++i;
 					++pkg.offset;
 				}
-			}
-			if (i < len && pkg.length + Pkg.CHECKSUM_RELATIVE_OFFSET == pkg.offset)
-			{
-				pkg.checksum = pkg.checksum();
-				if (pkg.checksum != (byte) (msg[i++] & 0xFF))
+				if (i < len && Pkg.STX1_OFFSET == pkg.offset)
 				{
-					System.err.println("DEBUG: Incorrect package checksum");
+					pkg.raw[Pkg.STX1_OFFSET] = (byte) (msg[i] & 0xFF);
+					pkg.stx1 = (byte) (msg[i] & 0xFF);
+					if (Pkg.STX1 != (msg[i] & 0xFF))
+					{
+						System.err.println("DEBUG: pkg[" + pkg.offset + "] STX1 isn't where it is expected to be");
+					}
+					else
+					{
+						System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found STX1: %2x", (byte) (pkg.stx1 & 0xFF));
+						System.err.println();
+					}
+					++i;
+					++pkg.offset;
 				}
-				++pkg.offset;
-			}
-			if (i < len && pkg.length + Pkg.ETX0_RELATIVE_OFFSET == pkg.offset)
-			{
-				if (Pkg.ETX0 != msg[i])
+				if (i < len && Pkg.RID_OFFSET == pkg.offset)
 				{
-					System.err.println("DEBUG: ETX0 isn't where it is expected to be");
+					pkg.raw[Pkg.RID_OFFSET] = (byte) (msg[i] & 0xFF);
+					pkg.destination = (byte) (msg[i] & 0xFF);
+					System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found RID: %x", (byte) (pkg.destination & 0xFF));
+					System.err.println();
+					++i;
+					++pkg.offset;
 				}
-				pkg.etx0 = (byte) (msg[i++] & 0xFF);
-				++pkg.offset;
-			}
-			if (i < len && pkg.length + Pkg.ETX1_RELATIVE_OFFSET == pkg.offset)
-			{
-				if (Pkg.ETX1 != msg[i++])
+				if (i < len && Pkg.RESERVED_OFFSET == pkg.offset)
 				{
-					System.err.println("DEBUG: ETX1 isn't where it is expected to be");
+					pkg.raw[Pkg.RESERVED_OFFSET] = (byte) (msg[i] & 0xFF);
+					pkg.serial = (byte) (msg[i] & 0xFF);
+					System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found RESERVED: %x", (byte) (pkg.serial & 0xFF));
+					System.err.println();
+					++i;
+					++pkg.offset;
 				}
-				pkg.etx1 = (byte) (msg[i++] & 0xFF);
-				
-				dispatch(pkg, robotIP, robotPort); // or produce/enqueue
-				pkg.reset();
+				if (i < len && Pkg.DID_OFFSET == pkg.offset)
+				{
+					pkg.raw[Pkg.DID_OFFSET] = (byte) (msg[i] & 0xFF); 
+					pkg.type = (byte) (msg[i] & 0xFF);
+					System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found DID: %x", (byte) (pkg.type & 0xFF));
+					System.err.println();
+					++i;
+					++pkg.offset;
+				}
+				if (i < len && Pkg.LENGTH_OFFSET == pkg.offset)
+				{
+					pkg.raw[Pkg.LENGTH_OFFSET] = (byte) (msg[i] & 0xFF); 
+					pkg.length = (byte) (msg[i] & 0xFF);
+					System.err.println("DEBUG: pkg[" + pkg.offset + "] Found LENGTH: " + pkg.length);
+					++i;
+					++pkg.offset;
+					System.err.print("DEBUG: pkg header: ");
+					for (int k = 0; k < Pkg.HEADER_LENGTH; ++k)
+					{
+						System.err.printf("%x ", (byte) (pkg.data[k] & 0xFF));
+					}
+					System.err.println();
+				}
+				if (i < len && Pkg.DATA_OFFSET <= pkg.offset && pkg.offset < Pkg.HEADER_LENGTH + pkg.length)
+				{
+					int j = pkg.offset - Pkg.HEADER_LENGTH;
+					System.err.println("DEBUG: pkg.offset - Pkg.HEADER_LENGTH => j: " + j);
+					System.err.print("DEBUG: pkg[" + pkg.offset + "] Found DATA: ");
+					while (i < len && j < pkg.length)
+					{
+						pkg.raw[Pkg.HEADER_LENGTH + j] = (byte) (msg[i] & 0xFF);
+						pkg.data[j] = (byte) (msg[i] & 0xFF);
+						System.err.printf("%2x ", (byte) (pkg.data[j] & 0xFF));
+						++i;
+						++j;
+						++pkg.offset;
+					}
+					System.err.println();
+					if (len <= i)
+					{
+						System.err.println("package overflowed packet in data region, last entry: ");
+						System.err.printf("pkg.data[" + (pkg.offset - 1) + "]: %x", (byte) (pkg.data[pkg.offset - 1] & 0xFF));
+						System.err.println();
+					}
+				}
+				int offsetChecksum = Pkg.HEADER_LENGTH + pkg.length + Pkg.CHECKSUM_RELATIVE_OFFSET;
+//				System.err.println("DEBUG: pkg[" + pkg.offset + "] Checksum offset: " + offsetChecksum);
+				if (i < len && offsetChecksum == pkg.offset)
+				{
+					pkg.raw[offsetChecksum] = pkg.checksum();
+					pkg.checksum = pkg.checksum();
+					if (pkg.checksum != msg[i])
+					{
+						System.err.println("DEBUG: Incorrect package checksum");
+//						System.err.println("DEBUG: Expected: " + pkg.checksum);
+//						System.err.println("DEBUG: Actual: " + msg[i]);
+					}
+					else
+					{
+						System.err.printf("DEBUG: Correct checksum: %x", pkg.checksum);
+//						System.err.println("DEBUG: Expected: " + pkg.checksum);
+//						System.err.println("DEBUG: Actual: " + msg[i]);
+					}
+					++i;
+					++pkg.offset;
+				}
+				int offsetETX0 = Pkg.HEADER_LENGTH + pkg.length + Pkg.ETX0_RELATIVE_OFFSET;
+//				System.err.println("DEBUG: Pkg.HEADER_LENGTH: " + Pkg.HEADER_LENGTH);
+//				System.err.println("DEBUG: pkg.length: " + pkg.length);
+//				System.err.println("DEBUG: Pkg.ETX0_RELATIVE_OFFSET: " + Pkg.ETX0_RELATIVE_OFFSET);
+//				System.err.println("DEBUG: ETX0 offset: " + offsetEtx0);
+				if (i < len && offsetETX0 == pkg.offset)
+				{
+					pkg.raw[offsetETX0] = (byte) (msg[i] & 0xFF);
+					pkg.etx0 = (byte) (msg[i] & 0xFF);
+					if (Pkg.ETX0 != (byte) (msg[i] & 0xFF))
+					{
+						System.err.printf("DEBUG: ETX0 isn't where it is expected to be (found %x)", msg[i] & 0xFF);
+						System.err.println();
+					}
+					else
+					{
+						System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found ETX0: %x", pkg.etx0);
+						System.err.println();
+					}
+					++i;
+					++pkg.offset;
+				}
+				int offsetETX1 = Pkg.HEADER_LENGTH + pkg.length + Pkg.ETX1_RELATIVE_OFFSET;
+//				System.err.println("DEBUG: ETX1 offset: " + offsetEtx1);
+				if (i < len && offsetETX1 == pkg.offset)
+				{
+					pkg.raw[offsetETX1] = (byte) (msg[i] & 0xFF);
+					pkg.etx1 = (byte) (msg[i] & 0xFF);
+					if (Pkg.ETX1 != (byte) (msg[i] & 0xFF))
+					{
+						System.err.printf("DEBUG: ETX1 isn't where it is expected to be (found %x)", msg[i] & 0xFF);
+						System.err.println();
+					}
+					else
+					{
+						System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found ETX1: %x, dispatching", pkg.etx1);
+						System.err.println();
+					}
+					pkg.robotIP = robotIP;
+					pkg.robotPort = robotPort;
+					System.err.println("DEBUG: len: " + len + ", pkg.offset: " + pkg.offset + ", i: " + i);
+					System.err.println("DEBUG: dispatching...");
+					dispatch(pkg); // or produce/enqueue
+					System.err.println("DEBUG: resetting package");
+					pkg.reset();
+					++i;
+				}
+				else
+				{
+	//				System.err.println("incomplete package: ");
+	//				pkg.print();
+	//				System.err.println();
+				}
+				//pkg.reset();
 			}
-			else
-			{
-				System.err.println("incomplete package: ");
-				pkg.print();
-				System.err.println();
-			}
+			System.err.println();
+		}
+		else
+		{
+			System.err.println("Zero packet");
 		}
 	}
 	
@@ -1557,8 +1674,8 @@ public class X80Pro implements IRobot, Runnable
 	    socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) X80Pro.CONTROL_MODE_POSITION));
 	    
 	    //int diffEncoder = (int)((1200*0.2875*theta)/(4*Math.PI*0.085));
-	    //int diffEncoder = (int)((WHEEL_ENCODER_CIRCUMFERENCE*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
-	    int diffEncoder = (int)((X80Pro.ROTATE_ROBOT_ENCODER_COUNT*WHEEL_DISPLACEMENT*theta)/(2*Math.PI*WHEEL_RADIUS));
+	    int diffEncoder = (int)((X80Pro.ROTATE_ROBOT_ENCODER_COUNT*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
+	    //int diffEncoder = (int)((X80Pro.ROTATE_ROBOT_ENCODER_COUNT*WHEEL_DISPLACEMENT*theta)/(2*Math.PI*WHEEL_RADIUS));
 	    
 	    int leftPosition = getEncoderPulse(0) - diffEncoder;
 	    if (leftPosition < 0) 

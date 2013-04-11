@@ -168,29 +168,29 @@ public class UDPSocket implements Runnable
 			{
 				this.socket.setSoTimeout(10);
 				this.socket.receive(this.rxPkt);
+				//int z = this.rxPkt.getLength();
+				if (0 < this.rxPkt.getLength()) // 0 < z
+				{
+					// decode here
+					//byte[] sensorData = new byte[z];
+					//System.err.println("DEBUG: raw packet: ");
+					//for (int i = 0; i < z; ++i)
+					//{
+						//sensorData[i] = (byte) (this.rxBuf[i] & 0xFF);
+						//System.err.print("DEBUG: " + sensorData[i] + " ");
+					//}
+					//System.err.println("DEBUG: ");
+					// callback
+					this.iRobot.sensorEvent(this.ip, this.port, this.rxPkt.getData(), this.rxPkt.getLength());
+					//this.rxPkt.setLength(this.rxBuf.length);
+				}
+				//System.out.println("sensorEvent took " + (System.currentTimeMillis() - beginTime) + "ms to complete");
 			}
 			catch (IOException ex)
 			{
 				//ex.printStackTrace();
 				//System.err.println("did not receive sensor data");
 			}
-			//int z = this.rxPkt.getLength();
-			if (0 < this.rxPkt.getLength()) // 0 < z
-			{
-				// decode here
-				//byte[] sensorData = new byte[z];
-				//System.err.println("DEBUG: raw packet: ");
-				//for (int i = 0; i < z; ++i)
-				//{
-					//sensorData[i] = (byte) (this.rxBuf[i] & 0xFF);
-					//System.err.print("DEBUG: " + sensorData[i] + " ");
-				//}
-				//System.err.println("DEBUG: ");
-				// callback
-				this.iRobot.sensorEvent(this.ip, this.port, this.rxBuf, this.rxPkt.getLength());
-				//this.rxPkt.setLength(this.rxBuf.length);
-			}
-			//System.out.println("sensorEvent took " + (System.currentTimeMillis() - beginTime) + "ms to complete");
 		}
 	}
 }

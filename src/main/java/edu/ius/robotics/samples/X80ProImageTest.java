@@ -22,6 +22,7 @@ public class X80ProImageTest implements IRobotEventHandler
 		X80ProImageTest imageTest = new X80ProImageTest();
 		X80Pro robot = new X80Pro("192.168.0.204", imageTest);
 		robot.resetHead();
+		robot.suspendAllSensors();
 		
 		try
 		{

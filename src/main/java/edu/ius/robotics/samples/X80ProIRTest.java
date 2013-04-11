@@ -33,7 +33,7 @@ public class X80ProIRTest
 		//otherRobot.resumeAllSensors();
 		//otherRobot.resetHead();
 		
-		robot.resumeAllSensors();
+		//robot.resumeAllSensors();
 		robot.resetHead();
 		
 		while (true)
