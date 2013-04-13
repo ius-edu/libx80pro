@@ -120,10 +120,10 @@ public class UDPSocket implements Runnable
 	{
 		long beginTime = System.currentTimeMillis();
 		System.arraycopy(cmd, 0, this.txBuf, 0, cmd.length);
-		this.txPkt = new DatagramPacket(this.txBuf, this.txBuf.length, this.server, this.port);
+		this.txPkt = new DatagramPacket(this.txBuf, cmd.length, this.server, this.port);
 		try
 		{
-			this.socket.send(this.txPkt);
+			this.socket.send(txPkt);
 		}
 		catch (IOException ioException)	
 		{

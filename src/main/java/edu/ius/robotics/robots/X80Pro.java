@@ -79,21 +79,6 @@ public class X80Pro implements IRobot, Runnable
 	public static final int Y = 1;
 	
 	public static final int MAX_SPEED = 32767;
-
-//	public static final int PACKAGE_STX0 = 0x5E;
-//	public static final int PACKAGE_STX1 = 0x02;
-//	public static final int PACKAGE_ETX0 = 0x5E;
-//	public static final int PACKAGE_ETX1 = 0x0D;
-//	
-//	public static final int PACKAGE_DATA_HEADER_LENGTH = 6;
-//	public static final int PACKAGE_DATA_FOOTER_LENGTH = 3;
-//	public static final int PACKAGE_DATA_DID_OFFSET = 4;
-//	public static final int PACKAGE_DATA_PAYLOAD_OFFSET = 6;
-//	public static final int PACKAGE_DATA_LENGTH_OFFSET = 5;
-//	public static final int PACKAGE_DATA_METADATA_SIZE = 9;
-//	
-//	public static final int PACKAGE_DATA_NUM_IMAGE_PKGS_OFFSET = 1;
-//	public static final int PACKAGE_DATA_IMAGE_VIDEO_DATA_OFFSET = 2;
 	
 	private class Pkg
 	{
@@ -179,7 +164,7 @@ public class X80Pro implements IRobot, Runnable
 			byte fb_bit;
 			int z;
 			shift_reg = 0; // initialize the shift register
-			z = raw.length - 5;
+			z = length - 5;
 			for (int i = 0; i < z; ++i) 
 			{
 			    v = (byte) (raw[2 + i]); // start from RID
@@ -432,9 +417,19 @@ public class X80Pro implements IRobot, Runnable
 	
 	public static class Sensors // enum?
 	{
+		public static final int TYPE_SONAR = PMS5005.GET_STANDARD_SENSOR_DATA;
+		public static final int TYPE_IR_1 = PMS5005.GET_STANDARD_SENSOR_DATA;
+		public static final int TYPE_IR_2 = PMS5005.GET_CUSTOM_SENSOR_DATA;
+		public static final int TYPE_DC_MOTOR = PMS5005.GET_MOTOR_SENSOR_DATA;
+		public static final int TYPE_SERVO_MOTOR = PMS5005.GET_MOTOR_SENSOR_DATA;
+		
+		public static final int TYPE_STANDARD_GENERAL = PMS5005.GET_STANDARD_SENSOR_DATA;
+		public static final int TYPE_CUSTOM_GENERAL = PMS5005.GET_CUSTOM_SENSOR_DATA;
+		public static final int TYPE_MOTOR_GENERAL = PMS5005.GET_MOTOR_SENSOR_DATA;
+		
 		// Standard and Custom sensors
 		public static final int NUM_STANDARD_SENSORS = 6;
-		public static final int NUM_MOTORS = 2;
+		public static final int NUM_DC_MOTOR_CHANNELS = 2;
 		public static final int NUM_INFRARED_SENSORS = 8;
 		public static final int NUM_INFRARED_SENSORS_FRONT = 4;
 		public static final int NUM_CUSTOM_AD_SENSORS = 8;
@@ -482,23 +477,17 @@ public class X80Pro implements IRobot, Runnable
 		}
 	}
 	
-	// private ByteArrayInputStream byteArrIn;
-	// private DataInputStream dataIn;
-	// private DataOutputStream dataOut;
-	// private InputStream inputStream;
-	// private BufferedReader reader;
-	// private String command;
+	/** robot state */
+	private int[] encoderPulseInitial;
+	private double heading;
+	
 	/** wheel distance */
 	public static final short WHEEL_CIRCUMFERENCE_ENCODER_COUNT = 800; // encoder units
 	public static final double WHEEL_CIRCUMFERENCE = 0.265; // meters
-	public static final double WHEEL_DISPLACEMENT = 0.2897; // meters (default: 0.305)
+	public static final double WHEEL_DISPLACEMENT = 0.297; // meters (default: 0.305) // (old: 0.2897)
 	
 	/** wheel radius */
 	public static final double WHEEL_RADIUS = 0.085; // ~0.0825-0.085 meters
-	
-	/** encoder one circle count */
-	//public static final int ROTATE_ROBOT_ENCODER_COUNT = 1200;
-	public static final int ROTATE_ROBOT_ENCODER_COUNT = 800;
 	
 //	private int motorSensorTimePeriod;
 //	private int standardSensorTimePeriod;
@@ -543,6 +532,8 @@ public class X80Pro implements IRobot, Runnable
 		this.audioBuffer = new ByteArrayOutputStream();
 		this.imageBuffer = new ByteArrayOutputStream();
 		
+		encoderPulseInitial = new int[Sensors.NUM_DC_MOTOR_CHANNELS];
+		
 		//this.motorSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.MOTOR_SENSOR_DATA_LENGTH];
 		//this.customSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.CUSTOM_SENSOR_DATA_LENGTH];
 		//this.standardSensorData = new byte[PMS5005.HEADER_LENGTH + PMS5005.STANDARD_SENSOR_DATA_LENGTH];
@@ -561,12 +552,19 @@ public class X80Pro implements IRobot, Runnable
 		//this.oldStandardSensorData[0] = this.standardSensorData;
 	}
 	
-	private void postInit()
+	private void postInit(boolean resumeSensorSending)
 	{
 		// Enable collection of all sensor data by default.
-		this.socket.send(PMS5005.enableMotorSensorSending());
-		this.socket.send(PMS5005.enableCustomSensorSending());
-		this.socket.send(PMS5005.enableStandardSensorSending());
+		if (resumeSensorSending) {
+			this.socket.send(PMS5005.enableMotorSensorSending());
+			this.socket.send(PMS5005.enableCustomSensorSending());
+			this.socket.send(PMS5005.enableStandardSensorSending());
+		}
+		else {
+			this.socket.send(PMS5005.disableMotorSensorSending());
+			this.socket.send(PMS5005.disableCustomSensorSending());
+			this.socket.send(PMS5005.disableStandardSensorSending());
+		}
 		
 		this.socket.send(PMS5005.setDCMotorSensorUsage((byte) L, (byte) X80Pro.SENSOR_USAGE_ENCODER));
 		this.socket.send(PMS5005.setDCMotorSensorUsage((byte) R, (byte) X80Pro.SENSOR_USAGE_ENCODER));
@@ -587,7 +585,7 @@ public class X80Pro implements IRobot, Runnable
 	{
 		preInit();
 		this.socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
-		postInit();
+		postInit(true);
 	}
 	
 	/**
@@ -600,7 +598,7 @@ public class X80Pro implements IRobot, Runnable
 	{
 		preInit();
 		this.socket = new UDPSocket(this, ipAddress, port);
-		postInit();
+		postInit(true);
 	}
 	
 	public X80Pro(String ipAddress, IRobotEventHandler iRobotEventHandler) throws IOException
@@ -608,7 +606,15 @@ public class X80Pro implements IRobot, Runnable
 		preInit();
 		this.iRobotEventHandler = iRobotEventHandler;
 		this.socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
-		postInit();
+		postInit(true);
+	}
+	
+	public X80Pro(String ipAddress, IRobotEventHandler iRobotEventHandler, boolean resumeSensorSending) throws IOException
+	{
+		preInit();
+		this.iRobotEventHandler = iRobotEventHandler;
+		this.socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
+		postInit(resumeSensorSending);
 	}
 	
 	public X80Pro(String ipAddress, int port, IRobotEventHandler iRobotEventHandler) throws IOException
@@ -616,7 +622,15 @@ public class X80Pro implements IRobot, Runnable
 		preInit();
 		this.iRobotEventHandler = iRobotEventHandler;
 		this.socket = new UDPSocket(this, ipAddress, port);
-		postInit();
+		postInit(true);
+	}
+	
+	public X80Pro(String ipAddress, int port, IRobotEventHandler iRobotEventHandler, boolean resumeSensorSending) throws IOException
+	{
+		preInit();
+		this.iRobotEventHandler = iRobotEventHandler;
+		this.socket = new UDPSocket(this, ipAddress, port);
+		postInit(resumeSensorSending);
 	}
 	
 	/**
@@ -635,6 +649,7 @@ public class X80Pro implements IRobot, Runnable
 		{
 			System.err.println("-*- Motor Sensor Data Package Received -*-");
 			motorSensorData.setMotorSensorData(pkg.data);
+			this.updateHeading();
 			if (null != iRobotEventHandler) {
 				iRobotEventHandler.sensorDataReceivedEvent(pkg.robotIP, pkg.robotPort, pkg.type);
 			}
@@ -681,36 +696,42 @@ public class X80Pro implements IRobot, Runnable
 			if (null != iRobotEventHandler)
 			{
 				// Step 1: Clear buffer sizes if we're receiving first JPEG packet.
-				if (PMB5010.SEQ_BEGIN == (byte) (0xFF & pkg.data[PMB5010.VIDEO_SEQ_OFFSET]))
+				if (PMB5010.SEQ_BEGIN == (byte) (pkg.data[PMB5010.VIDEO_SEQ_OFFSET] & 0xFF))
 				//if (0 == this.numImagePkgs)
 				{
 					System.err.println("Beginning jpeg image assembly");
-					System.err.println();
-					//this.numImagePkgs = 0xFF & currentPackage[X80Pro.PACKAGE_DATA_NUM_IMAGE_PKGS_OFFSET];
-					//System.err.println("numImagePkgs: " + numImagePkgs);
+					try
+					{
+						imageBuffer.flush();
+					}
+					catch (IOException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					imageBuffer.reset();
+					imageBuffer.write(pkg.data, Pkg.IMAGE_DATA_RELATIVE_OFFSET, pkg.length);
 					previousSEQ = pkg.data[PMB5010.VIDEO_SEQ_OFFSET];
 				}
-				
-				// Step 2: Assemble complete data in buffer.
-				if (0 == imageBuffer.size() || PMB5010.SEQ_TERMINATE == (byte) (0xFF & pkg.data[PMB5010.VIDEO_SEQ_OFFSET]) || 
+				else if (PMB5010.SEQ_TERMINATE == (byte) (pkg.data[PMB5010.VIDEO_SEQ_OFFSET] & 0xFF) || 
 						previousSEQ == pkg.data[PMB5010.VIDEO_SEQ_OFFSET] - 1)
 				{
+					// Step 2: Assemble complete data in buffer.
 					System.err.println("Continuing jpeg image assembly");
 					imageBuffer.write(pkg.data, Pkg.IMAGE_DATA_RELATIVE_OFFSET, pkg.length);
 					previousSEQ = pkg.data[PMB5010.VIDEO_SEQ_OFFSET];
+				}
+				else if (PMB5010.SEQ_TERMINATE == (byte) (0xFF & pkg.data[PMB5010.VIDEO_SEQ_OFFSET])) // || this.numImagePkgs - 1 <= pkg[PMB5010.VIDEO_SEQ_OFFSET])
+				{
+					// Step 3: Decode complete data from buffer if we have finished receiving.
+					System.err.println("Finished jpeg image assembly");
+					iRobotEventHandler.imageReceivedEvent(pkg.robotIP, pkg.robotPort, imageBuffer);
 				}
 				else
 				{
 					System.err.println("Image pieces out of sequence");
 				}
 				
-				// Step 3: Decode complete data from buffer if we have finished receiving.
-				if (PMB5010.SEQ_TERMINATE == (byte) (0xFF & pkg.data[PMB5010.VIDEO_SEQ_OFFSET])) // || this.numImagePkgs - 1 <= pkg[PMB5010.VIDEO_SEQ_OFFSET])
-				{
-					System.err.println("Finished jpeg image assembly");
-					iRobotEventHandler.imageReceivedEvent(pkg.robotIP, pkg.robotPort, imageBuffer);
-				}
 			}
 			else
 			{
@@ -785,7 +806,7 @@ public class X80Pro implements IRobot, Runnable
 				{
 					pkg.raw[Pkg.RID_OFFSET] = (byte) (msg[i] & 0xFF);
 					pkg.destination = (byte) (msg[i] & 0xFF);
-					System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found RID: %x", (byte) (pkg.destination & 0xFF));
+					System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found RID: %2x", (byte) (pkg.destination & 0xFF));
 					System.err.println();
 					++i;
 					++pkg.offset;
@@ -794,7 +815,7 @@ public class X80Pro implements IRobot, Runnable
 				{
 					pkg.raw[Pkg.RESERVED_OFFSET] = (byte) (msg[i] & 0xFF);
 					pkg.serial = (byte) (msg[i] & 0xFF);
-					System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found RESERVED: %x", (byte) (pkg.serial & 0xFF));
+					System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found RESERVED: %2x", (byte) (pkg.serial & 0xFF));
 					System.err.println();
 					++i;
 					++pkg.offset;
@@ -803,7 +824,7 @@ public class X80Pro implements IRobot, Runnable
 				{
 					pkg.raw[Pkg.DID_OFFSET] = (byte) (msg[i] & 0xFF); 
 					pkg.type = (byte) (msg[i] & 0xFF);
-					System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found DID: %x", (byte) (pkg.type & 0xFF));
+					System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found DID: %2x", (byte) (pkg.type & 0xFF));
 					System.err.println();
 					++i;
 					++pkg.offset;
@@ -818,7 +839,7 @@ public class X80Pro implements IRobot, Runnable
 					System.err.print("DEBUG: pkg header: ");
 					for (int k = 0; k < Pkg.HEADER_LENGTH; ++k)
 					{
-						System.err.printf("%x ", (byte) (pkg.data[k] & 0xFF));
+						System.err.printf("%2x ", (byte) (pkg.raw[k] & 0xFF));
 					}
 					System.err.println();
 				}
@@ -927,171 +948,6 @@ public class X80Pro implements IRobot, Runnable
 			System.err.println("Zero packet");
 		}
 	}
-	
-	//public void sensorEvent(String robotIP, int robotPort, byte[] msg, int len)
-//	{
-//        int msgi = 0;
-////		System.err.println("len: " + len);
-//		// Assuming packets arrive in serial order. Not the best assumption, but it is easy to implement.
-////		System.err.println("remain: " + remain + " bytes");
-//        if (PACKAGE_DATA_HEADER_LENGTH <= remain) // remain too long (broken on header)
-//        {
-//        	int pkgbp = remain - currentPackageLength; // always negative value
-//			if (0 < pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET && pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET < len)
-//			{
-//				currentPackageType = 0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET];
-//				//System.err.println("currentPackageType: " + currentPackageType);
-//			}
-//			// if not out of bounds, read in the length
-//			if (0 < pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET && pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET < len)
-//			{
-//				currentPackageLength = (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET]); // + X80Pro.PACKAGE_DATA_HEADER_LENGTH;
-//				//System.err.println("currentPackageLength: " + currentPackageLength);
-//			}
-//			
-//        	// consume the header
-//        	pkgi = PACKAGE_DATA_HEADER_LENGTH;
-//        	remain = currentPackageLength - PACKAGE_DATA_HEADER_LENGTH;
-//        }
-//		if (0 < remain)
-//		{
-////			if (pkgi < PACKAGE_DATA_DID_OFFSET)
-////			{
-////				System.err.println("Only read " + pkgi + " bytes before, need to read package type");
-////				currentPackageType = msg[PACKAGE_DATA_DID_OFFSET - pkgi];
-////				System.err.println("type: " + currentPackageType);
-////			}
-////			if (pkgi < PACKAGE_DATA_LENGTH_OFFSET)
-////			{
-////				System.err.println("Only read " + pkgi + " bytes previously, need to read package length");
-////				currentPackageLength = msg[PACKAGE_DATA_LENGTH_OFFSET - pkgi];
-////				System.err.println("length: " + currentPackageLength);
-////			}
-//			System.err.println("Concatenating remaining (" + remain + ") bytes to previous package");
-//			for (msgi = 0; msgi < remain; ++msgi)
-//			{
-//				currentPackage[pkgi + msgi] = msg[msgi];
-//				System.err.printf("%x ", 0xFF & currentPackage[pkgi + msgi]);
-//			}
-//			pkgi += msgi;
-//			System.err.println();
-//			remain -= msgi;
-//			if (0 == remain)
-//			{
-//				System.err.println("read all remaining bytes");
-//			}
-//			System.err.println("remain pkgi: " + pkgi + ", remain currentPackageLength: " + currentPackageLength);
-//			System.err.print("postamble: ");
-//			for (int j = 0; j < 12; ++j)
-//			{
-//				System.err.printf("%x ", msg[msgi + j] & 0xFF);
-//			}
-//			System.err.println();
-//			System.err.println("remain " + msgi + " ?<= " + len);
-//			System.err.println("remain Checksum: " + (0xFF & msg[msgi]));
-//			System.err.println("remain ETX0: " + (0xFF & msg[msgi + 1]));
-//			System.err.println("remain ETX1: " + (0xFF & msg[msgi + 2]));
-//			System.err.println("remain len: " + len);
-//			if (currentPackageLength == pkgi && 
-//					msgi + pkgi + 2 <= len - 1 && 
-//					PACKAGE_ETX0 == (0xFF & msg[msgi + 1]) && 
-//					PACKAGE_ETX1 == (0xFF & msg[msgi + 2]))
-//			{
-//				dispatch(currentPackage, currentPackageLength, currentPackageType, robotIP, robotPort);
-//				msgi += PACKAGE_DATA_FOOTER_LENGTH; // discard trailing metadata
-//			}
-//			System.err.println("msgi after remain: " + msgi);
-//		}
-////		else if (remain <= PACKAGE_DATA_FOOTER_LENGTH) // remain too short (broken on footer)
-////		{
-////			//pkgi += currentPackageLength - pkgi;
-////			// could check checksum here, if it resides here and 
-////			// consume ETX0, ETX1, if they reside here, then
-////			// reset current pacakge information.
-////			pkgi = 0;
-////			remain = 0;
-////		}
-//		remain = 0;
-//		pkgi = 0;
-//		// While there are remaining packages...
-//		while (msgi < len)
-//		{
-//			Arrays.fill(currentPackage, (byte) 0);
-//			currentPackageLength = 0;
-//			currentPackageType = 0;
-//			
-//			int pkgbp = msgi; // acts as a base pointer to the start of the pkg
-//			// if not out of bounds, read in the type
-//			if (pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET < len)
-//			{
-//				currentPackageType = 0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_DID_OFFSET];
-//				//System.err.println("currentPackageType: " + currentPackageType);
-//			}
-//			// if not out of bounds, read in the length
-//			if (pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET < len)
-//			{
-//				currentPackageLength = (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_LENGTH_OFFSET]); // + X80Pro.PACKAGE_DATA_HEADER_LENGTH;
-//				//System.err.println("currentPackageLength: " + currentPackageLength);
-//			}
-//			// read data payload
-//			// TODO enter loop, while less than msg len and package len, copy bytes from msg into a package, decrement tmp len
-//			msgi += X80Pro.PACKAGE_DATA_HEADER_LENGTH;
-//			if (currentPackageType == 0x09)
-//			{
-//				for (pkgi = 0; pkgbp + pkgi + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET < len && pkgi < currentPackageLength; ++pkgi)
-//				{
-//					currentPackage[pkgi] = (byte) (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET + pkgi]);
-//					System.err.printf("%x ", 0xFF & currentPackage[pkgi]);
-//					msgi++;
-//				}
-//				System.err.println();
-//			}
-//			else
-//			{
-//				for (pkgi = 0; msgi < len && pkgi < currentPackageLength; ++pkgi) // pkgbp + pkgi + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET
-//				{
-//					currentPackage[pkgi] = (byte) (0xFF & msg[pkgbp + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET + pkgi]);
-//					msgi++;
-//				}
-//			}
-////			System.err.println();
-////			System.err.println("postamble: ");
-////			for (int j = 0; j < 3; ++j)
-////			{
-////				System.err.print((0xFF & msg[msgi + j]) + " ");
-////			}
-//			// not always true... checksum, ETX0, ETX1 may be discontinuous (may cross packets), 
-//			// as well as STX0, STX1 may cross packets to next package
-//			if (currentPackageLength == pkgi && msgi + 2 <= len && 
-//					PACKAGE_ETX0 == (0xFF & msg[msgi + 1]) && PACKAGE_ETX1 == (0xFF & msg[msgi + 2]))
-//			{
-//				//int checksum = 0xFF & msg[pkgbp + pkgi];
-////				System.err.println("Read ETX0 and ETX1, Dispatching...");
-//				dispatch(currentPackage, currentPackageLength, currentPackageType, robotIP, robotPort);
-//				msgi += PACKAGE_DATA_FOOTER_LENGTH; // discard trailing metadata
-//			}
-//			else // we've run out of packet from which to read the package
-//			{
-//				System.err.println("pkgi: " + pkgi + ", currentPackageLength: " + currentPackageLength);
-////				System.err.print("postamble: ");
-////				for (int j = 0; j < 12; ++j)
-////				{
-////					System.err.printf("%x ", msg[msgi + j] & 0xFF);
-////				}
-//				System.err.println();
-//				System.err.println(msgi + " ?<= " + len);
-//				System.err.println("Checksum: " + (0xFF & msg[pkgbp + pkgi + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET]));
-//				System.err.println("ETX0: " + (0xFF & msg[pkgbp + pkgi + 1 + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET]));
-//				System.err.println("ETX1: " + (0xFF & msg[pkgbp + pkgi + 2 + X80Pro.PACKAGE_DATA_PAYLOAD_OFFSET]));
-//				System.err.println("len: " + len);
-//				System.err.println("Package Overflowed Packet");
-//				System.err.println("currentPackageLength: " + currentPackageLength);
-//				System.err.println("pkgi: " + pkgi);
-//				remain = currentPackageLength - pkgi;
-//				System.err.println("Bytes Remaining: " + remain);
-//			}
-//		}
-//	}
 	
 	public void attachShutdownHook()
 	{
@@ -1681,11 +1537,9 @@ public class X80Pro implements IRobot, Runnable
 	    socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) X80Pro.CONTROL_MODE_POSITION));
 	    socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) X80Pro.CONTROL_MODE_POSITION));
 	    
-	    //int diffEncoder = (int)((1200*0.2875*theta)/(4*Math.PI*0.085));
-	    int diffEncoder = (int)((X80Pro.ROTATE_ROBOT_ENCODER_COUNT*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
-	    //int diffEncoder = (int)((X80Pro.ROTATE_ROBOT_ENCODER_COUNT*WHEEL_DISPLACEMENT*theta)/(2*Math.PI*WHEEL_RADIUS));
+	    int s = (int)((X80Pro.WHEEL_CIRCUMFERENCE_ENCODER_COUNT*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
 	    
-	    int leftPosition = getEncoderPulse(0) - diffEncoder;
+	    int leftPosition = motorSensorData.encoderPulse[L] - s;
 	    if (leftPosition < 0) 
 	    {
 	    	leftPosition = 32767 + leftPosition;
@@ -1695,7 +1549,7 @@ public class X80Pro implements IRobot, Runnable
 	    	leftPosition = leftPosition - 32767;
 	    }
 	    
-	    int rightPosition = getEncoderPulse(1) - diffEncoder;
+	    int rightPosition = motorSensorData.encoderPulse[R] - s;
 	    if (rightPosition < 0)
 	    {
 	    	rightPosition = 32767 + rightPosition;
@@ -1712,12 +1566,12 @@ public class X80Pro implements IRobot, Runnable
 	    		(short) NO_CONTROL, (short) NO_CONTROL, (short) NO_CONTROL, (short) NO_CONTROL, (short) milliseconds);
 	}
 	
-	public void runStepPWM(double runDis, int milliseconds)
+	public void runStepPWM(double runDis, int milliseconds, int maneuverID)
 	{
         //the robot will go forward the rundistance
-        int diffEncoder = (int)((runDis / (2 * Math.PI * WHEEL_RADIUS)) * ROTATE_ROBOT_ENCODER_COUNT);
+        int d = (int)((runDis/(2*Math.PI*WHEEL_RADIUS))*WHEEL_CIRCUMFERENCE_ENCODER_COUNT);
         
-        int LeftTarget = motorSensorData.encoderPulse[L] + diffEncoder;
+        int LeftTarget = motorSensorData.encoderPulse[L] + d;
         if (LeftTarget < 0) 
         {
             LeftTarget = 32767 + LeftTarget;
@@ -1727,7 +1581,7 @@ public class X80Pro implements IRobot, Runnable
             LeftTarget = LeftTarget - 32767;
         }
         
-        int RightTarget = motorSensorData.encoderPulse[R] - diffEncoder;
+        int RightTarget = motorSensorData.encoderPulse[R] - d;
         if (32767 < RightTarget)
         {
             RightTarget = RightTarget - 32767;
@@ -1762,7 +1616,7 @@ public class X80Pro implements IRobot, Runnable
     public void runStep(double runDis, int milliseconds) 
     {
         //the robot will go forward the rundistance
-        int diffEncoder = (int)((runDis / (2 * Math.PI * WHEEL_RADIUS)) * ROTATE_ROBOT_ENCODER_COUNT);
+        int diffEncoder = (int)((runDis/(2*Math.PI*WHEEL_RADIUS))*WHEEL_CIRCUMFERENCE_ENCODER_COUNT);
         
         int LeftTarget = motorSensorData.encoderPulse[L] + diffEncoder;
         if (LeftTarget < 0) 
@@ -1798,10 +1652,12 @@ public class X80Pro implements IRobot, Runnable
 	{
 		//@ post: Robot has turned an angle theta in radians
 		
-	    int diffEncoder = (int)((WHEEL_CIRCUMFERENCE_ENCODER_COUNT*WHEEL_DISPLACEMENT*theta)/(4*Math.PI*WHEEL_RADIUS));
+		double r = WHEEL_DISPLACEMENT/2.0;
+		double metersToEncoderUnitsConversion = WHEEL_CIRCUMFERENCE_ENCODER_COUNT/(2*Math.PI*WHEEL_RADIUS);
+	    int s = (int) (r*theta*metersToEncoderUnitsConversion);
 	    
 	    // TODO: cross calling
-	    int leftPulseWidth = getEncoderPulse(L) - diffEncoder;
+	    int leftPulseWidth = getEncoderPulse(L) - s;
 		if (leftPulseWidth < 0)
 		{
 			leftPulseWidth = 32768 + leftPulseWidth;
@@ -1812,7 +1668,7 @@ public class X80Pro implements IRobot, Runnable
 		}
 		
 		// TODO: cross calling
-		int rightPulseWidth = getEncoderPulse(R) - diffEncoder;
+		int rightPulseWidth = getEncoderPulse(R) - s;
 		if (rightPulseWidth < 0) 
 		{
 			rightPulseWidth = 32768 + rightPulseWidth;
@@ -1907,5 +1763,73 @@ public class X80Pro implements IRobot, Runnable
 		
 		socket.send(PMS5005.setAllDCMotorPulses((short) power[L], (short) power[R], (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL, (short) NO_CTRL));
 	//} else Robot.DcMotorPwmNonTimeCtrAll((short)N_PWM, (short)N_PWM, NO_CONTROL, NO_CONTROL, NO_CONTROL, NO_CONTROL); Sleep(MICRO_DELAY);
+	}
+	
+	/**
+	 * Resets heading to zero by storing current left and right encoder pulse values as initial values 
+	 */
+	public void resetHeading()
+	{	
+		encoderPulseInitial[L] = motorSensorData.encoderPulse[L];
+		if (encoderPulseInitial[L] < 0)
+		{
+			encoderPulseInitial[L] += 32768;
+		}
+		else if (32767 < encoderPulseInitial[L])
+		{
+			encoderPulseInitial[L] -= 32768;
+		}
+		
+		encoderPulseInitial[R] = motorSensorData.encoderPulse[R];
+		if (encoderPulseInitial[R] < 0)
+		{
+			encoderPulseInitial[R] += 32768;
+		}
+		else if (32767 < encoderPulseInitial[R])
+		{
+			encoderPulseInitial[R] -= 32768;
+		}
+	}
+	
+	private void updateHeading()
+	{
+		double r = WHEEL_DISPLACEMENT/2.0;
+		
+		int leftEncoderPulse = motorSensorData.encoderPulse[L];
+		if (leftEncoderPulse < 0)
+		{
+			leftEncoderPulse += 32768;
+		}
+		else if (32767 < leftEncoderPulse)
+		{
+			leftEncoderPulse -= 32768;
+		}
+		
+		int rightEncoderPulse = motorSensorData.encoderPulse[R];
+		if (rightEncoderPulse < 0)
+		{
+			rightEncoderPulse += 32768;
+		}
+		else if (32767 < rightEncoderPulse)
+		{
+			rightEncoderPulse -= 32768;
+		}
+		
+		int sLeft = leftEncoderPulse - encoderPulseInitial[L];
+		int sRight = rightEncoderPulse - encoderPulseInitial[R];
+		
+		double thetaLeft = (sLeft/r)*((2*Math.PI*WHEEL_RADIUS)/WHEEL_CIRCUMFERENCE_ENCODER_COUNT);
+		double thetaRight = (sRight/r)*((2*Math.PI*WHEEL_RADIUS)/WHEEL_CIRCUMFERENCE_ENCODER_COUNT);
+		
+		heading = (thetaLeft + thetaRight) / 2.0;
+	}
+	
+	/**
+	 * 
+	 * @return heading value in radians
+	 */
+	public double getHeading()
+	{
+		return heading;
 	}
 }

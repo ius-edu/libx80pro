@@ -13,4 +13,5 @@ public interface IRobotEventHandler
 	public void audioSegmentReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream audioBuffer);
 	public void audioCodecResetRequestReceivedEvent(String robotIP, int robotPort);
 	public void imageReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream imageBuffer);
+	public void maneuverCompletedEvent(String robotIP, int robotPort, int maneuverID);
 }

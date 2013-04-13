@@ -21,21 +21,20 @@ public class X80ProPCMTest implements IRobotEventHandler
 		X80ProPCMTest pcmtest = new X80ProPCMTest();
 		try
 		{
-			robot = new X80Pro("192.168.0.204", pcmtest);
+			robot = new X80Pro("192.168.0.202", pcmtest, false);
 		}
 		catch (IOException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		if (null == robot)
 		{
 			System.err.println("No robot instance!");
 			return;
 		}
-		
 		robot.startAudioRecording(4);
+		robot.suspendAllSensors();
 		try
 		{
 			Thread.sleep(5000);
