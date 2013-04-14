@@ -1,5 +1,8 @@
 package edu.ius.robotics.robots.boards;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 public class PMS5005
 {
 	/*
@@ -155,14 +158,14 @@ public class PMS5005
 				sr_lsb = (byte) ((shift_reg & 0x01) & 0xff);
 				// calculate the feed back bit
 				fb_bit = (byte) (((data_bit ^ sr_lsb) & 0x01) & 0xff);
-				shift_reg = (byte) ((shift_reg & 0xff) >>> 1);
+				shift_reg = (byte) ((shift_reg & 0xff) >> 1);
 				
 				if (fb_bit == 1) 
 				{
 					shift_reg = (byte) ((shift_reg ^ 0x8C) & 0xff);
 				}
 				
-				v = (byte) ((v & 0xff) >>> 1);
+				v = (byte) ((v & 0xff) >> 1);
 			}
 		}
 		
@@ -785,13 +788,13 @@ public class PMS5005
 		packet[7] = channel; // 0=L | 1=R
 		packet[8] = KP_ID; // Proportional gain
 		packet[9] = (byte) (kp & 0xff);
-		packet[10] = (byte) (kp >>> 8 & 0xff);
+		packet[10] = (byte) ((kp >> 8) & 0xff);
 		packet[11] = KD_ID; // Derivative gain
 		packet[12] = (byte) (kd & 0xff);
-		packet[13] = (byte) (kd >>> 8 & 0xff);
+		packet[13] = (byte) ((kd >> 8) & 0xff);
 		packet[14] = KI_ID; // Integral gain
 		packet[15] = (byte) (ki & 0xff);
-		packet[16] = (byte) (ki >>> 8 & 0xff);
+		packet[16] = (byte) ((ki >> 8) & 0xff);
 		packet[17] = calcCRC(packet); // Checksum
 		packet[18] = ETX0;
 		packet[19] = ETX1;
@@ -813,13 +816,13 @@ public class PMS5005
 		packet[7] = channel; // 0=L | 1=R
 		packet[8] = KP_ID; // Proportional gain
 		packet[9] = (byte) (kp & 0xff);
-		packet[10] = (byte) (kp >>> 8 & 0xff);
+		packet[10] = (byte) ((kp >> 8) & 0xff);
 		packet[11] = KD_ID; // Derivative gain
 		packet[12] = (byte) (kd & 0xff);
-		packet[13] = (byte) (kd >>> 8 & 0xff);
+		packet[13] = (byte) ((kd >> 8) & 0xff);
 		packet[14] = KI_ID; // Integral gain
 		packet[15] = (byte) (ki & 0xff);
-		packet[16] = (byte) (ki >>> 8 & 0xff);
+		packet[16] = (byte) ((ki >> 8) & 0xff);
 		packet[17] = calcCRC(packet); // Checksum
 		packet[18] = ETX0;
 		packet[19] = ETX1;
@@ -945,9 +948,9 @@ public class PMS5005
 		packet[5] = 5; // LEN
 		packet[6] = channel; // Channel 0-5
 		packet[7] = (byte) (pos & 0xff); // cmdValue
-		packet[8] = (byte) (pos >>> 8 & 0xff);
+		packet[8] = (byte) ((pos >> 8) & 0xff);
 		packet[9] = (byte) (timePeriod & 0xff); // time
-		packet[10] = (byte) (timePeriod >>> 8 & 0xff);
+		packet[10] = (byte) ((timePeriod >> 8) & 0xff);
 		packet[11] = calcCRC(packet); // Checksum
 		packet[12] = ETX0;
 		packet[13] = ETX1;
@@ -989,7 +992,7 @@ public class PMS5005
 		packet[5] = 3; // LEN
 		packet[6] = channel; // channel 0-5
 		packet[7] = (byte) (pos & 0xff); // cmdValue
-		packet[8] = (byte) (pos >>> 8 & 0xff);
+		packet[8] = (byte) ((pos >> 8) & 0xff);
 		packet[9] = calcCRC(packet); // Checksum
 		packet[10] = ETX0;
 		packet[11] = ETX1;
@@ -1033,10 +1036,10 @@ public class PMS5005
 		packet[5] = 6; // LEN
 		packet[6] = channel; // Channel 0-5
 		packet[7] = (byte) (pulseWidth & 0xff); // cmdValue
-		packet[8] = (byte) (pulseWidth >>> 8 & 0xff);
+		packet[8] = (byte) ((pulseWidth >> 8) & 0xff);
 		packet[9] = (byte) SINGLE_CHANNEL_TIMED_FLAG; // we have a flag
 		packet[10] = (byte) (timePeriod & 0xff); // time
-		packet[11] = (byte) (timePeriod >>> 8 & 0xff);
+		packet[11] = (byte) ((timePeriod >> 8) & 0xff);
 		packet[12] = calcCRC(packet); // Checksum
 		packet[13] = ETX0;
 		packet[14] = ETX1;
@@ -1080,7 +1083,7 @@ public class PMS5005
 		packet[5] = 3; // LEN
 		packet[6] = channel; // Channel 0-5
 		packet[7] = (byte) (pulseWidth & 0xff); // cmdValue
-		packet[8] = (byte) (pulseWidth >>> 8 & 0xff);
+		packet[8] = (byte) ((pulseWidth >> 8) & 0xff);
 		packet[9] = calcCRC(packet); // Checksum
 		packet[10] = ETX0;
 		packet[11] = ETX1;
@@ -1134,19 +1137,19 @@ public class PMS5005
 		packet[4] = ALL_POSITION_CTRL; // DID
 		packet[5] = 14; // LEN
 		packet[6] = (byte) (pos1 & 0xff); // channel 1
-		packet[7] = (byte) (pos1 >>> 8 & 0xff);
+		packet[7] = (byte) ((pos1 >> 8) & 0xff);
 		packet[8] = (byte) (pos2 & 0xff); // channel 2
-		packet[9] = (byte) (pos2 >>> 8 & 0xff);
+		packet[9] = (byte) ((pos2 >> 8) & 0xff);
 		packet[10] = (byte) (pos3 & 0xff); // channel 3
-		packet[11] = (byte) (pos3 >>> 8 & 0xff);
+		packet[11] = (byte) ((pos3 >> 8) & 0xff);
 		packet[12] = (byte) (pos4 & 0xff); // channel 4
-		packet[13] = (byte) (pos4 >>> 8 & 0xff);
+		packet[13] = (byte) ((pos4 >> 8) & 0xff);
 		packet[14] = (byte) (pos5 & 0xff); // channel 5
-		packet[15] = (byte) (pos5 >>> 8 & 0xff);
+		packet[15] = (byte) ((pos5 >> 8) & 0xff);
 		packet[16] = (byte) (pos6 & 0xff); // channel 6
-		packet[17] = (byte) (pos6 >>> 8 & 0xff);
+		packet[17] = (byte) ((pos6 >> 8) & 0xff);
 		packet[18] = (byte) (timePeriod & 0xff); // time
-		packet[19] = (byte) (timePeriod >>> 8 & 0xff);
+		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
 		packet[20] = calcCRC(packet); // Checksum
 		packet[21] = ETX0;
 		packet[22] = ETX1;
@@ -1199,17 +1202,17 @@ public class PMS5005
 		packet[4] = ALL_POSITION_CTRL; // DID
 		packet[5] = 12; // LEN
 		packet[6] = (byte) (pos1 & 0xff); // channel 1
-		packet[7] = (byte) (pos1 >>> 8 & 0xff);
+		packet[7] = (byte) ((pos1 >> 8) & 0xff);
 		packet[8] = (byte) (pos2 & 0xff); // channel 2
-		packet[9] = (byte) (pos2 >>> 8 & 0xff);
+		packet[9] = (byte) ((pos2 >> 8) & 0xff);
 		packet[10] = (byte) (pos3 & 0xff); // channel 3
-		packet[11] = (byte) (pos3 >>> 8 & 0xff);
+		packet[11] = (byte) ((pos3 >> 8) & 0xff);
 		packet[12] = (byte) (pos4 & 0xff); // channel 4
-		packet[13] = (byte) (pos4 >>> 8 & 0xff);
+		packet[13] = (byte) ((pos4 >> 8) & 0xff);
 		packet[14] = (byte) (pos5 & 0xff); // channel 5
-		packet[15] = (byte) (pos5 >>> 8 & 0xff);
+		packet[15] = (byte) ((pos5 >> 8) & 0xff);
 		packet[16] = (byte) (pos6 & 0xff); // channel 6
-		packet[17] = (byte) (pos6 >>> 8 & 0xff);
+		packet[17] = (byte) ((pos6 >> 8) & 0xff);
 		packet[18] = calcCRC(packet); // Checksum
 		packet[19] = ETX0;
 		packet[20] = ETX1;
@@ -1261,19 +1264,19 @@ public class PMS5005
 		packet[4] = ALL_VELOCITY_CTRL; // DID
 		packet[5] = 14; // LEN
 		packet[6] = (byte) (v0 & 0xff); // MOTOR 1
-		packet[7] = (byte) (v0 >>> 8 & 0xff);
+		packet[7] = (byte) ((v0 >> 8) & 0xff);
 		packet[8] = (byte) (v1 & 0xff); // MOTOR 2
-		packet[9] = (byte) (v1 >>> 8 & 0xff);
+		packet[9] = (byte) ((v1 >> 8) & 0xff);
 		packet[10] = (byte) (v2 & 0xff); // MOTOR 3
-		packet[11] = (byte) (v2 >>> 8 & 0xff);
+		packet[11] = (byte) ((v2 >> 8) & 0xff);
 		packet[12] = (byte) (v3 & 0xff); // MOTOR 4
-		packet[13] = (byte) (v3 >>> 8 & 0xff);
+		packet[13] = (byte) ((v3 >> 8) & 0xff);
 		packet[14] = (byte) (v4 & 0xff); // MOTOR 5
-		packet[15] = (byte) (v4 >>> 8 & 0xff);
+		packet[15] = (byte) ((v4 >> 8) & 0xff);
 		packet[16] = (byte) (v5 & 0xff); // MOTOR 6
-		packet[17] = (byte) (v5 >>> 8 & 0xff);
+		packet[17] = (byte) ((v5 >> 8) & 0xff);
 		packet[18] = (byte) (timePeriod & 0xff); // time
-		packet[19] = (byte) (timePeriod >>> 8 & 0xff);
+		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
 		packet[20] = calcCRC(packet); // Checksum
 		packet[21] = ETX0;
 		packet[22] = ETX1;
@@ -1324,17 +1327,17 @@ public class PMS5005
 		packet[4] = ALL_VELOCITY_CTRL; // DID
 		packet[5] = 12; // LEN
 		packet[6] = (byte) (v0 & 0xff); // MOTOR 1
-		packet[7] = (byte) (v0 >>> 8 & 0xff);
+		packet[7] = (byte) ((v0 >> 8) & 0xff);
 		packet[8] = (byte) (v1 & 0xff); // MOTOR 2
-		packet[9] = (byte) (v1 >>> 8 & 0xff);
+		packet[9] = (byte) ((v1 >> 8) & 0xff);
 		packet[10] = (byte) (v2 & 0xff); // MOTOR 3
-		packet[11] = (byte) (v2 >>> 8 & 0xff);
+		packet[11] = (byte) ((v2 >> 8) & 0xff);
 		packet[12] = (byte) (v3 & 0xff); // MOTOR 4
-		packet[13] = (byte) (v3 >>> 8 & 0xff);
+		packet[13] = (byte) ((v3 >> 8) & 0xff);
 		packet[14] = (byte) (v4 & 0xff); // MOTOR 5
-		packet[15] = (byte) (v4 >>> 8 & 0xff);
+		packet[15] = (byte) ((v4 >> 8) & 0xff);
 		packet[16] = (byte) (v5 & 0xff); // MOTOR 6
-		packet[17] = (byte) (v5 >>> 8 & 0xff);
+		packet[17] = (byte) ((v5 >> 8) & 0xff);
 		//packet[18] = (byte) 0x06; // we have a flag?
 		packet[18] = calcCRC(packet); // Checksum
 		packet[19] = ETX0;
@@ -1387,19 +1390,19 @@ public class PMS5005
 		packet[4] = ALL_PWM_CTRL; // DID
 		packet[5] = 14; // LEN
 		packet[6] = (byte) (p0 & 0xff); // MOTOR 1
-		packet[7] = (byte) (p0 >>> 8 & 0xff);
+		packet[7] = (byte) ((p0 >> 8) & 0xff);
 		packet[8] = (byte) (p1 & 0xff); // MOTOR 2
-		packet[9] = (byte) (p1 >>> 8 & 0xff);
+		packet[9] = (byte) ((p1 >> 8) & 0xff);
 		packet[10] = (byte) (p2 & 0xff); // MOTOR 3
-		packet[11] = (byte) (p2 >>> 8 & 0xff);
+		packet[11] = (byte) ((p2 >> 8) & 0xff);
 		packet[12] = (byte) (p3 & 0xff); // MOTOR 4
-		packet[13] = (byte) (p3 >>> 8 & 0xff);
+		packet[13] = (byte) ((p3 >> 8) & 0xff);
 		packet[14] = (byte) (p4 & 0xff); // MOTOR 5
-		packet[15] = (byte) (p4 >>> 8 & 0xff);
+		packet[15] = (byte) ((p4 >> 8) & 0xff);
 		packet[16] = (byte) (p5 & 0xff); // MOTOR 6
-		packet[17] = (byte) (p5 >>> 8 & 0xff);
+		packet[17] = (byte) ((p5 >> 8) & 0xff);
 		packet[18] = (byte) (timePeriod & 0xff); // time
-		packet[19] = (byte) (timePeriod >>> 8 & 0xff);
+		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
 		packet[20] = calcCRC(packet); // Checksum
 		packet[21] = ETX0;
 		packet[22] = ETX1;
@@ -1449,17 +1452,17 @@ public class PMS5005
 		packet[4] = ALL_PWM_CTRL; // DID
 		packet[5] = 12; // LEN
 		packet[6] = (byte) (p0 & 0xff); // MOTOR 1
-		packet[7] = (byte) (p0 >>> 8 & 0xff);
+		packet[7] = (byte) ((p0 >> 8) & 0xff);
 		packet[8] = (byte) (p1 & 0xff); // MOTOR 2
-		packet[9] = (byte) (p1 >>> 8 & 0xff);
+		packet[9] = (byte) ((p1 >> 8) & 0xff);
 		packet[10] = (byte) (p2 & 0xff); // MOTOR 3
-		packet[11] = (byte) (p2 >>> 8 & 0xff);
+		packet[11] = (byte) ((p2 >> 8) & 0xff);
 		packet[12] = (byte) (p3 & 0xff); // MOTOR 4
-		packet[13] = (byte) (p3 >>> 8 & 0xff);
+		packet[13] = (byte) ((p3 >> 8) & 0xff);
 		packet[14] = (byte) (p4 & 0xff); // MOTOR 5
-		packet[15] = (byte) (p4 >>> 8 & 0xff);
+		packet[15] = (byte) ((p4 >> 8) & 0xff);
 		packet[16] = (byte) (p5 & 0xff); // MOTOR 6
-		packet[17] = (byte) (p5 >>> 8 & 0xff);
+		packet[17] = (byte) ((p5 >> 8) & 0xff);
 		packet[18] = calcCRC(packet); // Checksum
 		packet[19] = ETX0;
 		packet[20] = ETX1;
@@ -1563,10 +1566,10 @@ public class PMS5005
 		packet[5] = 6; // LEN
 		packet[6] = channel; // channel
 		packet[7] = (byte) (pulseWidth & 0xff); // command value low 8 bit
-		packet[8] = (byte) ((pulseWidth >>> 8) & 0xff); // high 8 bit
+		packet[8] = (byte) ((pulseWidth >> 8) & 0xff); // high 8 bit
 		packet[9] = SINGLE_CHANNEL_TIMED_FLAG; // flag
 		packet[10] = (byte) (timePeriod & 0xff); // time low 8 bit
-		packet[11] = (byte) ((timePeriod >>> 8) & 0xff); // high 8 bit
+		packet[11] = (byte) ((timePeriod >> 8) & 0xff); // high 8 bit
 		packet[12] = calcCRC(packet); // Checksum
 		packet[13] = ETX0;
 		packet[14] = ETX1;
@@ -1599,7 +1602,7 @@ public class PMS5005
 		packet[5] = 4; // LEN
 		packet[6] = channel; // channel
 		packet[7] = (byte) (pulseWidth & 0xff); // command value low 8 bit
-		packet[8] = (byte) ((pulseWidth >>> 8) & 0xff); // high 8 bit
+		packet[8] = (byte) ((pulseWidth >> 8) & 0xff); // high 8 bit
 		packet[9] = SINGLE_CHANNEL_TIMED_FLAG; // flag
 		packet[10] = calcCRC(packet); // Checksum
 		packet[11] = ETX0;
@@ -1646,19 +1649,19 @@ public class PMS5005
 		packet[4] = ALL_SERVO_CTRL; // DID
 		packet[5] = 14; // LEN
 		packet[6] = (byte) (p0 & 0xff); // channel 1
-		packet[7] = (byte) (p0 >>> 8 & 0xff);
+		packet[7] = (byte) ((p0 >> 8) & 0xff);
 		packet[8] = (byte) (p1 & 0xff); // channel 2
-		packet[9] = (byte) (p1 >>> 8 & 0xff);
+		packet[9] = (byte) ((p1 >> 8) & 0xff);
 		packet[10] = (byte) (p2 & 0xff); // channel 3
-		packet[11] = (byte) (p2 >>> 8 & 0xff);
+		packet[11] = (byte) ((p2 >> 8) & 0xff);
 		packet[12] = (byte) (p3 & 0xff); // channel 4
-		packet[13] = (byte) (p3 >>> 8 & 0xff);
+		packet[13] = (byte) ((p3 >> 8) & 0xff);
 		packet[14] = (byte) (p4 & 0xff); // channel 5
-		packet[15] = (byte) (p5 >>> 8 & 0xff);
+		packet[15] = (byte) ((p5 >> 8) & 0xff);
 		packet[16] = (byte) (p5 & 0xff); // channel 6
-		packet[17] = (byte) (p5 >>> 8 & 0xff);
+		packet[17] = (byte) ((p5 >> 8) & 0xff);
 		packet[18] = (byte) (timePeriod & 0xff); // time
-		packet[19] = (byte) (timePeriod >>> 8 & 0xff);
+		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
 		packet[20] = calcCRC(packet); // Checksum
 		packet[21] = ETX0;
 		packet[22] = ETX1;
@@ -1703,17 +1706,17 @@ public class PMS5005
 		packet[4] = ALL_SERVO_CTRL; // DID
 		packet[5] = 12; // LEN
 		packet[6] = (byte) (p0 & 0xff); // motor 1
-		packet[7] = (byte) (p0 >>> 8 & 0xff);
+		packet[7] = (byte) ((p0 >> 8) & 0xff);
 		packet[8] = (byte) (p1 & 0xff); // motor 2
-		packet[9] = (byte) (p1 >>> 8 & 0xff);
+		packet[9] = (byte) ((p1 >> 8) & 0xff);
 		packet[10] = (byte) (p2 & 0xff); // motor 3
-		packet[11] = (byte) (p2 >>> 8 & 0xff);
+		packet[11] = (byte) ((p2 >> 8) & 0xff);
 		packet[12] = (byte) (p3 & 0xff); // motor 4
-		packet[13] = (byte) (p3 >>> 8 & 0xff);
+		packet[13] = (byte) ((p3 >> 8) & 0xff);
 		packet[14] = (byte) (p4 & 0xff); // motor 5
-		packet[15] = (byte) (p4 >>> 8 & 0xff);
+		packet[15] = (byte) ((p4 >> 8) & 0xff);
 		packet[16] = (byte) (p5 & 0xff); // motor 6
-		packet[17] = (byte) (p5 >>> 8 & 0xff);
+		packet[17] = (byte) ((p5 >> 8) & 0xff);
 		packet[18] = calcCRC(packet); // Checksum
 		packet[19] = ETX0;
 		packet[20] = ETX1;
@@ -1739,17 +1742,12 @@ public class PMS5005
 		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = LCD_CTRL;
-		packet[5] = 65; // LEN
-		packet[6] = (byte) (frameNumber & 0xff);
-		
-		for (int i = 0; i < FRAME_LENGTH; ++i)
-		{
-			packet[7+i] = (byte) (frame[i] & 0xff);
-		}
-		
-		packet[70] = calcCRC(packet);
-		packet[71] = ETX0;
-		packet[72] = ETX1;
+		packet[5] = 65; // LEN (1 frame slice byte + 64 bytes of bitmap image data)
+		packet[6] = (byte) (frameNumber & 0xFF);
+		for (int i = 0; i < FRAME_LENGTH; ++i) packet[7+i] = (byte) (frame[i] & 0xFF);
+		packet[71] = calcCRC(packet);
+		packet[72] = ETX0;
+		packet[73] = ETX1;
 		
 		return packet;
 	}

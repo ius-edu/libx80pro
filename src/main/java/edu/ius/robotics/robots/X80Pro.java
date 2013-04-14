@@ -2612,10 +2612,8 @@ public class X80Pro implements IRobot, Runnable
 	    		(short) milliseconds));
 	}
 	
-	public void runStepPWM(double runDis, int milliseconds, int maneuverID)
+	public void runStepPWM(double runDis, int milliseconds)
 	{
-		//X80ProWorker.enqueueCommand();
-        //the robot will go forward the rundistance
         int d = (int)((runDis/(2*Math.PI*WHEEL_RADIUS))*WHEEL_CIRCUMFERENCE_ENCODER_COUNT);
         
         int LeftTarget = absEncoderPulseValue(motorSensorData.encoderPulse[L] + d);
