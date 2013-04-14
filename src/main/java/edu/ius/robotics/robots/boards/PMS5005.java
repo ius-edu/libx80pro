@@ -11,17 +11,17 @@ public class PMS5005
 	 */
 	
 	/*
-	 * The structure for a packet to the PMS5005 is the following: STX0 = 94
-	 * (always) STX1 = 2 (always) RID = 1 (generally) Reserved = 0 (generally)
+	 * The structure for a packet to the PMS5005 is the following: STX0 = 94 (0x5E)
+	 * (always) STX1 = 2 (0x02) (always) RID = 1 (generally) Reserved = 0 (generally)
 	 * DID (Data ID) = <DID> (your choice of DID) LENGTH = <len> (Length from
 	 * next element to CRC byte) DATA = <data> (may be more than 1 byte in
 	 * length) CHECKSUM = <cksum> (use crc() method to calculate on cmd) ETX0 =
-	 * 94 (always) ETX1 = 13 (always)
+	 * 94 (0x5E) (always) ETX1 = 13 (0x13) (always)
 	 */
 	
 	// 2013-04-1 JR
-	// an alternative to the little endian byte array construction:
-	//
+	// an example alternative to the little endian byte array construction:
+	// 
 	//import java.nio.ByteBuffer;
 	//import java.nio.ByteOrder;
 	//
