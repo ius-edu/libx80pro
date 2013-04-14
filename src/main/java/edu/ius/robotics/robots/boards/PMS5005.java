@@ -1,8 +1,5 @@
 package edu.ius.robotics.robots.boards;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 public class PMS5005
 {
 	/*
@@ -22,16 +19,40 @@ public class PMS5005
 	 * 94 (always) ETX1 = 13 (always)
 	 */
 	
+	// 2013-04-1 JR
+	// an alternative to the little endian byte array construction:
+	//
+	//import java.nio.ByteBuffer;
+	//import java.nio.ByteOrder;
+	//
+	//setAllDCMotorPulseWidths()
+	//{
+//		byte dataLen = 6*(Short.SIZE >> 3);
+//		ByteBuffer buffer = ByteBuffer.allocate(METADATA_SIZE + dataLen);
+//		buffer.order(ByteOrder.LITTLE_ENDIAN);
+//		buffer.put(STX0).put(STX1);
+//		buffer.put(RID_PMS5005).put(RESERVED).put(ALL_PWM_CTRL).put(dataLen);
+//		buffer.putShort(p0);
+//		buffer.putShort(p1);
+//		buffer.putShort(p2);
+//		buffer.putShort(p3);
+//		buffer.putShort(p4);
+//		buffer.putShort(p5);
+//		buffer.put(calcCRC(buffer.array())).put(ETX0).put(ETX1);
+//		return buffer.array();
+	//}
+
 	/* Packet Info */
 	public static final int HEADER_LENGTH = 6;
 	public static final int FOOTER_LENGTH = 3;
+	public static final int METADATA_SIZE = 9;
 	public static final int DID_OFFSET = 4;
 	
 	/* Start transmission, End transmission */
-	public static final byte STX0 = 94; // 0x5E
-	public static final byte STX1 = 2; // 0x02
-	public static final byte ETX0 = 94; // 0x5E
-	public static final byte ETX1 = 13; // 0x13
+	public static final byte STX0 = 0x5E;
+	public static final byte STX1 = 0x02;
+	public static final byte ETX0 = 0x5E;
+	public static final byte ETX1 = 0x13;
 	
 	/* RID */
 	public static final byte RID_HOST = 0x00;
@@ -75,60 +96,9 @@ public class PMS5005
 	public static final short SETUP_COM = 255;
 	/* End Data ID (DID) descriptor listing */
 	
-	public static final byte PWM_CTRL_MODE = 0x00;
-	public static final byte POSITION_CTRL_MODE = 0x01;
-	public static final byte VELOCITY_CTRL_MODE = 0x02;
-	
-	public static final int SINGLE_POT_SENSOR_USAGE = 0x00;
-	public static final int DUAL_POT_SENSOR_USAGE = 0x01;
-	public static final int ENCODER_SENSOR_USAGE = 0x02;
-	
 	public static final byte KP_ID = 1; // progressive id
 	public static final byte KD_ID = 2; // derivative id
 	public static final byte KI_ID = 3; // integral id
-	
-	public static final short NON_CTRL_CMD = (short) 0xffff; // No Control command
-	public static final short NO_CTRL = (short) 0x8000; // 32768
-	
-	public static final int MAX_PWM_L = 32767;
-	public static final int MAX_PWM_R = 0;
-	
-	public static final int PWM_N = 16383;
-	//public static final int PWM_O = 8000;
-	public static final int PWM_O = 12000;
-	public static final int DUTY_CYCLE_UNIT = 8383;
-	
-	/* Sensor Data Offsets */
-	public static final int ULTRASONIC_OFFSET_WITH_HEADER = 0 + HEADER_LENGTH;
-	public static final int ENCODER_PULSE_OFFSET_WITH_HEADER = 24 + HEADER_LENGTH;
-	public static final int ENCODER_SPEED_OFFSET_WITH_HEADER = 32 + HEADER_LENGTH;
-	public static final int STANDARD_IR_RANGE_OFFSET_WITH_HEADER = 24 + HEADER_LENGTH;
-	public static final int CUSTOM_IR_RANGE_OFFSET_WITH_HEADER = 4 + HEADER_LENGTH; // CustomAD3
-	public static final int HUMAN_ALARM_OFFSET_WITH_HEADER = 6 + HEADER_LENGTH;
-	public static final int HUMAN_MOTION_OFFSET_WITH_HEADER = 8 + HEADER_LENGTH;
-	public static final int TILTING_X_OFFSET_WITH_HEADER = 14 + HEADER_LENGTH;
-	public static final int TILTING_Y_OFFSET_WITH_HEADER = 16 + HEADER_LENGTH;
-	public static final int ENCODER_DIRECTION_OFFSET_WITH_HEADER = 32 + HEADER_LENGTH;
-	public static final int MOTOR_SPEED_OFFSET_WITH_HEADER = 26 + HEADER_LENGTH;
-	public static final int CUSTOM_AD_OFFSET_WITH_HEADER = 0 + HEADER_LENGTH;
-	public static final int TEMPERATURE_AD_OFFSET_WITH_HEADER = 22 + HEADER_LENGTH;
-	public static final int OVERHEAT_SENSOR_OFFSET_WITH_HEADER = 18 + HEADER_LENGTH;
-	public static final int INFRARED_COMMAND_OFFSET_WITH_HEADER = 26 + HEADER_LENGTH;
-	public static final int BATTERY_SENSOR_OFFSET_WITH_HEADER = 30 + HEADER_LENGTH;
-	public static final int REFERENCE_VOLTAGE_OFFSET_WITH_HEADER = 36 + HEADER_LENGTH;
-	public static final int POTENTIOMETER_POWER_OFFSET_WITH_HEADER = 38 + HEADER_LENGTH;
-	public static final int POTENTIOMETER_SENSOR_OFFSET_WITH_HEADER = 0 + HEADER_LENGTH;
-	public static final int MOTOR_CURRENT_SENSOR_OFFSET_WITH_HEADER = 12 + HEADER_LENGTH;
-	
-	/* Sensor Data Size */
-	public static final int MOTOR_SENSOR_DATA_LENGTH = 1024; // 34
-	public static final int CUSTOM_SENSOR_DATA_LENGTH = 1024; // 37
-	public static final int STANDARD_SENSOR_DATA_LENGTH = 1024; // 33
-	
-	/* Magic numbers */
-	public static final int MAX_PULSE_WIDTH = 32767;
-	public static final int MIN_PULSE_WIDTH = -32768;
-	public static final int NEUTRAL_PULSE_WIDTH = 0;
 	
 	/**
 	 * Calculates a valid CRC value to be used in order to check the integrity
@@ -1742,7 +1712,7 @@ public class PMS5005
 		packet[2] = RID_PMS5005;
 		packet[3] = RESERVED;
 		packet[4] = LCD_CTRL;
-		packet[5] = 65; // LEN (1 frame slice byte + 64 bytes of bitmap image data)
+		packet[5] = 1 + FRAME_LENGTH; // LEN (1 frame slice byte + 64 bytes of bitmap image data)
 		packet[6] = (byte) (frameNumber & 0xFF);
 		for (int i = 0; i < FRAME_LENGTH; ++i) packet[7+i] = (byte) (frame[i] & 0xFF);
 		packet[71] = calcCRC(packet);
