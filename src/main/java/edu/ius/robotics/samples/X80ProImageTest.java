@@ -166,6 +166,7 @@ public class X80ProImageTest implements IRobotEventHandler
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		if (null == image)
 		{
 			System.err.println("Image (image) is null!");
@@ -174,8 +175,7 @@ public class X80ProImageTest implements IRobotEventHandler
 //        //got an image file
         BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
 		//iRobotImage.imageEvent(robotIP, robotPort, bufferedImage);
-
-
+        
         File imageFile = new File("/tmp/outputImage2.bmp");
         try
 		{
@@ -188,16 +188,16 @@ public class X80ProImageTest implements IRobotEventHandler
 			e.printStackTrace();
 		}
 	}
-
+	
 	@Override
 	public void sensorDataReceivedEvent(String robotIP, int robotPort, int sensorDataType)
 	{
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	@Override
-	public void audioDataReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream audioBuffer)
+	public void audioDataReceivedEvent(String robotIP, int robotPort, short[] audioBuffer)
 	{
 		// TODO Auto-generated method stub
 		

@@ -47,15 +47,7 @@ public class X80ProPCMTest implements IRobotEventHandler
 	}
 	
 	@Override
-	public void audioDataReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream audioBuffer)
-	{
-		// TODO Auto-generated method stub
-		System.out.println("*** AUDIO DATA RECEIVED ***");
-		System.out.println("Size: " + audioBuffer.size());
-	}
-
-	@Override
-	public void imageDataReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream imageBuffer)
+	public void imageDataReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream imageData)
 	{
 		// TODO Auto-generated method stub
 		
@@ -67,4 +59,12 @@ public class X80ProPCMTest implements IRobotEventHandler
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void audioDataReceivedEvent(String robotIP, int robotPort, short[] audioData)
+	{
+		System.out.println("*** AUDIO DATA RECEIVED ***");
+		System.out.println("Buffer length: " + audioData.length);
+	}
+
 }

@@ -8,9 +8,12 @@
 
 package edu.ius.robotics.robots;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.Runtime;
+
+import javax.imageio.ImageIO;
 
 import edu.ius.robotics.robots.boards.PMS5005;
 import edu.ius.robotics.robots.boards.PMB5010;
@@ -33,11 +36,13 @@ public class X80Pro implements IRobot, Runnable
 	
 	public static class Sensors
 	{
-		public static final int ACCEPTABLE_ENCODER_DEVIATION = 16;
+		public static final int USAGE_SINGLE_POTENTIOMETER = 0x00;		/* Single */
+		public static final int USAGE_DUAL_POTENTIOMETER = 0x01;		/* Dual */
+		public static final int USAGE_ENCODER = 0x02;					/* Quadrature */
 		
 		public static final int TYPE_SONAR = PMS5005.GET_STANDARD_SENSOR_DATA;
-		public static final int TYPE_IR_1 = PMS5005.GET_STANDARD_SENSOR_DATA;
-		public static final int TYPE_IR_2 = PMS5005.GET_CUSTOM_SENSOR_DATA;
+		public static final int TYPE_IR_FRONT_LEFT = PMS5005.GET_STANDARD_SENSOR_DATA;
+		public static final int TYPE_IR_NON_FRONT_LEFT = PMS5005.GET_CUSTOM_SENSOR_DATA;
 		public static final int TYPE_DC_MOTOR = PMS5005.GET_MOTOR_SENSOR_DATA;
 		public static final int TYPE_SERVO_MOTOR = PMS5005.GET_MOTOR_SENSOR_DATA;
 		
@@ -45,14 +50,13 @@ public class X80Pro implements IRobot, Runnable
 		public static final int TYPE_CUSTOM_GENERAL = PMS5005.GET_CUSTOM_SENSOR_DATA;
 		public static final int TYPE_MOTOR_GENERAL = PMS5005.GET_MOTOR_SENSOR_DATA;
 		
-		public static final int USAGE_SINGLE_POTENTIOMETER = 0x00;		/* Single */
-		public static final int USAGE_DUAL_POTENTIOMETER = 0x01;		/* Dual */
-		public static final int USAGE_ENCODER = 0x02;					/* Quadrature */
+		public static final double IR_DISTANCE_MAXIMUM = 0.81;
+		public static final double IR_DISTANCE_MINIMUM = 0.09;
+		
+		public static final double SONAR_DISTANCE_MAXIMUM = 1.01;
+		public static final double SONAR_DISTANCE_MINIMUM = 0.05;
 		
 		// Standard and Custom sensors
-		public static final double MAX_IR_DISTANCE = 0.81;
-		public static final double MIN_IR_DISTANCE = 0.09;
-		
 		public static final int NUM_STANDARD_SENSORS = 6;
 		public static final int NUM_DC_MOTOR_CHANNELS = 2;
 		public static final int NUM_INFRARED_SENSORS = 8;
@@ -92,13 +96,14 @@ public class X80Pro implements IRobot, Runnable
 		public static int FRONT_MIDDLE_SONAR_SENSOR = 1;
 		public static int FRONT_RIGHT_SONAR_SENSOR = 2;
 		
-		static
+		public static final int ACCEPTABLE_ENCODER_DEVIATION = 16;
+		
+		static 
 		{
 			INFRARED_SENSOR_POSITION[0] = 0.785;
 			INFRARED_SENSOR_POSITION[1] = 0.35;
 			INFRARED_SENSOR_POSITION[2] = -0.35;
 			INFRARED_SENSOR_POSITION[3] = -0.785; 
-			
 			SONAR_SENSOR_POSITION[0] = 0.8; 
 			SONAR_SENSOR_POSITION[1] = 0;
 			SONAR_SENSOR_POSITION[2] = -0.8; 
@@ -472,14 +477,15 @@ public class X80Pro implements IRobot, Runnable
 		
 		iRobotEventHandler = null;
 		adpcm = new ADPCM();
-		
 		imageBuffer = new ByteArrayOutputStream();
-		
-		encoderPulseInitial = new int[Sensors.NUM_DC_MOTOR_CHANNELS];
 		
 		motorSensorData = new MotorSensorData();
 		customSensorData = new CustomSensorData();
 		standardSensorData = new StandardSensorData();
+
+		// encoderPulseInitial is used as an independent variable to determine the robot's heading in radians.
+		// encoderPulseInitial may be reset at any time by calling resetHeading();
+		encoderPulseInitial = new int[Sensors.NUM_DC_MOTOR_CHANNELS];
 	}
 	
 	private void postInit(boolean resumeSensorSending)
@@ -489,12 +495,18 @@ public class X80Pro implements IRobot, Runnable
 			socket.send(PMS5005.enableMotorSensorSending());
 			socket.send(PMS5005.enableCustomSensorSending());
 			socket.send(PMS5005.enableStandardSensorSending());
+			
+			encoderPulseInitial[L] = absEncoderPulseValue(motorSensorData.encoderPulse[L]);
+			encoderPulseInitial[R] = absEncoderPulseValue(motorSensorData.encoderPulse[R]);
 		}
 		else  
 		{
 			socket.send(PMS5005.disableMotorSensorSending());
 			socket.send(PMS5005.disableCustomSensorSending());
 			socket.send(PMS5005.disableStandardSensorSending());
+			
+			encoderPulseInitial[L] = -1;
+			encoderPulseInitial[R] = -1;
 		}
 		
 		socket.send(PMS5005.setDCMotorSensorUsage((byte) L, (byte) X80Pro.Sensors.USAGE_ENCODER));
@@ -515,7 +527,7 @@ public class X80Pro implements IRobot, Runnable
 	public X80Pro(String ipAddress) throws IOException
 	{
 		preInit();
-		this.socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
+		socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
 		postInit(true);
 	}
 	
@@ -528,7 +540,7 @@ public class X80Pro implements IRobot, Runnable
 	public X80Pro(String ipAddress, int port) throws IOException
 	{
 		preInit();
-		this.socket = new UDPSocket(this, ipAddress, port);
+		socket = new UDPSocket(this, ipAddress, port);
 		postInit(true);
 	}
 	
@@ -536,7 +548,7 @@ public class X80Pro implements IRobot, Runnable
 	{
 		preInit();
 		this.iRobotEventHandler = iRobotEventHandler;
-		this.socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
+		socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
 		postInit(true);
 	}
 	
@@ -544,7 +556,7 @@ public class X80Pro implements IRobot, Runnable
 	{
 		preInit();
 		this.iRobotEventHandler = iRobotEventHandler;
-		this.socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
+		socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
 		postInit(resumeSensorSending);
 	}
 	
@@ -552,7 +564,7 @@ public class X80Pro implements IRobot, Runnable
 	{
 		preInit();
 		this.iRobotEventHandler = iRobotEventHandler;
-		this.socket = new UDPSocket(this, ipAddress, port);
+		socket = new UDPSocket(this, ipAddress, port);
 		postInit(true);
 	}
 	
@@ -560,13 +572,13 @@ public class X80Pro implements IRobot, Runnable
 	{
 		preInit();
 		this.iRobotEventHandler = iRobotEventHandler;
-		this.socket = new UDPSocket(this, ipAddress, port);
+		socket = new UDPSocket(this, ipAddress, port);
 		postInit(resumeSensorSending);
 	}
 	
 	/**
 	 * sends a custom command to the robot
-	 * it's crazy to support this.	                                                                                                                              ... is it, though?
+	 * it's crazy to support this...	                                                                                                                              ... or is it?
 	 * @param command
 	 */
 	public void sendCommand(byte[] command)
@@ -2276,20 +2288,26 @@ public class X80Pro implements IRobot, Runnable
      * @param bmpFileName Full path of the BMP file for displaying
      * 
      * The graphic LCD display is monochrome with dimensions 128 by 64 pixels.  
-     * The bmp image must be 128x64 pixels in mono.
+     * The bitmap (bmp) image must be 128x64 pixels in mono.
      */
-	public void setLCDDisplayPMS(String bmpFileName)
+	public void setLCDDisplayPMS(BufferedImage bufferedImage) throws IOException
 	{
-		/* TODO slice buffer */
-		
-		/* TODO send buffer */
-		
-		/*
-		for (int i = 0; i < 16; ++i)
+		ImageIO.setUseCache(false);
+		ByteArrayOutputStream imageBaos = new ByteArrayOutputStream();
+		ImageIO.write(bufferedImage, "bmp", imageBaos);
+		imageBaos.flush();
+		byte[] imageBytes = imageBaos.toByteArray();
+		byte[] imageBytesFor8Rows = new byte[64];
+		imageBaos.close();
+		/* send image buffer slices */
+		for (int frameSlice = 0; frameSlice < (imageBytes.length >> 6); ++frameSlice)
 		{
-			socket.send(PMS5005.setLCDDisplayPMS(frameNumber, frameContent));
+			for (int j = 0; j < imageBytesFor8Rows.length; ++j)
+			{
+				imageBytesFor8Rows[j] = (byte) (imageBytes[(frameSlice << 6) + j] & 0xFF);
+			}
+			socket.send(PMS5005.setLCDDisplayPMS((byte) frameSlice, imageBytesFor8Rows));
 		}
-		*/
 	}
 	
     /**

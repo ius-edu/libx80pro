@@ -32,8 +32,8 @@ public class X80Test
 		robot.resumeAllSensors();
 		robot.resetHead();
 		
-		robot.setBothDCMotorSensorUsages(X80Pro.SENSOR_USAGE_ENCODER);
-		robot.setBothDCMotorControlModes(X80Pro.CONTROL_MODE_VELOCITY);
+		robot.setBothDCMotorSensorUsages(X80Pro.Sensors.USAGE_ENCODER);
+		robot.setBothDCMotorControlModes(X80Pro.Motors.CONTROL_MODE_VELOCITY);
 		
 		robot.setBothDCMotorVelocities(0, 0);
 		robot.resumeBothDCMotors();
