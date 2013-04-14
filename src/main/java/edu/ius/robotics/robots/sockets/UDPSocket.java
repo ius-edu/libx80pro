@@ -169,7 +169,7 @@ public class UDPSocket implements Runnable
 				this.socket.receive(this.rxPkt);
 				if (0 < this.rxPkt.getLength()) 
 				{
-					this.iRobot.sensorEvent(this.ip, this.port, this.rxPkt.getData(), this.rxPkt.getLength());
+					this.iRobot.socketEvent(this.ip, this.port, this.rxPkt.getData(), this.rxPkt.getLength());
 				}
 			}
 			catch (IOException ex) 

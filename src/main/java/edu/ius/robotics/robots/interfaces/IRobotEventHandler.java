@@ -10,8 +10,6 @@ public interface IRobotEventHandler
 //	public void powerSensorReceivedEvent(String robotIP, int robotPort);
 	
 	public void sensorDataReceivedEvent(String robotIP, int robotPort, int sensorDataType);
-	public void audioSegmentReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream audioBuffer);
-	public void audioCodecResetRequestReceivedEvent(String robotIP, int robotPort);
-	public void imageReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream imageBuffer);
-	public void maneuverCompletedEvent(String robotIP, int robotPort, int maneuverID);
+	public void audioDataReceivedEvent(String robotIP, int robotPort, short[] audioBuffer);
+	public void imageDataReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream imageBuffer);
 }
