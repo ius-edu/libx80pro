@@ -133,7 +133,7 @@ public class X80Pro implements IRobot, Runnable
 		public static final int DUTY_CYCLE_UNIT = 8383;
 	}
 	
-	private class Pkg
+	public static class Pkg
 	{
 		public static final int STX0_OFFSET = 0;
 		public static final int STX1_OFFSET = 1;
@@ -646,7 +646,6 @@ public class X80Pro implements IRobot, Runnable
 					}
 					catch (IOException e)
 					{
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					imageBuffer.reset();
@@ -1441,7 +1440,7 @@ public class X80Pro implements IRobot, Runnable
      */
     void setInfraredControlOutput(int lowWord, int highWord)
     {
-    	// TODO: unimplemented
+    	// TODO unimplemented
     }
     
     /**
