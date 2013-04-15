@@ -223,24 +223,24 @@ public class X80Pro implements IRobot, Runnable
 		
 		public void print()
 		{
-			//System.err.println("offset: " + offset);
-			//System.err.println("stx0: " + stx0);
-			//System.err.println("stx1: " + stx1);
-			//System.err.println("destination: " + destination);
-			//System.err.println("seq: " + seq);
-			//System.err.println("type: " + type);
-			//System.err.println("length: " + length);
-			//System.err.println("checksum: " + checksum);
-			//System.err.println("etx0: " + etx0);
-			//System.err.println("etx1: "+ etx1);
-			//System.err.print("data: ");
+			System.out.println("offset: " + offset);
+			System.out.println("stx0: " + stx0);
+			System.out.println("stx1: " + stx1);
+			System.out.println("destination: " + destination);
+			System.out.println("seq: " + seq);
+			System.out.println("type: " + type);
+			System.out.println("length: " + length);
+			System.out.println("checksum: " + checksum);
+			System.out.println("etx0: " + etx0);
+			System.out.println("etx1: "+ etx1);
+			System.out.print("data: ");
 			for (int i = 0; i < MAX_DATA_SIZE; ++i)
 			{
-				//System.err.print(data[i] + " ");
+				System.out.print(data[i] + " ");
 			}
-			//System.err.println();
-			//System.err.println("robotIP: " + robotIP);
-			//System.err.println("robotPort: " + robotPort);
+			System.out.println();
+			System.out.println("robotIP: " + robotIP);
+			System.out.println("robotPort: " + robotPort);
 		}
 	}
 	
