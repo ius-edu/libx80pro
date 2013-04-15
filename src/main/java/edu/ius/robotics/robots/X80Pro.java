@@ -662,7 +662,7 @@ public class X80Pro implements IRobot, Runnable
 				}
 				else if (previousSEQ != pkg.data[PMB5010.VIDEO_SEQ_OFFSET] - 1)
 				{
-					//System.err.println("Warning: Image pieces out of sequence");
+					System.err.println("Warning: Image pieces out of sequence");
 				}
 				
 				if (PMB5010.SEQ_TERMINATE == (byte) (0xFF & pkg.data[PMB5010.VIDEO_SEQ_OFFSET])) // || this.numImagePkgs - 1 <= pkg[PMB5010.VIDEO_SEQ_OFFSET])
@@ -671,10 +671,6 @@ public class X80Pro implements IRobot, Runnable
 					//System.err.println("Finished jpeg image assembly");
 					iRobotEventHandler.imageDataReceivedEvent(pkg.robotIP, pkg.robotPort, imageBuffer);
 				}
-			}
-			else
-			{
-				//System.err.println("iRobotEventHandler is null");
 			}
 			// else if null == iRobotEventHandler (no delegate), we won't do anything with the data.
 		}
@@ -703,180 +699,173 @@ public class X80Pro implements IRobot, Runnable
 		//System.err.println();
 		
 		int i = 0;
-		if (0 != (byte) (msg[0] & 0xFF))
+		while (i < len)
 		{
-			while (i < len)
+			if (i < len && Pkg.STX0_OFFSET == pkg.offset)
 			{
-				if (i < len && Pkg.STX0_OFFSET == pkg.offset)
+				pkg.raw[Pkg.STX0_OFFSET] = (byte) (msg[i] & 0xFF);
+				pkg.stx0 = (byte) (msg[i] & 0xFF);
+				if (Pkg.STX0 != (msg[i] & 0xFF)) 
 				{
-					pkg.raw[Pkg.STX0_OFFSET] = (byte) (msg[i] & 0xFF);
-					pkg.stx0 = (byte) (msg[i] & 0xFF);
-					if (Pkg.STX0 != (msg[i] & 0xFF)) 
-					{
-						//System.err.printf("DEBUG: pkg[" + pkg.offset + "] STX0 isn't where it is expected to be: %2x", pkg.stx0);
-						//System.err.println();
-					}
-					else
-					{
-						//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found STX0: %2x", (byte) (pkg.stx0 & 0xFF));
-						//System.err.println();
-					}
-					++i;
-					++pkg.offset;
-				}
-				if (i < len && Pkg.STX1_OFFSET == pkg.offset)
-				{
-					pkg.raw[Pkg.STX1_OFFSET] = (byte) (msg[i] & 0xFF);
-					pkg.stx1 = (byte) (msg[i] & 0xFF);
-					if (Pkg.STX1 != (msg[i] & 0xFF))
-					{
-						//System.err.printf("DEBUG: pkg[" + pkg.offset + "] STX1 isn't where it is expected to be: %2x", pkg.stx1);
-						//System.err.println();
-					}
-					else
-					{
-						//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found STX1: %2x", (byte) (pkg.stx1 & 0xFF));
-						//System.err.println();
-					}
-					++i;
-					++pkg.offset;
-				}
-				if (i < len && Pkg.RID_OFFSET == pkg.offset)
-				{
-					pkg.raw[Pkg.RID_OFFSET] = (byte) (msg[i] & 0xFF);
-					pkg.destination = (byte) (msg[i] & 0xFF);
-					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found RID: %2x", (byte) (pkg.destination & 0xFF));
-					//System.err.println();
-					++i;
-					++pkg.offset;
-				}
-				if (i < len && Pkg.SEQ_OFFSET == pkg.offset)
-				{
-					pkg.raw[Pkg.SEQ_OFFSET] = (byte) (msg[i] & 0xFF);
-					pkg.seq = (byte) (msg[i] & 0xFF);
-					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found SEQ: %2x", (byte) (pkg.seq & 0xFF));
-					//System.err.println();
-					++i;
-					++pkg.offset;
-				}
-				if (i < len && Pkg.DID_OFFSET == pkg.offset)
-				{
-					pkg.raw[Pkg.DID_OFFSET] = (byte) (msg[i] & 0xFF); 
-					pkg.type = (byte) (msg[i] & 0xFF);
-					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found DID: %2x", (byte) (pkg.type & 0xFF));
-					//System.err.println();
-					++i;
-					++pkg.offset;
-				}
-				if (i < len && Pkg.LENGTH_OFFSET == pkg.offset)
-				{
-					pkg.raw[Pkg.LENGTH_OFFSET] = (byte) (msg[i] & 0xFF); 
-					pkg.length = (byte) (msg[i] & 0xFF);
-					//System.err.println("DEBUG: pkg[" + pkg.offset + "] Found LENGTH: " + pkg.length);
-					++i;
-					++pkg.offset;
-					//System.err.print("DEBUG: pkg header: ");
-					for (int k = 0; k < Pkg.HEADER_LENGTH; ++k)
-					{
-						//System.err.printf("%2x ", (byte) (pkg.raw[k] & 0xFF));
-					}
+					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] STX0 isn't where it is expected to be: %2x", pkg.stx0);
 					//System.err.println();
 				}
-				if (i < len && Pkg.DATA_OFFSET <= pkg.offset && pkg.offset < Pkg.HEADER_LENGTH + pkg.length)
+				else
 				{
-					int j = pkg.offset - Pkg.HEADER_LENGTH;
-					//System.err.println("DEBUG: pkg.offset - Pkg.HEADER_LENGTH => j: " + j);
-					//System.err.print("DEBUG: pkg[" + pkg.offset + "] Found DATA: ");
-					while (i < len && j < pkg.length)
-					{
-						pkg.raw[Pkg.HEADER_LENGTH + j] = (byte) (msg[i] & 0xFF);
-						pkg.data[j] = (byte) (msg[i] & 0xFF);
-						//System.err.printf("%2x ", (byte) (pkg.data[j] & 0xFF));
-						++i;
-						++j;
-						++pkg.offset;
-					}
+					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found STX0: %2x", (byte) (pkg.stx0 & 0xFF));
 					//System.err.println();
-					if (len <= i)
-					{
-						//System.err.println("package overflowed packet in data region, last entry: ");
-						//System.err.printf("pkg.data[" + (pkg.offset - 1) + "]: %2x", (byte) (pkg.data[pkg.offset - 1] & 0xFF));
-						//System.err.println();
-					}
 				}
-				int offsetChecksum = Pkg.HEADER_LENGTH + pkg.length + Pkg.CHECKSUM_RELATIVE_OFFSET;
-				if (i < len && offsetChecksum == pkg.offset)
+				++i;
+				++pkg.offset;
+			}
+			if (i < len && Pkg.STX1_OFFSET == pkg.offset)
+			{
+				pkg.raw[Pkg.STX1_OFFSET] = (byte) (msg[i] & 0xFF);
+				pkg.stx1 = (byte) (msg[i] & 0xFF);
+				if (Pkg.STX1 != (msg[i] & 0xFF))
 				{
-					pkg.raw[offsetChecksum] = pkg.checksum();
-					pkg.checksum = pkg.checksum();
-					if (pkg.checksum != msg[i])
-					{
-						//System.err.println("DEBUG: Incorrect package checksum (ignore for now)");
-						//System.err.printf("DEBUG: Expected: %2x", pkg.checksum);
-						//System.err.println();
-						//System.err.printf("DEBUG: Actual: %2x", msg[i]);
-						//System.err.println();
-						//System.err.print("Raw data: ");
-						for (int k = 0; k < pkg.length; ++k)
-						{
-							//System.err.printf("%2x ", pkg.raw[k]);
-						}
-						//System.err.println();
-					}
-					else
-					{
-						//System.err.printf("DEBUG: Correct package checksum: %2x", pkg.checksum);
-					}
+					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] STX1 isn't where it is expected to be: %2x", pkg.stx1);
+					//System.err.println();
+				}
+				else
+				{
+					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found STX1: %2x", (byte) (pkg.stx1 & 0xFF));
+					//System.err.println();
+				}
+				++i;
+				++pkg.offset;
+			}
+			if (i < len && Pkg.RID_OFFSET == pkg.offset)
+			{
+				pkg.raw[Pkg.RID_OFFSET] = (byte) (msg[i] & 0xFF);
+				pkg.destination = (byte) (msg[i] & 0xFF);
+				//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found RID: %2x", (byte) (pkg.destination & 0xFF));
+				//System.err.println();
+				++i;
+				++pkg.offset;
+			}
+			if (i < len && Pkg.SEQ_OFFSET == pkg.offset)
+			{
+				pkg.raw[Pkg.SEQ_OFFSET] = (byte) (msg[i] & 0xFF);
+				pkg.seq = (byte) (msg[i] & 0xFF);
+				//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found SEQ: %2x", (byte) (pkg.seq & 0xFF));
+				//System.err.println();
+				++i;
+				++pkg.offset;
+			}
+			if (i < len && Pkg.DID_OFFSET == pkg.offset)
+			{
+				pkg.raw[Pkg.DID_OFFSET] = (byte) (msg[i] & 0xFF); 
+				pkg.type = (byte) (msg[i] & 0xFF);
+				//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found DID: %2x", (byte) (pkg.type & 0xFF));
+				//System.err.println();
+				++i;
+				++pkg.offset;
+			}
+			if (i < len && Pkg.LENGTH_OFFSET == pkg.offset)
+			{
+				pkg.raw[Pkg.LENGTH_OFFSET] = (byte) (msg[i] & 0xFF); 
+				pkg.length = (byte) (msg[i] & 0xFF);
+				//System.err.println("DEBUG: pkg[" + pkg.offset + "] Found LENGTH: " + pkg.length);
+				++i;
+				++pkg.offset;
+				//System.err.print("DEBUG: pkg header: ");
+				for (int k = 0; k < Pkg.HEADER_LENGTH; ++k)
+				{
+					//System.err.printf("%2x ", (byte) (pkg.raw[k] & 0xFF));
+				}
+				//System.err.println();
+			}
+			if (i < len && Pkg.DATA_OFFSET <= pkg.offset && pkg.offset < Pkg.HEADER_LENGTH + pkg.length)
+			{
+				int j = pkg.offset - Pkg.HEADER_LENGTH;
+				//System.err.println("DEBUG: pkg.offset - Pkg.HEADER_LENGTH => j: " + j);
+				//System.err.print("DEBUG: pkg[" + pkg.offset + "] Found DATA: ");
+				while (i < len && j < pkg.length)
+				{
+					pkg.raw[Pkg.HEADER_LENGTH + j] = (byte) (msg[i] & 0xFF);
+					pkg.data[j] = (byte) (msg[i] & 0xFF);
+					//System.err.printf("%2x ", (byte) (pkg.data[j] & 0xFF));
 					++i;
+					++j;
 					++pkg.offset;
 				}
-				int offsetETX0 = Pkg.HEADER_LENGTH + pkg.length + Pkg.ETX0_RELATIVE_OFFSET;
-				if (i < len && offsetETX0 == pkg.offset)
+				//System.err.println();
+				if (len <= i)
 				{
-					pkg.raw[offsetETX0] = (byte) (msg[i] & 0xFF);
-					pkg.etx0 = (byte) (msg[i] & 0xFF);
-					if (Pkg.ETX0 != (byte) (msg[i] & 0xFF))
-					{
-						//System.err.printf("DEBUG: ETX0 isn't where it is expected to be (found %2x)", msg[i] & 0xFF);
-						//System.err.println();
-					}
-					else
-					{
-						//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found ETX0: %2x", pkg.etx0);
-						//System.err.println();
-					}
-					++i;
-					++pkg.offset;
-				}
-				int offsetETX1 = Pkg.HEADER_LENGTH + pkg.length + Pkg.ETX1_RELATIVE_OFFSET;
-				if (i < len && offsetETX1 == pkg.offset)
-				{
-					pkg.raw[offsetETX1] = (byte) (msg[i] & 0xFF);
-					pkg.etx1 = (byte) (msg[i] & 0xFF);
-					if (Pkg.ETX1 != (byte) (msg[i] & 0xFF))
-					{
-						//System.err.printf("DEBUG: ETX1 isn't where it is expected to be (found %2x)", msg[i] & 0xFF);
-						//System.err.println();
-					}
-					else
-					{
-						//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found ETX1: %2x, dispatching", pkg.etx1);
-						//System.err.println();
-					}
-					pkg.robotIP = robotIP;
-					pkg.robotPort = robotPort;
-					//System.err.println("DEBUG: len: " + len + ", pkg.offset: " + pkg.offset + ", i: " + i);
-					//System.err.println("DEBUG: dispatching...");
-					dispatch(pkg); // or produce/enqueue
-					//System.err.println("DEBUG: resetting package");
-					pkg.reset();
-					++i;
+					//System.err.println("package overflowed packet in data region, last entry: ");
+					//System.err.printf("pkg.data[" + (pkg.offset - 1) + "]: %2x", (byte) (pkg.data[pkg.offset - 1] & 0xFF));
+					//System.err.println();
 				}
 			}
-		}
-		else
-		{
-			//System.err.println("Zero packet");
+			int offsetChecksum = Pkg.HEADER_LENGTH + pkg.length + Pkg.CHECKSUM_RELATIVE_OFFSET;
+			if (i < len && offsetChecksum == pkg.offset)
+			{
+				pkg.raw[offsetChecksum] = pkg.checksum();
+				pkg.checksum = pkg.checksum();
+				if (pkg.checksum != msg[i])
+				{
+					System.err.println("DEBUG: Incorrect package checksum (ignore for now)");
+					System.err.printf("DEBUG: Expected: %2x", pkg.checksum);
+					System.err.println();
+					System.err.printf("DEBUG: Actual: %2x", msg[i]);
+					System.err.println();
+					System.err.print("Raw data: ");
+					for (int k = 0; k < pkg.length; ++k)
+					{
+						System.err.printf("%2x ", pkg.raw[k]);
+					}
+					System.err.println();
+				}
+				else
+				{
+					System.err.printf("DEBUG: Correct package checksum: %2x", pkg.checksum);
+				}
+				++i;
+				++pkg.offset;
+			}
+			int offsetETX0 = Pkg.HEADER_LENGTH + pkg.length + Pkg.ETX0_RELATIVE_OFFSET;
+			if (i < len && offsetETX0 == pkg.offset)
+			{
+				pkg.raw[offsetETX0] = (byte) (msg[i] & 0xFF);
+				pkg.etx0 = (byte) (msg[i] & 0xFF);
+				if (Pkg.ETX0 != (byte) (msg[i] & 0xFF))
+				{
+					//System.err.printf("DEBUG: ETX0 isn't where it is expected to be (found %2x)", msg[i] & 0xFF);
+					//System.err.println();
+				}
+				else
+				{
+					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found ETX0: %2x", pkg.etx0);
+					//System.err.println();
+				}
+				++i;
+				++pkg.offset;
+			}
+			int offsetETX1 = Pkg.HEADER_LENGTH + pkg.length + Pkg.ETX1_RELATIVE_OFFSET;
+			if (i < len && offsetETX1 == pkg.offset)
+			{
+				pkg.raw[offsetETX1] = (byte) (msg[i] & 0xFF);
+				pkg.etx1 = (byte) (msg[i] & 0xFF);
+				if (Pkg.ETX1 != (byte) (msg[i] & 0xFF))
+				{
+					//System.err.printf("DEBUG: ETX1 isn't where it is expected to be (found %2x)", msg[i] & 0xFF);
+					//System.err.println();
+				}
+				else
+				{
+					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found ETX1: %2x, dispatching", pkg.etx1);
+					//System.err.println();
+				}
+				pkg.robotIP = robotIP;
+				pkg.robotPort = robotPort;
+				//System.err.println("DEBUG: len: " + len + ", pkg.offset: " + pkg.offset + ", i: " + i);
+				//System.err.println("DEBUG: dispatching...");
+				dispatch(pkg); // or produce/enqueue
+				//System.err.println("DEBUG: resetting package");
+				pkg.reset();
+				++i;
+			}
 		}
 	}
 	
