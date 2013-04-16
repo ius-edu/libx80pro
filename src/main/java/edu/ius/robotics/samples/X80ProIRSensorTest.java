@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import edu.ius.robotics.robots.X80Pro;
 
-public class X80ProIRTest
+public class X80ProIRSensorTest
 {
 	
 	/**

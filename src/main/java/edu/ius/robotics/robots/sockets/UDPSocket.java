@@ -105,25 +105,27 @@ public class UDPSocket implements Runnable
 		rxBuf = new byte[8192];
 		rxPkt = new DatagramPacket(rxBuf, rxBuf.length);
 		
-		txBuf = new byte[256];
+		txBuf = new byte[1024];
 		txPkt = new DatagramPacket(txBuf, txBuf.length, server, port);
 		
-		send(PMS5005.ping());
+		byte[] sendBuffer = new byte[1024];
+		int dataLength = PMS5005.ping(sendBuffer);
+		send(sendBuffer, dataLength);
 		// wait synchronously for feedback from robot to be clear that we have established connection
 		socket.setSoTimeout(CONNECT_WAIT);
-		socket.receive(this.rxPkt);
+		socket.receive(rxPkt);
 
 		new Thread(this).start(); // receive packet thread
 	}
 	
-	public void send(byte[] cmd) 
+	public void send(byte[] data, int dataLength) 
 	{
 		long beginTime = System.currentTimeMillis();
-		System.arraycopy(cmd, 0, this.txBuf, 0, cmd.length);
-		this.txPkt = new DatagramPacket(this.txBuf, cmd.length, this.server, this.port);
+		System.arraycopy(data, 0, txBuf, 0, dataLength);
+		txPkt = new DatagramPacket(txBuf, dataLength, server, port);
 		try
 		{
-			this.socket.send(txPkt);
+			socket.send(txPkt);
 		}
 		catch (IOException ioException)	
 		{
@@ -135,7 +137,7 @@ public class UDPSocket implements Runnable
 	public void delay(long beginTime)
 	{
 		//int actionsPerSecond = 1000/DEFAULT_MIN_TIME_STEP_IN_MS;
-		long nextUsableTick = beginTime + this.delay;
+		long nextUsableTick = beginTime + delay;
 		long sleepTime = nextUsableTick - System.currentTimeMillis();
 		if (0 < sleepTime)
 		{
@@ -152,8 +154,8 @@ public class UDPSocket implements Runnable
 	
 	public void close()
 	{
-		this.isFinished = true;
-		this.socket.close();
+		isFinished = true;
+		socket.close();
 	}
 	
 	/**
@@ -165,11 +167,11 @@ public class UDPSocket implements Runnable
 		{
 			try 
 			{
-				this.socket.setSoTimeout(10);
-				this.socket.receive(this.rxPkt);
-				if (0 < this.rxPkt.getLength()) 
+				socket.setSoTimeout(10);
+				socket.receive(rxPkt);
+				if (0 < rxPkt.getLength())
 				{
-					this.iRobot.socketEvent(this.ip, this.port, this.rxPkt.getData(), this.rxPkt.getLength());
+					iRobot.socketEvent(ip, port, rxPkt.getData(), rxPkt.getLength());
 				}
 			}
 			catch (IOException ex) 

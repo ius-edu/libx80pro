@@ -1,11 +1,16 @@
 package edu.ius.robotics.robots.boards;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 /* The following is taken pretty much directly from the 
  * PMB5010 serial protocol documentation
  */
 
 public class PMB5010
 {
+	public static final ByteOrder BYTE_ORDER = ByteOrder.LITTLE_ENDIAN; 
+	
 	/* Packet Info */
 	public static final int HEADER_LENGTH = 6;
 	public static final int FOOTER_LENGTH = 3;
@@ -33,8 +38,8 @@ public class PMB5010
 	
 	/* FLAGS */
 	public static final byte FLAG_VALUE = 0x06;
-	public static final byte SEQ_BEGIN = 0x00;
-	public static final byte SEQ_TERMINATE = (byte) (0xFF & 0xFF);
+	public static final int SEQ_BEGIN = 0x00;
+	public static final int SEQ_TERMINATE = 0xFF;
 	
 	/* DID Listing */
 	public static final byte RX_PING = 0x00;
@@ -56,198 +61,128 @@ public class PMB5010
      */
     public static byte checksum(byte[] buf) 
     {
-		byte shift_reg, sr_lsb, data_bit, v;
-		byte fb_bit;
+		int shift_reg, sr_lsb, data_bit, v;
+		int fb_bit;
 		int z;
 		shift_reg = 0; // initialize the shift register
 		z = buf.length - 5;
-		
 		for (int i = 0; i < z; ++i) 
 		{
-		    v = (byte) (buf[2 + i]); // start from RID
-		    
+		    v = buf[2 + i]; // start from RID
 		    // for each bit
 		    for (int j = 0; j < 8; ++j) 
 		    {
 				// isolate least sign bit
-				data_bit = (byte) ((v & 0x01) & 0xFF);
-				sr_lsb = (byte) ((shift_reg & 0x01) & 0xFF);
+				data_bit = ((v & 0x01) & 0xFF);
+				sr_lsb = ((shift_reg & 0x01) & 0xFF);
 				// calculate the feed back bit
-				fb_bit = (byte) (((data_bit ^ sr_lsb) & 0x01) & 0xFF);
-				shift_reg = (byte) ((shift_reg & 0xFF) >> 1);
-				
+				fb_bit = (((data_bit ^ sr_lsb) & 0x01) & 0xFF);
+				shift_reg = ((shift_reg & 0xFF) >> 1);
 				if (fb_bit == 1)
 				{
-				    shift_reg = (byte) ((shift_reg ^ 0x8C) & 0xFF);
+				    shift_reg = ((shift_reg ^ 0x8C) & 0xFF);
 				}
-				
-				v = (byte) ((v & 0xFF) >> 1);
+				v = ((v & 0xFF) >> 1);
 		    }
 		}
-		
-		return shift_reg;
+		return (byte) shift_reg;
     }
     
-    public static byte[] ping(byte seq)
+    public static int ping(byte[] buffer, int seq)
     {
-    	byte[] msg = new byte[10];
-    	
-    	msg[0] = STX0;
-    	msg[1] = STX1;
-    	msg[2] = RID_PMB5010;
-    	msg[3] = (byte) (seq & 0xff);
-    	msg[4] = (byte) (TX_PING & 0xff);
-    	msg[5] = 1;
-    	msg[6] = 0;
-    	msg[7] = checksum(msg);
-    	msg[8] = ETX0;
-    	msg[9] = ETX1;
-    	
-    	return msg;
+    	ByteBuffer msg = ByteBuffer.wrap(buffer);
+    	msg.order(PMB5010.BYTE_ORDER);
+    	int dataLength = (Byte.SIZE >> 3);
+    	msg.put(STX0).put(STX1).put(RID_PMB5010).put((byte) seq).put(TX_PING).put((byte) dataLength);
+    	msg.put((byte) 0); // ping
+    	msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+    	return dataLength + METADATA_SIZE;
     }
     
-    public static byte[] ack(byte seq)
+    public static int ack(byte[] buffer, int seq)
     {
-    	byte[] msg = new byte[10];
-    	
-    	msg[0] = STX0;
-    	msg[1] = STX1;
-    	msg[2] = RID_PMB5010;
-    	msg[3] = (byte) (seq & 0xff);
-    	msg[4] = TX_ACK;
-    	msg[5] = 1;
-    	msg[6] = 1;
-    	msg[7] = checksum(msg);
-    	msg[8] = ETX0;
-    	msg[9] = ETX1;
-    	
-    	return msg;
+    	ByteBuffer msg = ByteBuffer.wrap(buffer);
+    	msg.order(PMB5010.BYTE_ORDER);
+    	int dataLength = (Byte.SIZE >> 3);
+    	msg.put(STX0).put(STX1).put(RID_PMB5010).put((byte) seq).put(TX_ACK).put((byte) dataLength);
+    	msg.put((byte) 1); // ack
+    	msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+    	return dataLength + METADATA_SIZE;
     }
     
-    public static byte[] startAudioRecording(short voiceSegmentLength)
+    public static int startAudioRecording(byte[] buffer, byte voiceSegmentLength)
     {
-    	byte[] msg = new byte[10];
-    	
-    	msg[0] = STX0;
-    	msg[1] = STX1;
-    	msg[2] = RID_PMB5010;
-    	msg[3] = RESERVED;
-    	msg[4] = START_AUDIO_RECORDING;
-    	msg[5] = 1; // len
-    	msg[6] = (byte) (voiceSegmentLength & 0xff);
-    	msg[7] = checksum(msg);
-    	msg[8] = ETX0;
-    	msg[9] = ETX1;
-    	
-    	return msg;
+    	ByteBuffer msg = ByteBuffer.wrap(buffer);
+    	msg.order(PMB5010.BYTE_ORDER);
+    	int dataLength = (Byte.SIZE >> 3);
+    	msg.put(STX0).put(STX1).put(RID_PMB5010).put(RESERVED).put(START_AUDIO_RECORDING).put((byte) dataLength);
+    	msg.put(voiceSegmentLength); // voiceSegmentLength * 255
+    	msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+    	return dataLength + METADATA_SIZE;
     }
     
-    public static byte[] stopAudioRecording()
+    public static int stopAudioRecording(byte[] buffer)
     {
-    	byte[] msg = new byte[9];
-    	
-    	msg[0] = STX0;
-    	msg[1] = STX1;
-    	msg[2] = RID_PMB5010;
-    	msg[3] = RESERVED;
-    	msg[4] = STOP_AUDIO_RECORDING;
-    	msg[5] = 0;
-    	msg[6] = checksum(msg);
-    	msg[7] = ETX0;
-    	msg[8] = ETX1;
-    	
-    	return msg;
+    	ByteBuffer msg = ByteBuffer.wrap(buffer);
+    	msg.order(PMB5010.BYTE_ORDER);
+    	int dataLength = 0;
+    	msg.put(STX0).put(STX1).put(RID_PMB5010).put(RESERVED).put(STOP_AUDIO_RECORDING).put((byte) dataLength);
+    	msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+    	return dataLength + METADATA_SIZE;
     }
     
-    public static byte[] startAudioPlayback(short sampleLength, byte seq)
+    public static int startAudioPlayback(byte[] buffer, short sampleLength, byte seq)
     {
-    	byte[] msg = new byte[10];
-    	
-    	int length = 4;
+    	byte abbreviatedSampleLength = 4;
     	
     	if (sampleLength < 16000)
     	{
-    		length = 1;
+    		abbreviatedSampleLength = 1;
     	}
     	else if (sampleLength < 16000*20)
     	{
-    		length = 2;
+    		abbreviatedSampleLength = 2;
     	}
     	else if (sampleLength < 16000*32)
     	{
-    		length = 3;
+    		abbreviatedSampleLength = 3;
     	}
     	
-    	msg[0] = STX0;
-    	msg[1] = STX1;
-    	msg[2] = RID_PMB5010;
-    	msg[3] = (byte) (seq & 0xff);
-    	msg[4] = START_AUDIO_PLAYBACK;
-    	msg[5] = 1;
-    	msg[6] = (byte) (length & 0xff);
-    	msg[7] = checksum(msg);
-    	msg[8] = ETX0;
-    	msg[9] = ETX1;
-    	
-    	return msg;
+    	ByteBuffer msg = ByteBuffer.wrap(buffer);
+    	int dataLength = (Byte.SIZE >> 3);
+    	msg.put(STX0).put(STX1).put(RID_PMB5010).put((byte) seq).put(START_AUDIO_PLAYBACK).put((byte) dataLength);
+    	msg.put(abbreviatedSampleLength);
+    	msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+    	return dataLength + METADATA_SIZE;
     }
     
-    public static byte[] stopAudioPlayback()
+    public static int stopAudioPlayback(byte[] buffer)
     {
-    	byte[] msg = new byte[9];
-    	
-    	msg[0] = STX0;
-    	msg[1] = STX1;
-    	msg[2] = RID_PMB5010;
-    	msg[3] = RESERVED;
-    	msg[4] = STOP_AUDIO_PLAYBACK;
-    	msg[5] = 0;
-    	msg[6] = checksum(msg);
-    	msg[7] = ETX0;
-    	msg[8] = ETX1;
-    	
-    	return msg;
+    	ByteBuffer msg = ByteBuffer.wrap(buffer);
+    	msg.order(PMB5010.BYTE_ORDER);
+    	int dataLength = 0;
+    	msg.put(STX0).put(STX1).put(RID_PMB5010).put(RESERVED).put(STOP_AUDIO_PLAYBACK).put((byte) dataLength);
+    	msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+    	return dataLength + METADATA_SIZE;
     }
     
-    public static byte[] continueAudioPlayback(byte[] encodedAudioSample)
+    public static int continueAudioPlayback(byte[] buffer, byte[] encodedAudioSample)
     {
-    	int z = encodedAudioSample.length;
-    	
-    	byte[] msg = new byte[8+z];
-    	
-    	msg[0] = STX0;
-    	msg[1] = STX1;
-    	msg[2] = RID_PMB5010;
-    	msg[3] = RESERVED; // Not SEQ?
-    	msg[4] = AUDIO_PACKAGE;
-    	msg[5] = (byte) (z & 0xff);
-    	
-    	for (int i = 0; i < z; ++i)
-    	{
-    		msg[6+i] = encodedAudioSample[i];
-    	}
-    	
-    	msg[6+z] = checksum(msg);
-    	msg[7+z] = ETX0;
-    	msg[8+z] = ETX1;
-    	
-    	return msg;
+    	ByteBuffer msg = ByteBuffer.wrap(buffer);
+    	msg.order(PMB5010.BYTE_ORDER);
+    	int dataLength = encodedAudioSample.length;
+    	msg.put(STX0).put(STX1).put(RID_PMB5010).put(RESERVED).put(AUDIO_PACKAGE).put((byte) dataLength);
+    	for (int i = 0, z = encodedAudioSample.length; i < z; ++i) msg.put(encodedAudioSample[i]);
+    	msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+    	return dataLength + METADATA_SIZE;
     }
     
-    public static byte[] takePhoto()
+    public static int takePhoto(byte[] buffer)
     {
-    	byte[] msg = new byte[9];
-    	
-    	msg[0] = STX0;
-    	msg[1] = STX1;
-    	msg[2] = RID_PMB5010;
-    	msg[3] = RESERVED;
-    	msg[4] = TAKE_PHOTO;
-    	msg[5] = 0; // len
-    	msg[6] = checksum(msg);
-    	msg[7] = ETX0;
-    	msg[8] = ETX1;
-    	
-    	return msg;
+    	ByteBuffer msg = ByteBuffer.wrap(buffer);
+    	int dataLength = 0;
+    	msg.put(STX0).put(STX1).put(RID_PMB5010).put(RESERVED).put(TAKE_PHOTO).put((byte) dataLength);
+    	msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+    	return dataLength + METADATA_SIZE;
     }
 }

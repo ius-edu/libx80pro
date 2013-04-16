@@ -1,9 +1,12 @@
 package edu.ius.robotics.robots.boards;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 public class PMS5005
 {
 	/*
-	 * Java implmentation written by Jesse Riddle and Colton Jenkins, with
+	 * Java implementation written by Jesse Riddle and Colton Jenkins, with
 	 * significant documentation taken from the DrRobot WiRobot SDK Application
 	 * Programming Interface (API) Reference Manual - (For MS Windows) Version:
 	 * 1.0.8 Feb. 2004 by DrRobot, Inc. and some parts from the DrRobot Java
@@ -19,29 +22,14 @@ public class PMS5005
 	 * 94 (0x5E) (always) ETX1 = 13 (0x13) (always)
 	 */
 	
-	// 2013-04-1 JR
-	// an example alternative to the little endian byte array construction:
-	// 
-	//import java.nio.ByteBuffer;
-	//import java.nio.ByteOrder;
-	//
-	//setAllDCMotorPulseWidths()
-	//{
-//		byte dataLen = 6*(Short.SIZE >> 3);
-//		ByteBuffer buffer = ByteBuffer.allocate(METADATA_SIZE + dataLen);
-//		buffer.order(ByteOrder.LITTLE_ENDIAN);
-//		buffer.put(STX0).put(STX1);
-//		buffer.put(RID_PMS5005).put(RESERVED).put(ALL_PWM_CTRL).put(dataLen);
-//		buffer.putShort(p0);
-//		buffer.putShort(p1);
-//		buffer.putShort(p2);
-//		buffer.putShort(p3);
-//		buffer.putShort(p4);
-//		buffer.putShort(p5);
-//		buffer.put(calcCRC(buffer.array())).put(ETX0).put(ETX1);
-//		return buffer.array();
-	//}
-
+	public static final ByteOrder BYTE_ORDER = ByteOrder.LITTLE_ENDIAN;
+	public static final byte ENABLE = 1;
+	public static final byte DISABLE = 0;
+	public static final byte RESUME = 1;
+	public static final byte SUSPEND = 0;
+	public static final byte ENABLE_SERVO = 0;
+	public static final byte DISABLE_SERVO = 1;
+	
 	/* Packet Info */
 	public static final int HEADER_LENGTH = 6;
 	public static final int FOOTER_LENGTH = 3;
@@ -68,6 +56,8 @@ public class PMS5005
 	public static final byte FRAME_LENGTH = 64;
 	
 	/* Data ID (DID) descriptor listing */
+	public static final byte PING = 0x01;
+	public static final byte ACK = 0x01;
 	public static final byte POSITION_CTRL = 3;
 	public static final byte ALL_POSITION_CTRL = 4;
 	public static final byte PWM_CTRL = 5;
@@ -92,88 +82,72 @@ public class PMS5005
 	public static final byte GET_CUSTOM_SENSOR_DATA = 124;
 	public static final byte GET_STANDARD_SENSOR_DATA = 125;
 	public static final byte GET_ALL_SENSOR_DATA = 127;
-	// to use as ubyte: (byte)(SETUP_COM & 0xFF)
-	public static final short SETUP_COM = 255;
+	// to use as ubyte: (SETUP_COM & 0xFF)
+	public static final int SETUP_COM = 255;
 	/* End Data ID (DID) descriptor listing */
 	
-	public static final byte KP_ID = 1; // progressive id
-	public static final byte KD_ID = 2; // derivative id
-	public static final byte KI_ID = 3; // integral id
+	public static final byte PROPORTIONAL_GAIN = 1; // progressive id
+	public static final byte DERIVATIVE_GAIN = 2; // derivative id
+	public static final byte INTEGRAL_GAIN = 3; // integral id
 	
 	/**
 	 * Calculates a valid CRC value to be used in order to check the integrity
 	 * of the contents of a request packet.
 	 * 
-	 * @param buf
+	 * @param buffer
 	 *            is the buffer from which the CRC value will be calculated.
 	 * 
 	 * @return The CRC value calculated from the given buffer.
 	 */
-	public static byte checksum(byte[] buf)
+	public static byte checksum(byte[] buffer)
 	{
-		byte shift_reg, sr_lsb, data_bit, v;
-		byte fb_bit;
-		short z;
+		int shift_reg, sr_lsb, data_bit, v;
+		int fb_bit;
+		int z;
 		shift_reg = 0; // initialize the shift register
-		z = (short) (buf.length - 3);// Don't include CRC and ETX (z=length-3)
-		for (short i = 2; i < z; ++i)// Don't include STX (i=2)
+		z = buffer.length - 3;// Don't include CRC and ETX (z=length-3)
+		for (int i = 2; i < z; ++i)// Don't include STX (i=2)
 		{
-			v = (byte) (buf[i]);
+			v = buffer[i];
 			// for each bit
-			
-			for (short j = 0; j < 8; ++j) 
+			for (int j = 0; j < 8; ++j) 
 			{
 				// isolate least sign bit
-				data_bit = (byte) ((v & 0x01) & 0xff);
-				sr_lsb = (byte) ((shift_reg & 0x01) & 0xff);
+				data_bit = ((v & 0x01) & 0xff);
+				sr_lsb = ((shift_reg & 0x01) & 0xff);
 				// calculate the feed back bit
-				fb_bit = (byte) (((data_bit ^ sr_lsb) & 0x01) & 0xff);
-				shift_reg = (byte) ((shift_reg & 0xff) >> 1);
-				
+				fb_bit = (((data_bit ^ sr_lsb) & 0x01) & 0xff);
+				shift_reg = ((shift_reg & 0xff) >> 1);
 				if (fb_bit == 1) 
 				{
-					shift_reg = (byte) ((shift_reg ^ 0x8C) & 0xff);
+					shift_reg = ((shift_reg ^ 0x8C) & 0xff);
 				}
-				
-				v = (byte) ((v & 0xff) >> 1);
+				v = ((v & 0xff) >> 1);
 			}
 		}
-		
-		return shift_reg;
+		return (byte) shift_reg;
 	}
 	
-	public static byte[] ping()
+	public static int ping(byte[] buffer)
 	{
-		byte[] msg = new byte[9];
-		
-		msg[0] = STX0;
-		msg[1] = STX1;
-		msg[2] = RID_PMS5005;
-		msg[3] = RESERVED;
-		msg[4] = (byte) (SETUP_COM & 0xFF);
-		msg[5] = 0x01; // ping
-		msg[6] = checksum(msg);
-		msg[7] = ETX0;
-		msg[8] = ETX1;
-		
-		return msg;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put((byte) SETUP_COM).put((byte) dataLength);
+		msg.put(PING);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
-	public static byte[] ack()
+	public static int ack(byte[] buffer)
 	{
-		byte[] msg = new byte[9];
-		
-		msg[0] = STX0;
-		msg[1] = STX1;
-		msg[2] = RID_PMS5005;
-		msg[3] = RESERVED;
-		msg[4] = (byte) (SETUP_COM & 0xFF);
-		msg[5] = 0x01; // pong
-		msg[6] = checksum(msg);
-		msg[7] = ETX0;
-		msg[8] = ETX1;
-		
-		return msg;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put((byte) SETUP_COM).put((byte) dataLength);
+		msg.put(ACK);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -192,22 +166,15 @@ public class PMS5005
 	 * 
 	 *            See Also: setMotorSensorPeriod
 	 */
-	public static byte[] motorSensorRequest(short packetNumber)
+	public static int motorSensorRequest(byte[] buffer, short packetNumber)
 	{
-		byte[] cmd = new byte[10];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_MOTOR_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = checksum(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_MOTOR_SENSOR_DATA).put((byte) dataLength);
+		msg.putShort(packetNumber);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -226,22 +193,15 @@ public class PMS5005
 	 * 
 	 *            See Also: setStandardSensorPeriod
 	 */
-	public static byte[] standardSensorRequest(short packetNumber)
+	public static int standardSensorRequest(byte[] buffer, short packetNumber)
 	{
-		byte[] cmd = new byte[10];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_MOTOR_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = checksum(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_MOTOR_SENSOR_DATA).put((byte) dataLength); // header
+		msg.putShort(packetNumber);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1); // footer
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -260,22 +220,15 @@ public class PMS5005
 	 * 
 	 *            See Also: setCustomSensorPeriod
 	 */
-	public static byte[] customSensorRequest(short packetNumber)
+	public static int customSensorRequest(byte[] buffer, short packetNumber)
 	{
-		byte[] cmd = new byte[10];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_CUSTOM_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = checksum(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_CUSTOM_SENSOR_DATA).put((byte) dataLength);
+		msg.putShort(packetNumber);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -294,22 +247,15 @@ public class PMS5005
 	 * 
 	 *            See Also: setAllSensorPeriod
 	 */
-	public static byte[] allSensorRequest(short packetNumber)
+	public static int allSensorRequest(byte[] buffer, short packetNumber)
 	{
-		byte[] cmd = new byte[10];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_ALL_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = checksum(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_ALL_SENSOR_DATA).put((byte) dataLength);
+		msg.putShort(packetNumber);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -321,21 +267,14 @@ public class PMS5005
 	 * 
 	 * @see motorSensorRequest
 	 */
-	public static byte[] enableMotorSensorSending()
+	public static int enableMotorSensorSending(byte[] buffer)
 	{
-		byte[] cmd = new byte[9];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_MOTOR_SENSOR_DATA;
-		cmd[5] = 0; // len
-		cmd[6] = checksum(cmd);
-		cmd[7] = ETX0;
-		cmd[8] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 0;
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_MOTOR_SENSOR_DATA).put((byte) dataLength);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -347,21 +286,14 @@ public class PMS5005
 	 * 
 	 * @see disableMotorSensorSending
 	 */
-	public static byte[] enableStandardSensorSending()
+	public static int enableStandardSensorSending(byte[] buffer)
 	{
-		byte[] cmd = new byte[9];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_STANDARD_SENSOR_DATA;
-		cmd[5] = 0; // len
-		cmd[6] = checksum(cmd);
-		cmd[7] = ETX0;
-		cmd[8] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 0;
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_STANDARD_SENSOR_DATA).put((byte) dataLength);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -373,21 +305,14 @@ public class PMS5005
 	 * 
 	 * @see disableStandardSensorSending
 	 */
-	public static byte[] enableCustomSensorSending()
+	public static int enableCustomSensorSending(byte[] buffer)
 	{
-		byte[] cmd = new byte[9];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_CUSTOM_SENSOR_DATA;
-		cmd[5] = 0; // len
-		cmd[6] = checksum(cmd);
-		cmd[7] = ETX0;
-		cmd[8] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 0;
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_CUSTOM_SENSOR_DATA).put((byte) dataLength);
+		msg.put((byte) checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -399,21 +324,14 @@ public class PMS5005
 	 * 
 	 * @see disableCustomSensorSending
 	 */
-	public static byte[] enableAllSensorSending()
+	public static int enableAllSensorSending(byte[] buffer)
 	{
-		byte[] cmd = new byte[9];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_ALL_SENSOR_DATA;
-		cmd[5] = 0; // len
-		cmd[6] = checksum(cmd);
-		cmd[7] = ETX0;
-		cmd[8] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 0;
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_ALL_SENSOR_DATA).put((byte) dataLength);
+		msg.put((byte) checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -421,22 +339,15 @@ public class PMS5005
 	 * 
 	 * @see enableMotorSensorSending
 	 */
-	public static byte[] disableMotorSensorSending()
+	public static int disableMotorSensorSending(byte[] buffer)
 	{
-		byte[] cmd = new byte[10];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_MOTOR_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = 0; // (byte) (0 & 0xff);
-		cmd[7] = checksum(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_MOTOR_SENSOR_DATA).put((byte) dataLength);
+		msg.put(DISABLE);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -444,22 +355,15 @@ public class PMS5005
 	 * 
 	 * @see enableStandardSensorSending
 	 */
-	public static byte[] disableStandardSensorSending()
+	public static int disableStandardSensorSending(byte[] buffer)
 	{
-		byte[] cmd = new byte[10];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_STANDARD_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = 0; // (byte) (0 & 0xff);
-		cmd[7] = checksum(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_STANDARD_SENSOR_DATA).put((byte) dataLength);
+		msg.put(DISABLE);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -467,22 +371,15 @@ public class PMS5005
 	 * 
 	 * @see enableCustomSensorSending
 	 */
-	public static byte[] disableCustomSensorSending()
+	public static int disableCustomSensorSending(byte[] buffer)
 	{
-		byte[] cmd = new byte[10];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_CUSTOM_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = 0; // (byte) (0 & 0xff);
-		cmd[7] = checksum(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_CUSTOM_SENSOR_DATA).put((byte) dataLength);
+		msg.put(DISABLE);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -490,28 +387,21 @@ public class PMS5005
 	 * 
 	 * @see enableAllSensorSending
 	 */
-	public static byte[] disableAllSensorSending()
+	public static int disableAllSensorSending(byte[] buffer)
 	{
-		byte[] cmd = new byte[10];
-		
-		cmd[0] = STX0;
-		cmd[1] = STX1;
-		cmd[2] = RID_PMS5005;
-		cmd[3] = RESERVED;
-		cmd[4] = GET_ALL_SENSOR_DATA;
-		cmd[5] = 1; // len
-		cmd[6] = 0; // (byte) (0 & 0xff);
-		cmd[7] = checksum(cmd);
-		cmd[8] = ETX0;
-		cmd[9] = ETX1;
-		
-		return cmd;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(GET_ALL_SENSOR_DATA).put((byte) dataLength);
+		msg.put(DISABLE);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
 	 * Sets the refresh rate for batch updating by motor-related sensor packets.
 	 * 
-	 * @param timePeriod
+	 * @param milliseconds
 	 *            The update period in milliseconds for batch sensing packets to
 	 *            the PC central controller.
 	 * 
@@ -521,16 +411,16 @@ public class PMS5005
 	 * 
 	 * @see motorSensorRequest
 	 */
-	public static byte[] setMotorSensorPeriod(short timePeriod)
+	public static int setMotorSensorPeriod(byte[] buffer, short milliseconds)
 	{
 		// TODO stub
-		return null;
+		return 0;
 	}
 	
 	/**
 	 * Sets the refresh rate for batch updating by standard sensor packets.
 	 * 
-	 * @param timePeriod
+	 * @param milliseconds
 	 *            The update period in milliseconds for batch sensing packets to
 	 *            the PC central controller.
 	 * 
@@ -540,16 +430,16 @@ public class PMS5005
 	 * 
 	 * @see standardSensorRequest
 	 */
-	public static byte[] setStandardSensorPeriod(short timePeriod)
+	public static int setStandardSensorPeriod(byte[] buffer, short milliseconds)
 	{
 		// TODO stub
-		return null;
+		return 0;
 	}
 	
 	/**
 	 * Sets the refresh rate for batch updating by custom sensor packets.
 	 * 
-	 * @param timePeriod
+	 * @param milliseconds
 	 *            The update period in milliseconds for batch sensing packets to
 	 *            the PC central controller.
 	 * 
@@ -559,16 +449,16 @@ public class PMS5005
 	 * 
 	 * @see customSensorRequest
 	 */
-	public static byte[] setCustomSensorPeriod(short timePeriod)
+	public static int setCustomSensorPeriod(byte[] buffer, short milliseconds)
 	{
 		// TODO stub
-		return null;
+		return 0;
 	}
 	
 	/**
 	 * Sets the refresh rate for batch updating of all sensor packets.
 	 * 
-	 * @param timePeriod
+	 * @param milliseconds
 	 *            The update period in milliseconds for batch sensing packets to
 	 *            the PC central controller.
 	 * 
@@ -578,10 +468,10 @@ public class PMS5005
 	 * 
 	 * @see allSensorRequest
 	 */
-	public static byte[] setAllSensorPeriod(short timePeriod)
+	public static int setAllSensorPeriod(byte[] buffer, short milliseconds)
 	{
 		// TODO stub
-		return null;
+		return 0;
 	}
 
 	/**
@@ -593,9 +483,9 @@ public class PMS5005
 	 *            byte represents channel #8 and LSB of the lower byte
 	 *            represents channel #1.
 	 */
-	public static byte[] setCustomDOut(byte ival)
+	public static int setCustomDOut(byte[] buffer, byte ival)
 	{
-		return null;
+		return 0;
 		// TODO Auto-generated method stub
 		
 	}
@@ -615,24 +505,17 @@ public class PMS5005
 	 * @param polarity
 	 *            1 or -1
 	 */
-	public static byte[] setMotorPolarity(byte channel, byte polarity)
+	public static int setMotorPolarity(byte[] buffer, byte channel, byte polarity)
 	{
-		byte[] packet = new byte[12];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = PARAM_SET; // DID
-		packet[5] = 3; // LEN
-		packet[6] = DC_SENSOR_USAGE; // Subcommand
-		packet[7] = channel; // 0-L | 1=R
-		packet[8] = polarity; // polarity 1 | -1
-		packet[9] = checksum(packet); // Checksum
-		packet[10] = ETX0;
-		packet[11] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 3*(Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(PARAM_SET).put((byte) dataLength);
+		msg.put(DC_SENSOR_USAGE); // Subcommand
+		msg.put(channel);
+		msg.put(polarity);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -645,23 +528,16 @@ public class PMS5005
 	 * 
 	 * @see resumeDCMotor
 	 */
-	public static byte[] enableDCMotor(byte channel)
+	public static int enableDCMotor(byte[] buffer, byte channel)
 	{
-		byte[] packet = new byte[11];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = TOGGLE_DC_MOTORS; // DID
-		packet[5] = 2; // LEN
-		packet[6] = 1; // 1 = Enable/Resume
-		packet[7] = channel; // 0=L | 1=R
-		packet[8] = checksum(packet); // Checksum
-		packet[9] = ETX0;
-		packet[10] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 2*(Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(TOGGLE_DC_MOTORS).put((byte) dataLength);
+		msg.put(ENABLE);
+		msg.put(channel);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -674,23 +550,16 @@ public class PMS5005
 	 * 
 	 * @see suspendDCMotor
 	 */
-	public static byte[] disableDCMotor(byte channel)
+	public static int disableDCMotor(byte[] buffer, byte channel)
 	{
-		byte[] packet = new byte[11];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = TOGGLE_DC_MOTORS; // DID
-		packet[5] = 2; // LEN
-		packet[6] = 0; // 0 = Disable/Suspend
-		packet[7] = channel; // 0=L | 1=R
-		packet[8] = checksum(packet); // Checksum
-		packet[9] = ETX0;
-		packet[10] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 2*(Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(TOGGLE_DC_MOTORS).put((byte) dataLength);
+		msg.put(DISABLE); // 0 = Disable/Suspend
+		msg.put(channel); // 0=L | 1=R
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -699,23 +568,16 @@ public class PMS5005
 	 * @param channel
 	 *            0 for left, 1 for right (robot first person perspective)
 	 */
-	public static byte[] resumeDCMotor(byte channel)
+	public static int resumeDCMotor(byte[] buffer, byte channel)
 	{
-		byte[] packet = new byte[11];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = TOGGLE_DC_MOTORS; // DID
-		packet[5] = 2; // LEN
-		packet[6] = 1; // resume
-		packet[7] = channel; // 0=L | 1=R
-		packet[8] = checksum(packet); // Checksum
-		packet[9] = ETX0;
-		packet[10] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 2*(Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(TOGGLE_DC_MOTORS).put((byte) dataLength);
+		msg.put(RESUME);
+		msg.put(channel);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -726,23 +588,16 @@ public class PMS5005
 	 * 
 	 *            All motor control channels are initially suspended at boot-up.
 	 */
-	public static byte[] suspendDCMotor(byte channel)
+	public static int suspendDCMotor(byte[] buffer, byte channel)
 	{
-		byte[] packet = new byte[11];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = TOGGLE_DC_MOTORS; // DID
-		packet[5] = 2; // LEN
-		packet[6] = 0; // SUSPEND
-		packet[7] = channel; // 0=L | 1=R
-		packet[8] = checksum(packet); // Checksum
-		packet[9] = ETX0;
-		packet[10] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 2*(Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(TOGGLE_DC_MOTORS).put((byte) dataLength);
+		msg.put(SUSPEND);
+		msg.put(channel);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -762,69 +617,49 @@ public class PMS5005
 	 * 
 	 * @see setDCMotorControlMode
 	 */
-	public static byte[] setDCMotorPositionControlPID(byte channel, short kp, short kd, short ki)
+	public static int setDCMotorPositionControlPID(byte[] buffer, byte channel, short kp, short kd, short ki)
 	{
-		byte[] packet = new byte[20];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = PARAM_SET; // DID
-		packet[5] = 11; // LEN
-		packet[6] = DC_POSITION_PID; // Subcommand
-		packet[7] = channel; // 0=L | 1=R
-		packet[8] = KP_ID; // Proportional gain
-		packet[9] = (byte) (kp & 0xff);
-		packet[10] = (byte) ((kp >> 8) & 0xff);
-		packet[11] = KD_ID; // Derivative gain
-		packet[12] = (byte) (kd & 0xff);
-		packet[13] = (byte) ((kd >> 8) & 0xff);
-		packet[14] = KI_ID; // Integral gain
-		packet[15] = (byte) (ki & 0xff);
-		packet[16] = (byte) ((ki >> 8) & 0xff);
-		packet[17] = checksum(packet); // Checksum
-		packet[18] = ETX0;
-		packet[19] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 5*(Byte.SIZE >> 3) + 3*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(PARAM_SET).put((byte) dataLength);
+		msg.put(DC_POSITION_PID);
+		msg.put(channel);
+		msg.put(PROPORTIONAL_GAIN);
+		msg.putShort(kp);
+		msg.put(DERIVATIVE_GAIN);
+		msg.putShort(kd);
+		msg.put(INTEGRAL_GAIN);
+		msg.putShort(ki);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
-	public static byte[] setDCMotorVelocityControlPID(byte channel, int kp, int kd, int ki)
+	public static int setDCMotorVelocityControlPID(byte[] buffer, byte channel, short kp, short kd, short ki)
 	{
-		byte[] packet = new byte[20];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = PARAM_SET; // DID
-		packet[5] = 11; // LEN
-		packet[6] = DC_VELOCITY_PID; // Subcommand
-		packet[7] = channel; // 0=L | 1=R
-		packet[8] = KP_ID; // Proportional gain
-		packet[9] = (byte) (kp & 0xff);
-		packet[10] = (byte) ((kp >> 8) & 0xff);
-		packet[11] = KD_ID; // Derivative gain
-		packet[12] = (byte) (kd & 0xff);
-		packet[13] = (byte) ((kd >> 8) & 0xff);
-		packet[14] = KI_ID; // Integral gain
-		packet[15] = (byte) (ki & 0xff);
-		packet[16] = (byte) ((ki >> 8) & 0xff);
-		packet[17] = checksum(packet); // Checksum
-		packet[18] = ETX0;
-		packet[19] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 5*(Byte.SIZE >> 3) + 3*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(PARAM_SET).put((byte) dataLength);
+		msg.put(DC_VELOCITY_PID);
+		msg.put(channel);
+		msg.put(PROPORTIONAL_GAIN);
+		msg.putShort(kp);
+		msg.put(DERIVATIVE_GAIN);
+		msg.putShort(kd);
+		msg.put(INTEGRAL_GAIN);
+		msg.putShort(ki);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
 	 * This filtering feature is still under development. All data will be
 	 * treated as raw data.
 	 */
-	public static byte[] setDCMotorSensorFilter(byte channel, short filterMethod)
+	public static int setDCMotorSensorFilter(byte[] buffer, byte channel, short filterMethod)
 	{
-		return null;
+		return 0;
 	}
 	
 	/**
@@ -855,24 +690,17 @@ public class PMS5005
 	 * 
 	 * @see getSensorPot
 	 */
-	public static byte[] setDCMotorSensorUsage(byte channel, byte sensorType)
+	public static int setDCMotorSensorUsage(byte[] buffer, byte channel, byte sensorType)
 	{
-		byte[] packet = new byte[12];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = PARAM_SET; // DID
-		packet[5] = 3; // LEN
-		packet[6] = DC_SENSOR_USAGE; // Subcommand
-		packet[7] = channel; // 0-5 = Single Potentiometer, 0-2 = Dual Potentiometer, 0-1 = Encoder
-		packet[8] = sensorType; // 0x00 = Single Potentiometer, 0x01 = Dual Potentiometer, 0x02 = Encoder
-		packet[9] = checksum(packet); // Checksum
-		packet[10] = ETX0;
-		packet[11] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 3*(Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(PARAM_SET).put((byte) dataLength);
+		msg.put(DC_SENSOR_USAGE); // Subcommand
+		msg.put(channel); // 0-5 = Single Potentiometer, 0-2 = Dual Potentiometer, 0-1 = Encoder
+		msg.put(sensorType); // 0x00 = Single Potentiometer, 0x01 = Dual Potentiometer, 0x02 = Encoder
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -890,24 +718,17 @@ public class PMS5005
 	 * @see setDCMotorPositionControlPID
 	 * @see setDCMotorVelocityControlPID
 	 */
-	public static byte[] setDCMotorControlMode(byte channel, byte controlMode)
+	public static int setDCMotorControlMode(byte[] buffer, byte channel, byte controlMode)
 	{
-		byte[] packet = new byte[12];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = PARAM_SET; // DID
-		packet[5] = 3; // LEN
-		packet[6] = DC_CTRL_MODE; // Subcommand
-		packet[7] = channel; // channel 0-5
-		packet[8] = controlMode; // 0 = open, 1 = closed position, 2 = closed // velocity
-		packet[9] = checksum(packet); // Checksum
-		packet[10] = ETX0;
-		packet[11] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 3*(Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(PARAM_SET).put((byte) dataLength);
+		msg.put(DC_CTRL_MODE); // Subcommand
+		msg.put(channel); // channel 0-5
+		msg.put(controlMode); // 0 = open, 1 = closed position, 2 = closed // velocity
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -919,31 +740,22 @@ public class PMS5005
 	 * 
 	 * @param channel
 	 *            0, 1, 2, 3, 4, or 5
-	 * @param pos
+	 * @param position
 	 *            Target position value
-	 * @param timePeriod
+	 * @param milliseconds
 	 *            Executing time in milliseconds
 	 */
-	public static byte[] setDCMotorPosition(byte channel, short pos, short timePeriod)
+	public static int setDCMotorPosition(byte[] buffer, byte channel, short position, short milliseconds)
 	{
-		byte[] packet = new byte[14];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = POSITION_CTRL; // DID
-		packet[5] = 5; // LEN
-		packet[6] = channel; // Channel 0-5
-		packet[7] = (byte) (pos & 0xff); // cmdValue
-		packet[8] = (byte) ((pos >> 8) & 0xff);
-		packet[9] = (byte) (timePeriod & 0xff); // time
-		packet[10] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[11] = checksum(packet); // Checksum
-		packet[12] = ETX0;
-		packet[13] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3) + 2*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(POSITION_CTRL).put((byte) dataLength);
+		msg.put(channel); // Channel 0-5
+		msg.putShort(position);
+		msg.putShort(milliseconds);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -955,42 +767,34 @@ public class PMS5005
 	 * 
 	 * @param channel
 	 *            0, 1, 2, 3, 4, or 5
-	 * @param pos
+	 * @param position
 	 *            Target position value
 	 * 
 	 *            1) Motor will be enabled automatically by the system when this
 	 *            command is received. 2) No velocity is available for motor
 	 *            channel using single potentiometer sensor. 3) The unit of the
 	 *            velocity is (Position change in A/D sampling data) / second
-	 *            when using dual potentiometer sensor for rotational postion
+	 *            when using dual potentiometer sensor for rotational position
 	 *            measurement and pulse/second when using quadrature encoder.
 	 * 
 	 * @see DCMotorVelocityTimeCtrl
 	 * @see getSensorPot
 	 */
-	public static byte[] setDCMotorPosition(byte channel, short pos)
+	public static int setDCMotorPosition(byte[] buffer, byte channel, short position)
 	{
-		byte[] packet = new byte[12];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = POSITION_CTRL; // DID
-		packet[5] = 3; // LEN
-		packet[6] = channel; // channel 0-5
-		packet[7] = (byte) (pos & 0xff); // cmdValue
-		packet[8] = (byte) ((pos >> 8) & 0xff);
-		packet[9] = checksum(packet); // Checksum
-		packet[10] = ETX0;
-		packet[11] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 3*(Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(POSITION_CTRL).put((byte) dataLength);
+		msg.put(channel); // channel 0-5
+		msg.putShort(position);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
-	 * Sends the PWM control command to the specified motion control channel on
-	 * the Sensing and Motion Controller (PMS5005). The command includes the
+	 * Sends the PWM control command to the specified motion control channel on 
+	 * the Sensing and Motion Controller (PMS5005). The command includes the 
 	 * target pulse width value and the time period to execute the command. The
 	 * current trajectory planning method for time control is linear.
 	 * 
@@ -998,7 +802,7 @@ public class PMS5005
 	 *            0, 1, 2, 3, 4, or 5
 	 * @param pulseWidth
 	 *            Target pulse width value
-	 * @param timePeriod
+	 * @param milliseconds
 	 *            Executing time in milliseconds
 	 * 
 	 *            1) The specified channel (motor) will be enabled automatically
@@ -1012,27 +816,18 @@ public class PMS5005
 	 *            to turn counter-clockwise. 16383 is neutral.
 	 * 
 	 */
-	public static byte[] setDCMotorPulse(byte channel, short pulseWidth, short timePeriod)
+	public static int setDCMotorPulse(byte[] buffer, byte channel, short pulseWidth, short milliseconds)
 	{
-		byte[] packet = new byte[15];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = PWM_CTRL; // DID
-		packet[5] = 6; // LEN
-		packet[6] = channel; // Channel 0-5
-		packet[7] = (byte) (pulseWidth & 0xff); // cmdValue
-		packet[8] = (byte) ((pulseWidth >> 8) & 0xff);
-		packet[9] = (byte) SINGLE_CHANNEL_TIMED_FLAG; // we have a flag
-		packet[10] = (byte) (timePeriod & 0xff); // time
-		packet[11] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[12] = checksum(packet); // Checksum
-		packet[13] = ETX0;
-		packet[14] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 2*(Byte.SIZE >> 3) + 2*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(PWM_CTRL).put((byte) dataLength);
+		msg.put(channel); // Channel 0-5
+		msg.putShort(pulseWidth);
+		msg.put(SINGLE_CHANNEL_TIMED_FLAG);
+		msg.putShort(milliseconds);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1059,24 +854,16 @@ public class PMS5005
 	 * 
 	 * @see DCMotorPwmTimeCtrl
 	 */
-	public static byte[] setDCMotorPulse(byte channel, short pulseWidth)
+	public static int setDCMotorPulse(byte[] buffer, byte channel, short pulseWidth)
 	{
-		byte[] packet = new byte[12];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = PWM_CTRL; // DID
-		packet[5] = 3; // LEN
-		packet[6] = channel; // Channel 0-5
-		packet[7] = (byte) (pulseWidth & 0xff); // cmdValue
-		packet[8] = (byte) ((pulseWidth >> 8) & 0xff);
-		packet[9] = checksum(packet); // Checksum
-		packet[10] = ETX0;
-		packet[11] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3) + (Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(PWM_CTRL).put((byte) dataLength);
+		msg.put(channel); // Channel 0-5
+		msg.putShort(pulseWidth);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1085,19 +872,19 @@ public class PMS5005
 	 * includes the target positions and the time period to execute the command.
 	 * The current trajectory planning method for time control is linear.
 	 * 
-	 * @param pos1
+	 * @param position0
 	 *            Target position for channel #1
-	 * @param pos2
+	 * @param position1
 	 *            Target position for channel #2
-	 * @param pos3
+	 * @param position2
 	 *            Target position for channel #3
-	 * @param pos4
+	 * @param position3
 	 *            Target position for channel #4
-	 * @param pos5
+	 * @param position4
 	 *            Target position for channel #5
-	 * @param pos6
+	 * @param position5
 	 *            Target position for channel #6
-	 * @param timePeriod
+	 * @param milliseconds
 	 *            Execution time in milliseconds
 	 * 
 	 *            1) All DC Motors will be enabled automatically by the system
@@ -1114,35 +901,22 @@ public class PMS5005
 	 * @see getSensorPot
 	 * @see DCMotorPositionTimeCtrl
 	 */
-	public static byte[] setAllDCMotorPositions(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6, short timePeriod)
+	public static int setAllDCMotorPositions(byte[] buffer, short position0, short position1, 
+			short position2, short position3, short position4, short position5, short milliseconds)
 	{
-		byte[] packet = new byte[23];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = ALL_POSITION_CTRL; // DID
-		packet[5] = 14; // LEN
-		packet[6] = (byte) (pos1 & 0xff); // channel 1
-		packet[7] = (byte) ((pos1 >> 8) & 0xff);
-		packet[8] = (byte) (pos2 & 0xff); // channel 2
-		packet[9] = (byte) ((pos2 >> 8) & 0xff);
-		packet[10] = (byte) (pos3 & 0xff); // channel 3
-		packet[11] = (byte) ((pos3 >> 8) & 0xff);
-		packet[12] = (byte) (pos4 & 0xff); // channel 4
-		packet[13] = (byte) ((pos4 >> 8) & 0xff);
-		packet[14] = (byte) (pos5 & 0xff); // channel 5
-		packet[15] = (byte) ((pos5 >> 8) & 0xff);
-		packet[16] = (byte) (pos6 & 0xff); // channel 6
-		packet[17] = (byte) ((pos6 >> 8) & 0xff);
-		packet[18] = (byte) (timePeriod & 0xff); // time
-		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[20] = checksum(packet); // Checksum
-		packet[21] = ETX0;
-		packet[22] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 7*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(ALL_POSITION_CTRL).put((byte) dataLength);
+		msg.putShort(position0);
+		msg.putShort(position1);
+		msg.putShort(position2);
+		msg.putShort(position3);
+		msg.putShort(position4);
+		msg.putShort(position5);
+		msg.putShort(milliseconds);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1152,17 +926,17 @@ public class PMS5005
 	 * execution. The motion controller will drive the motor to reach the target
 	 * position with maximum effort.
 	 * 
-	 * @param pos1
+	 * @param position0
 	 *            Target position for channel #1
-	 * @param pos2
+	 * @param position1
 	 *            Target position for channel #2
-	 * @param pos3
+	 * @param position2
 	 *            Target position for channel #3
-	 * @param pos4
+	 * @param position3
 	 *            Target position for channel #4
-	 * @param pos5
+	 * @param position4
 	 *            Target position for channel #5
-	 * @param pos6
+	 * @param position5
 	 *            Target position for channel #6
 	 * 
 	 *            1) All DC Motors will be enabled automatically by the system
@@ -1179,32 +953,21 @@ public class PMS5005
 	 * @see getSensorPot
 	 * @see DCMotorPositionNonTimeCtrl
 	 */
-	public static byte[] setAllDCMotorPositions(short pos1, short pos2, short pos3, short pos4, short pos5, short pos6)
+	public static int setAllDCMotorPositions(byte[] buffer, short position0, short position1, 
+			short position2, short position3, short position4, short position5)
 	{
-		byte[] packet = new byte[21];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = ALL_POSITION_CTRL; // DID
-		packet[5] = 12; // LEN
-		packet[6] = (byte) (pos1 & 0xff); // channel 1
-		packet[7] = (byte) ((pos1 >> 8) & 0xff);
-		packet[8] = (byte) (pos2 & 0xff); // channel 2
-		packet[9] = (byte) ((pos2 >> 8) & 0xff);
-		packet[10] = (byte) (pos3 & 0xff); // channel 3
-		packet[11] = (byte) ((pos3 >> 8) & 0xff);
-		packet[12] = (byte) (pos4 & 0xff); // channel 4
-		packet[13] = (byte) ((pos4 >> 8) & 0xff);
-		packet[14] = (byte) (pos5 & 0xff); // channel 5
-		packet[15] = (byte) ((pos5 >> 8) & 0xff);
-		packet[16] = (byte) (pos6 & 0xff); // channel 6
-		packet[17] = (byte) ((pos6 >> 8) & 0xff);
-		packet[18] = checksum(packet); // Checksum
-		packet[19] = ETX0;
-		packet[20] = ETX1;
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 6*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(ALL_POSITION_CTRL).put((byte) dataLength);
+		msg.putShort(position0);
+		msg.putShort(position1);
+		msg.putShort(position2);
+		msg.putShort(position3);
+		msg.putShort(position4);
+		msg.putShort(position5);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1213,19 +976,19 @@ public class PMS5005
 	 * includes the target velocities and the time period to execute the
 	 * command. The trajectory planning method for time control is linear.
 	 * 
-	 * @param v0
+	 * @param velocity0
 	 *            Target velocity for channel #1
-	 * @param v1
+	 * @param velocity1
 	 *            Target velocity for channel #2
-	 * @param v2
+	 * @param velocity2
 	 *            Target velocity for channel #3
-	 * @param v3
+	 * @param velocity3
 	 *            Target velocity for channel #4
-	 * @param v4
+	 * @param velocity4
 	 *            Target velocity for channel #5
-	 * @param v5
+	 * @param velocity5
 	 *            Target velocity for channel #6
-	 * @param timePeriod
+	 * @param milliseconds
 	 *            Execution time in milliseconds
 	 * 
 	 *            1) Motor will be enabled automatically by the system when this
@@ -1241,35 +1004,22 @@ public class PMS5005
 	 * 
 	 * @see DCMotorVelocityTimeCtrl
 	 */
-	public static byte[] setAllDCMotorVelocities(short v0, short v1, short v2, short v3, short v4, short v5, short timePeriod)
+	public static int setAllDCMotorVelocities(byte[] buffer, short velocity0, short velocity1, 
+			short velocity2, short velocity3, short velocity4, short velocity5, short milliseconds)
 	{
-		byte[] packet = new byte[23];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = ALL_VELOCITY_CTRL; // DID
-		packet[5] = 14; // LEN
-		packet[6] = (byte) (v0 & 0xff); // MOTOR 1
-		packet[7] = (byte) ((v0 >> 8) & 0xff);
-		packet[8] = (byte) (v1 & 0xff); // MOTOR 2
-		packet[9] = (byte) ((v1 >> 8) & 0xff);
-		packet[10] = (byte) (v2 & 0xff); // MOTOR 3
-		packet[11] = (byte) ((v2 >> 8) & 0xff);
-		packet[12] = (byte) (v3 & 0xff); // MOTOR 4
-		packet[13] = (byte) ((v3 >> 8) & 0xff);
-		packet[14] = (byte) (v4 & 0xff); // MOTOR 5
-		packet[15] = (byte) ((v4 >> 8) & 0xff);
-		packet[16] = (byte) (v5 & 0xff); // MOTOR 6
-		packet[17] = (byte) ((v5 >> 8) & 0xff);
-		packet[18] = (byte) (timePeriod & 0xff); // time
-		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[20] = checksum(packet); // Checksum
-		packet[21] = ETX0;
-		packet[22] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 7*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(ALL_VELOCITY_CTRL).put((byte) dataLength);
+		msg.putShort(velocity0);
+		msg.putShort(velocity1);
+		msg.putShort(velocity2);
+		msg.putShort(velocity3);
+		msg.putShort(velocity4);
+		msg.putShort(velocity5);
+		msg.putShort(milliseconds);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1279,17 +1029,17 @@ public class PMS5005
 	 * period. The motion controller will drive the motor to achieve the target
 	 * velocity with maximum effort.
 	 * 
-	 * @param v0
+	 * @param velocity0
 	 *            Target velocity for channel #1
-	 * @param v1
+	 * @param velocity1
 	 *            Target velocity for channel #2
-	 * @param v2
+	 * @param velocity2
 	 *            Target velocity for channel #3
-	 * @param v3
+	 * @param velocity3
 	 *            Target velocity for channel #4
-	 * @param v4
+	 * @param velocity4
 	 *            Target velocity for channel #5
-	 * @param v5
+	 * @param velocity5
 	 *            Target velocity for channel #6
 	 * 
 	 *            1) Motor will be enabled automatically by the system when this
@@ -1304,34 +1054,21 @@ public class PMS5005
 	 *            send the command value -32768 (0x8000), which implies NO_CTRL.
 	 * 
 	 */
-	public static byte[] setAllDCMotorVelocities(short v0, short v1, short v2, short v3, short v4, short v5)
+	public static int setAllDCMotorVelocities(byte[] buffer, short velocity0, short velocity1, 
+			short velocity2, short velocity3, short velocity4, short velocity5)
 	{
-		byte[] packet = new byte[21];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = ALL_VELOCITY_CTRL; // DID
-		packet[5] = 12; // LEN
-		packet[6] = (byte) (v0 & 0xff); // MOTOR 1
-		packet[7] = (byte) ((v0 >> 8) & 0xff);
-		packet[8] = (byte) (v1 & 0xff); // MOTOR 2
-		packet[9] = (byte) ((v1 >> 8) & 0xff);
-		packet[10] = (byte) (v2 & 0xff); // MOTOR 3
-		packet[11] = (byte) ((v2 >> 8) & 0xff);
-		packet[12] = (byte) (v3 & 0xff); // MOTOR 4
-		packet[13] = (byte) ((v3 >> 8) & 0xff);
-		packet[14] = (byte) (v4 & 0xff); // MOTOR 5
-		packet[15] = (byte) ((v4 >> 8) & 0xff);
-		packet[16] = (byte) (v5 & 0xff); // MOTOR 6
-		packet[17] = (byte) ((v5 >> 8) & 0xff);
-		//packet[18] = (byte) 0x06; // we have a flag?
-		packet[18] = checksum(packet); // Checksum
-		packet[19] = ETX0;
-		packet[20] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 6*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(ALL_VELOCITY_CTRL).put((byte) dataLength);
+		msg.putShort(velocity0);
+		msg.putShort(velocity1);
+		msg.putShort(velocity2);
+		msg.putShort(velocity3);
+		msg.putShort(velocity4);
+		msg.putShort(velocity5);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1340,19 +1077,19 @@ public class PMS5005
 	 * includes the target PWM values and the time period for execution. The
 	 * current trajectory planning method for time control is linear.
 	 * 
-	 * @param p0
+	 * @param pulseWidth0
 	 *            Target PWM value (pulse width) for channel #1
-	 * @param p1
+	 * @param pulseWidth1
 	 *            Target PWM value (pulse width) for channel #2
-	 * @param p2
+	 * @param pulseWidth2
 	 *            Target PWM value (pulse width) for channel #3
-	 * @param p3
+	 * @param pulseWidth3
 	 *            Target PWM value (pulse width) for channel #4
-	 * @param p4
+	 * @param pulseWidth4
 	 *            Target PWM value (pulse width) for channel #5
-	 * @param p5
+	 * @param pulseWidth5
 	 *            Target PWM value (pulse width) for channel #6
-	 * @param timePeriod
+	 * @param milliseconds
 	 *            Execution time in milliseconds
 	 * 
 	 *            1) All channels (motors) will be enable automatically by the
@@ -1367,35 +1104,22 @@ public class PMS5005
 	 *            command value of -32768 (0x8000), should be sent. This implies
 	 *            NO_CTRL.
 	 */
-	public static byte[] setAllDCMotorPulses(short p0, short p1, short p2, short p3, short p4, short p5, short timePeriod)
+	public static int setAllDCMotorPulses(byte[] buffer, short pulseWidth0, short pulseWidth1, 
+			short pulseWidth2, short pulseWidth3, short pulseWidth4, short pulseWidth5, short milliseconds)
 	{
-		byte[] packet = new byte[23];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = ALL_PWM_CTRL; // DID
-		packet[5] = 14; // LEN
-		packet[6] = (byte) (p0 & 0xff); // MOTOR 1
-		packet[7] = (byte) ((p0 >> 8) & 0xff);
-		packet[8] = (byte) (p1 & 0xff); // MOTOR 2
-		packet[9] = (byte) ((p1 >> 8) & 0xff);
-		packet[10] = (byte) (p2 & 0xff); // MOTOR 3
-		packet[11] = (byte) ((p2 >> 8) & 0xff);
-		packet[12] = (byte) (p3 & 0xff); // MOTOR 4
-		packet[13] = (byte) ((p3 >> 8) & 0xff);
-		packet[14] = (byte) (p4 & 0xff); // MOTOR 5
-		packet[15] = (byte) ((p4 >> 8) & 0xff);
-		packet[16] = (byte) (p5 & 0xff); // MOTOR 6
-		packet[17] = (byte) ((p5 >> 8) & 0xff);
-		packet[18] = (byte) (timePeriod & 0xff); // time
-		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[20] = checksum(packet); // Checksum
-		packet[21] = ETX0;
-		packet[22] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 7*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(ALL_PWM_CTRL).put((byte) dataLength);
+		msg.putShort(pulseWidth0);
+		msg.putShort(pulseWidth1);
+		msg.putShort(pulseWidth2);
+		msg.putShort(pulseWidth3);
+		msg.putShort(pulseWidth4);
+		msg.putShort(pulseWidth5);
+		msg.putShort(milliseconds);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1404,17 +1128,17 @@ public class PMS5005
 	 * includes the target PWM values without a specified time period for
 	 * execution. The motion controller will adjust the pulse width right away.
 	 * 
-	 * @param p0
+	 * @param pulseWidth0
 	 *            Target PWM value (pulse width) for channel #1
-	 * @param p1
+	 * @param pulseWidth1
 	 *            Target PWM value (pulse width) for channel #2
-	 * @param p2
+	 * @param pulseWidth2
 	 *            Target PWM value (pulse width) for channel #3
-	 * @param p3
+	 * @param pulseWidth3
 	 *            Target PWM value (pulse width) for channel #4
-	 * @param p4
+	 * @param pulseWidth4
 	 *            Target PWM value (pulse width) for channel #5
-	 * @param p5
+	 * @param pulseWidth5
 	 *            Target PWM value (pulse width) for channel #6
 	 * 
 	 *            1) All channels (motors) will be enable automatically by the
@@ -1429,33 +1153,21 @@ public class PMS5005
 	 *            command value of -32768 (0x8000), should be sent. This implies
 	 *            NO_CTRL.
 	 */
-	public static byte[] setAllDCMotorPulses(short p0, short p1, short p2, short p3, short p4, short p5)
+	public static int setAllDCMotorPulses(byte[] buffer, short pulseWidth0, short pulseWidth1, 
+			short pulseWidth2, short pulseWidth3, short pulseWidth4, short pulseWidth5)
 	{
-		byte[] packet = new byte[21];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = ALL_PWM_CTRL; // DID
-		packet[5] = 12; // LEN
-		packet[6] = (byte) (p0 & 0xff); // MOTOR 1
-		packet[7] = (byte) ((p0 >> 8) & 0xff);
-		packet[8] = (byte) (p1 & 0xff); // MOTOR 2
-		packet[9] = (byte) ((p1 >> 8) & 0xff);
-		packet[10] = (byte) (p2 & 0xff); // MOTOR 3
-		packet[11] = (byte) ((p2 >> 8) & 0xff);
-		packet[12] = (byte) (p3 & 0xff); // MOTOR 4
-		packet[13] = (byte) ((p3 >> 8) & 0xff);
-		packet[14] = (byte) (p4 & 0xff); // MOTOR 5
-		packet[15] = (byte) ((p4 >> 8) & 0xff);
-		packet[16] = (byte) (p5 & 0xff); // MOTOR 6
-		packet[17] = (byte) ((p5 >> 8) & 0xff);
-		packet[18] = checksum(packet); // Checksum
-		packet[19] = ETX0;
-		packet[20] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 6*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(ALL_PWM_CTRL).put((byte) dataLength);
+		msg.putShort(pulseWidth0);
+		msg.putShort(pulseWidth1);
+		msg.putShort(pulseWidth2);
+		msg.putShort(pulseWidth3);
+		msg.putShort(pulseWidth4);
+		msg.putShort(pulseWidth5);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1464,28 +1176,21 @@ public class PMS5005
 	 * @param channel
 	 *            0, 1, 2, 3, 4, or 5
 	 * 
-	 *            All servo motor channels are disable initially at system
+	 *            All servo motor channels are disabled initially at system
 	 *            startup. They need to be enabled explicitly before use.
 	 * 
 	 * @see disableServo
 	 */
-	public static byte[] enableServo(byte channel)
+	public static int enableServo(byte[] buffer, byte channel)
 	{
-		byte[] packet = new byte[11];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = TOGGLE_DC_MOTORS; // DID
-		packet[5] = 2; // LEN
-		packet[6] = 0; // 0 = Enable
-		packet[7] = channel; // 6-11 SERVO
-		packet[8] = checksum(packet); // Checksum
-		packet[9] = ETX0;
-		packet[10] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 2*(Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(TOGGLE_DC_MOTORS).put((byte) dataLength);
+		msg.put(ENABLE); // 1 = Enable
+		msg.put(channel); // 6-11 SERVO
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1499,23 +1204,16 @@ public class PMS5005
 	 * 
 	 * @see enableServo
 	 */
-	public static byte[] disableServo(byte channel)
+	public static int disableServo(byte[] buffer, byte channel)
 	{
-		byte[] packet = new byte[11];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = TOGGLE_DC_MOTORS; // DID
-		packet[5] = 2; // LEN
-		packet[6] = 0; // 0 = Disable
-		packet[7] = channel; // 6-11 = SERVO
-		packet[8] = checksum(packet); // Checksum
-		packet[9] = ETX0;
-		packet[10] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 2*(Byte.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(TOGGLE_DC_MOTORS).put((byte) dataLength);
+		msg.put(DISABLE); // 0 = Disable
+		msg.put(channel);  // 6-11 = SERVO
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1529,7 +1227,7 @@ public class PMS5005
 	 *            0, 1, 2, 3, 4, or 5
 	 * @param pulseWidth
 	 *            Target Pulse Width (in milliseconds) * 2250
-	 * @param timePeriod
+	 * @param milliseconds
 	 *            Executing time in milliseconds
 	 * 
 	 *            Usually, a standard remote control servo motor expects to get
@@ -1542,26 +1240,18 @@ public class PMS5005
 	 *            specific servo motor.
 	 * 
 	 */
-	public static byte[] setServoPulse(byte channel, short pulseWidth, short timePeriod)
+	public static int setServoPulse(byte[] buffer, byte channel, short pulseWidth, short milliseconds)
 	{
-		byte[] packet = new byte[15];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = SERVO_CTRL; // DID
-		packet[5] = 6; // LEN
-		packet[6] = channel; // channel
-		packet[7] = (byte) (pulseWidth & 0xff); // command value low 8 bit
-		packet[8] = (byte) ((pulseWidth >> 8) & 0xff); // high 8 bit
-		packet[9] = SINGLE_CHANNEL_TIMED_FLAG; // flag
-		packet[10] = (byte) (timePeriod & 0xff); // time low 8 bit
-		packet[11] = (byte) ((timePeriod >> 8) & 0xff); // high 8 bit
-		packet[12] = checksum(packet); // Checksum
-		packet[13] = ETX0;
-		packet[14] = ETX1;
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 2*(Byte.SIZE >> 3) + 2*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(SERVO_CTRL).put((byte) dataLength);
+		msg.put(channel);
+		msg.putShort(pulseWidth);
+		msg.put(SINGLE_CHANNEL_TIMED_FLAG);
+		msg.putShort(milliseconds);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1578,25 +1268,17 @@ public class PMS5005
 	 * 
 	 * @see servoTimeCtrl
 	 */
-	public static byte[] setServoPulse(byte channel, short pulseWidth)
+	public static int setServoPulse(byte[] buffer, byte channel, short pulseWidth)
 	{
-		byte[] packet = new byte[13];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = SERVO_CTRL; // DID
-		packet[5] = 4; // LEN
-		packet[6] = channel; // channel
-		packet[7] = (byte) (pulseWidth & 0xff); // command value low 8 bit
-		packet[8] = (byte) ((pulseWidth >> 8) & 0xff); // high 8 bit
-		packet[9] = SINGLE_CHANNEL_TIMED_FLAG; // flag
-		packet[10] = checksum(packet); // Checksum
-		packet[11] = ETX0;
-		packet[12] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 2*(Byte.SIZE >> 3) + (Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(SERVO_CTRL).put((byte) dataLength);
+		msg.put(channel);
+		msg.putShort(pulseWidth);
+		msg.put(SINGLE_CHANNEL_TIMED_FLAG);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1607,54 +1289,41 @@ public class PMS5005
 	 * execute the command. The current trajectory planning method for time
 	 * control is linear.
 	 * 
-	 * @param p0
+	 * @param pulseWidth0
 	 *            Target pulse width for channel #1 (Left Motor on X80Pro)
-	 * @param p1
+	 * @param pulseWidth1
 	 *            Target pulse width for channel #2 (-Right Motor on X80Pro)
-	 * @param p2
+	 * @param pulseWidth2
 	 *            Target pulse width for channel #3 (NO_CTRL on X80Pro)
-	 * @param p3
+	 * @param pulseWidth3
 	 *            Target pulse width for channel #4 (NO_CTRL on X80Pro)
-	 * @param p4
+	 * @param pulseWidth4
 	 *            Target pulse width for channel #5 (NO_CTRL on X80Pro)
-	 * @param p5
+	 * @param pulseWidth5
 	 *            Target pulse width for channel #6 (NO_CTRL on X80Pro)
-	 * @param timePeriod
+	 * @param milliseconds
 	 *            Executing time in milliseconds
 	 * 
 	 *            When omitting servo motors from control, please send the
 	 *            command value -32768 (0x8000), which implies NO_CTRL.
 	 * 
 	 */
-	public static byte[] setAllServoPulses(short p0, short p1, short p2, short p3, short p4, short p5, short timePeriod)
+	public static int setAllServoPulses(byte[] buffer, short pulseWidth0, short pulseWidth1, 
+			short pulseWidth2, short pulseWidth3, short pulseWidth4, short pulseWidth5, short milliseconds)
 	{
-		byte[] packet = new byte[23];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = ALL_SERVO_CTRL; // DID
-		packet[5] = 14; // LEN
-		packet[6] = (byte) (p0 & 0xff); // channel 1
-		packet[7] = (byte) ((p0 >> 8) & 0xff);
-		packet[8] = (byte) (p1 & 0xff); // channel 2
-		packet[9] = (byte) ((p1 >> 8) & 0xff);
-		packet[10] = (byte) (p2 & 0xff); // channel 3
-		packet[11] = (byte) ((p2 >> 8) & 0xff);
-		packet[12] = (byte) (p3 & 0xff); // channel 4
-		packet[13] = (byte) ((p3 >> 8) & 0xff);
-		packet[14] = (byte) (p4 & 0xff); // channel 5
-		packet[15] = (byte) ((p5 >> 8) & 0xff);
-		packet[16] = (byte) (p5 & 0xff); // channel 6
-		packet[17] = (byte) ((p5 >> 8) & 0xff);
-		packet[18] = (byte) (timePeriod & 0xff); // time
-		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[20] = checksum(packet); // Checksum
-		packet[21] = ETX0;
-		packet[22] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 7*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(ALL_SERVO_CTRL).put((byte) dataLength);
+		msg.putShort(pulseWidth0);
+		msg.putShort(pulseWidth1);
+		msg.putShort(pulseWidth2);
+		msg.putShort(pulseWidth3);
+		msg.putShort(pulseWidth4);
+		msg.putShort(pulseWidth5);
+		msg.putShort(milliseconds);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1665,17 +1334,17 @@ public class PMS5005
 	 * time period in which to execute the command. The motion controller sends
 	 * the desired pulse width to the servo motor right away.
 	 * 
-	 * @param p0
+	 * @param pulseWidth0
 	 *            Target pulse width for channel #1 (Left Motor on X80Pro)
-	 * @param p1
+	 * @param pulseWidth1
 	 *            Target pulse width for channel #2 (-Right Motor on X80Pro)
-	 * @param p2
+	 * @param pulseWidth2
 	 *            Target pulse width for channel #3 (NO_CTRL on X80Pro)
-	 * @param p3
+	 * @param pulseWidth3
 	 *            Target pulse width for channel #4 (NO_CTRL on X80Pro)
-	 * @param p4
+	 * @param pulseWidth4
 	 *            Target pulse width for channel #5 (NO_CTRL on X80Pro)
-	 * @param p5
+	 * @param pulseWidth5
 	 *            Target pulse width for channel #6 (NO_CTRL on X80Pro)
 	 * 
 	 *            When omitting servo motors from control, please send the
@@ -1683,33 +1352,21 @@ public class PMS5005
 	 * 
 	 * @see servoNonTimeCtrl
 	 */
-	public static byte[] setAllServoPulses(short p0, short p1, short p2, short p3, short p4, short p5)
+	public static int setAllServoPulses(byte[] buffer, short pulseWidth0, short pulseWidth1, 
+			short pulseWidth2, short pulseWidth3, short pulseWidth4, short pulseWidth5)
 	{
-		byte[] packet = new byte[21];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = ALL_SERVO_CTRL; // DID
-		packet[5] = 12; // LEN
-		packet[6] = (byte) (p0 & 0xff); // motor 1
-		packet[7] = (byte) ((p0 >> 8) & 0xff);
-		packet[8] = (byte) (p1 & 0xff); // motor 2
-		packet[9] = (byte) ((p1 >> 8) & 0xff);
-		packet[10] = (byte) (p2 & 0xff); // motor 3
-		packet[11] = (byte) ((p2 >> 8) & 0xff);
-		packet[12] = (byte) (p3 & 0xff); // motor 4
-		packet[13] = (byte) ((p3 >> 8) & 0xff);
-		packet[14] = (byte) (p4 & 0xff); // motor 5
-		packet[15] = (byte) ((p4 >> 8) & 0xff);
-		packet[16] = (byte) (p5 & 0xff); // motor 6
-		packet[17] = (byte) ((p5 >> 8) & 0xff);
-		packet[18] = checksum(packet); // Checksum
-		packet[19] = ETX0;
-		packet[20] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = 6*(Short.SIZE >> 3);
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(ALL_SERVO_CTRL).put((byte) dataLength);
+		msg.putShort(pulseWidth0);
+		msg.putShort(pulseWidth1);
+		msg.putShort(pulseWidth2);
+		msg.putShort(pulseWidth3);
+		msg.putShort(pulseWidth4);
+		msg.putShort(pulseWidth5);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 	
 	/**
@@ -1721,22 +1378,15 @@ public class PMS5005
 	 * @param frame
 	 * 			64 byte frame data to display
 	 */
-	public static byte[] setLCDDisplayPMS(byte frameNumber, byte[] frame) // LCD PMS
+	public static int setLCDDisplayPMS(byte[] buffer, byte[] frame, byte frameNumber) // LCD PMS
 	{
-		byte[] packet = new byte[74];
-		
-		packet[0] = STX0;
-		packet[1] = STX1;
-		packet[2] = RID_PMS5005;
-		packet[3] = RESERVED;
-		packet[4] = LCD_CTRL;
-		packet[5] = 1 + FRAME_LENGTH; // LEN (1 frame slice byte + 64 bytes of bitmap image data)
-		packet[6] = (byte) (frameNumber & 0xFF);
-		for (int i = 0; i < FRAME_LENGTH; ++i) packet[7+i] = (byte) (frame[i] & 0xFF);
-		packet[71] = checksum(packet);
-		packet[72] = ETX0;
-		packet[73] = ETX1;
-		
-		return packet;
+		ByteBuffer msg = ByteBuffer.wrap(buffer);
+		msg.order(PMS5005.BYTE_ORDER);
+		int dataLength = (Byte.SIZE >> 3) + FRAME_LENGTH*(Byte.SIZE >> 3); // 1 frame slice byte + 64 bytes of bitmap data)
+		msg.put(STX0).put(STX1).put(RID_PMS5005).put(RESERVED).put(LCD_CTRL).put((byte) dataLength);
+		msg.put(frameNumber);
+		for (int i = 0; i < FRAME_LENGTH; ++i) msg.put(frame[i]);
+		msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
+		return dataLength + METADATA_SIZE;
 	}
 }

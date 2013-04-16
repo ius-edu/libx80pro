@@ -50,6 +50,8 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 package edu.ius.robotics.robots.codecs;
 
+import java.nio.ByteBuffer;
+
 public class ADPCM
 {
 	public static int[] indexTable = 
@@ -93,14 +95,14 @@ public class ADPCM
 		adpcmState.index = 0;
 	}
 	
-	public short[] decode(byte[] input, byte length)
+	public short[] decode(ByteBuffer input, int length)
 	{
-		int outputLength = 2*(length & 0xFF);
+		int outputLength = (length & 0xFF)*(Short.SIZE >> 3);
 		short[] output = new short[outputLength];
 		short predictedOutput = adpcmState.previousOutput;	/* Predicted output value */
 		char index = adpcmState.index;						/* Current step change index */
 		int step = stepsizeTable[index];					/* Stepsize */
-		short predictedOutputDelta;							/* Current change to valpred */
+		int predictedOutputDelta;							/* Current change to valpred */
 		int sign;											/* Current adpcm sign bit */
 		int delta;											/* Current adpcm output value */
 		int outputIndex = 0;								/* Current index in output buffer */
@@ -112,8 +114,8 @@ public class ADPCM
 			System.err.println("i: " + i);
 			/* Step 1: Get the data value */
 			System.err.println("step 1: get the data value");
-			if (bufferStep) delta = (byte) (input[inputIndex] & 0x0F);
-			else delta = (byte) (((input[++inputIndex] & 0x0F) >> 4) & 0xFF);
+			if (bufferStep) delta = (input.getInt(inputIndex) & 0x0F);
+			else delta = (((input.getInt(++inputIndex) & 0x0F) >> 4) & 0xFF);
 			bufferStep = !bufferStep;
 			
 			/* Step 2: Find new index value (for later) */
@@ -133,7 +135,7 @@ public class ADPCM
 			 * in encodeADPCM();
 			 */
 			System.err.println("step 4: combine difference and new predicted value");
-			predictedOutputDelta = (short) ((byte) (step & 0xFF) >> 3);
+			predictedOutputDelta = ((step & 0xFF) >> 3);
 			if (0 < (delta & 0x04)) predictedOutputDelta += step;
 			if (0 < (delta & 0x02)) predictedOutputDelta += step >> 1;
 			if (0 < (delta & 0x01))	predictedOutputDelta += step >> 2;
@@ -164,9 +166,9 @@ public class ADPCM
 		return output;
 	}
 	
-	public byte[] encode(short[] input, short length)
+	public byte[] encode(short[] input, int length)
 	{
-		int outputLength = 2*(length & 0xFFFF);
+		int outputLength = (length & 0xFFFF)*(Short.SIZE >> 3);
 		byte[] output = new byte[outputLength];
 		short predictedOutput = adpcmState.previousOutput;
 		char index = adpcmState.index;
