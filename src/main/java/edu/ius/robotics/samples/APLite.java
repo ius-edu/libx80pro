@@ -16,10 +16,42 @@ public class APLite implements Runnable
 		this.robot = robot;
 	}
 	
+	public static void main(String args[])
+	{
+		X80Pro robot = null;
+		try
+		{
+			robot = new X80Pro("192.168.0.203", null, true);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		if (null == robot)
+		{
+			System.err.println("No robot instance!");
+			return;
+		}
+		APLite aplite = new APLite(robot);
+		while (true)
+		{
+			try
+			{
+				Thread.sleep(50);
+			}
+			catch (InterruptedException ex)
+			{
+				ex.printStackTrace();
+			}
+			aplite.directRobot();
+		}
+	}
+	
 	public void directRobot()
 	{
 		double v, F, kmid, kside, Fx, Fy, theta, alpha; //, w, friction, mass, heading;
-		double[] power = new double[2];
+		double powerL;
+		double powerR;
 		int i;
 		int x;
 		
@@ -40,14 +72,20 @@ public class APLite implements Runnable
 			System.err.println("robot.getSensorIRRange(" + i + "): " + irr);
 			if (irr <= RANGE) // object detected
 			{
-				x = (int) (100*robot.getIRRange(i));
-				System.err.println("object too close, or object too far? sometimes gives same readings (incorrect deltaV?)");
+				if (X80Pro.Sensors.IR_DISTANCE_MINIMUM != irr)
+				{
+					x = irr;
+				}
+				else
+				{
+					x = 0;
+				}
+				//System.err.println("object too close, or object too far? sometimes gives same readings (incorrect deltaV?)");
 			}
 			else // nothing seen
 			{
 				x = 0;
 			}
-			
 			if (i == X80Pro.Sensors.FRONT_MID_LEFT_INFRARED_SENSOR_INDEX || 
 				i == X80Pro.Sensors.FRONT_MID_RIGHT_INFRARED_SENSOR_INDEX) // interior IR sensors
 			{
@@ -61,16 +99,17 @@ public class APLite implements Runnable
 			Fx = Fx - (F*Math.cos(X80Pro.Sensors.INFRARED_SENSOR_POSITION[i])); // Repulsive x component
 			Fy = Fy - (F*Math.sin(X80Pro.Sensors.INFRARED_SENSOR_POSITION[i])); // Repulsive y component
 		}
+		
 		v = Math.sqrt(Fx*Fx + Fy*Fy); // v = magnitude of force vector
-		theta = Math.atan2(Fy,Fx); // robot moves in 1st or 4th quadrant
+		theta = Math.atan2(Fy, Fx); // robot moves in 1st or 4th quadrant
 		
-		power[X80Pro.L] = (int)(v - v*alpha*theta); // power to left motor (v - v*alpha*w)
-		power[X80Pro.R] = (int)(v + v*alpha*theta); // power to right motor (v + v*alpha*w)
+		powerL = (int)(v - v*alpha*theta); // power to left motor (v - v*alpha*w)
+		powerR = (int)(v + v*alpha*theta); // power to right motor (v + v*alpha*w)
 		
-		power[X80Pro.L] /= Math.PI/2; // get percentage output.
-		power[X80Pro.R] /= Math.PI/2; // get percentage output.
+		powerL /= Math.PI/2; // get percentage output.
+		powerR /= Math.PI/2; // get percentage output.
 		
-		robot.setBothDCMotorPulsePercentages((int) power[X80Pro.L], (int) power[X80Pro.R]);
+		robot.setBothDCMotorPulsePercentages((int) powerL, (int) powerR);
 	}
 	
 	public void run()

@@ -100,20 +100,22 @@ public class X80Pro implements IRobot, Runnable
 		
 		static 
 		{
+			INFRARED_SENSOR_POSITION = new double[4];
 			INFRARED_SENSOR_POSITION[0] = 0.785;
 			INFRARED_SENSOR_POSITION[1] = 0.35;
 			INFRARED_SENSOR_POSITION[2] = -0.35;
-			INFRARED_SENSOR_POSITION[3] = -0.785; 
-			SONAR_SENSOR_POSITION[0] = 0.8; 
+			INFRARED_SENSOR_POSITION[3] = -0.785;
+			
+			SONAR_SENSOR_POSITION = new double[3];
+			SONAR_SENSOR_POSITION[0] = 0.8;
 			SONAR_SENSOR_POSITION[1] = 0;
-			SONAR_SENSOR_POSITION[2] = -0.8; 
+			SONAR_SENSOR_POSITION[2] = -0.8;
 		}
 	}
 	
 	public static class Motors
 	{
 		public static final int NO_CTRL = -32768;
-		
 		public static final int MAX_SPEED = 32767;
 		
 		public static final int CONTROL_MODE_PWM = 0;
@@ -152,10 +154,10 @@ public class X80Pro implements IRobot, Runnable
 		public static final int IMAGE_DATA_RELATIVE_OFFSET = 2;
 		
 		public static final int MAX_DATA_SIZE = 0xFF;
-		public static final int STX0 = 0x5e;
+		public static final int STX0 = 0x5E;
 		public static final int STX1 = 0x02;
-		public static final int ETX0 = 0x5e;
-		public static final int ETX1 = 0x0d;
+		public static final int ETX0 = 0x5E;
+		public static final int ETX1 = 0x0D;
 		
 		public int offset;
 		
@@ -490,7 +492,7 @@ public class X80Pro implements IRobot, Runnable
 	
 	private void postInit(boolean resumeSensorSending)
 	{
-		if (resumeSensorSending) 
+		if (resumeSensorSending)
 		{
 			socket.send(PMS5005.enableMotorSensorSending());
 			socket.send(PMS5005.enableCustomSensorSending());
@@ -509,11 +511,17 @@ public class X80Pro implements IRobot, Runnable
 			encoderPulseInitial[R] = -1;
 		}
 		
+		socket.send(PMS5005.setMotorPolarity((byte) L, (byte) 1));
+		socket.send(PMS5005.setMotorPolarity((byte) R, (byte) -1));
+		
 		socket.send(PMS5005.setDCMotorSensorUsage((byte) L, (byte) X80Pro.Sensors.USAGE_ENCODER));
 		socket.send(PMS5005.setDCMotorSensorUsage((byte) R, (byte) X80Pro.Sensors.USAGE_ENCODER));
 		
 		socket.send(PMS5005.setDCMotorControlMode((byte) L, (byte) X80Pro.Motors.CONTROL_MODE_PWM));
 		socket.send(PMS5005.setDCMotorControlMode((byte) R, (byte) X80Pro.Motors.CONTROL_MODE_PWM));		
+		
+		socket.send(PMS5005.setAllServoPulses((short) Motors.SERVO_Y_INI, (short) Motors.SERVO_X_INI, 
+				(short) Motors.NO_CTRL, (short) Motors.NO_CTRL, (short) Motors.NO_CTRL, (short) Motors.NO_CTRL));
 		
 		// This shutdown hook indicates other threads should terminate as well (e.g. sensor data collection thread).
 		attachShutdownHook();
@@ -805,21 +813,21 @@ public class X80Pro implements IRobot, Runnable
 				pkg.checksum = pkg.checksum();
 				if (pkg.checksum != msg[i])
 				{
-					System.err.println("DEBUG: Incorrect package checksum (ignore for now)");
-					System.err.printf("DEBUG: Expected: %2x", pkg.checksum);
-					System.err.println();
-					System.err.printf("DEBUG: Actual: %2x", msg[i]);
-					System.err.println();
-					System.err.print("Raw data: ");
-					for (int k = 0; k < pkg.length; ++k)
-					{
-						System.err.printf("%2x ", pkg.raw[k]);
-					}
-					System.err.println();
+					//System.err.println("DEBUG: Incorrect package checksum (ignore for now)");
+					//System.err.printf("DEBUG: Expected: %2x", pkg.checksum);
+					//System.err.println();
+					//System.err.printf("DEBUG: Actual: %2x", msg[i]);
+					//System.err.println();
+					//System.err.print("Raw data: ");
+					//for (int k = 0; k < pkg.length; ++k)
+					//{
+						//System.err.printf("%2x ", pkg.raw[k]);
+					//}
+					//System.err.println();
 				}
 				else
 				{
-					System.err.printf("DEBUG: Correct package checksum: %2x", pkg.checksum);
+					//System.err.printf("DEBUG: Correct package checksum: %2x", pkg.checksum);
 				}
 				++i;
 				++pkg.offset;
@@ -877,12 +885,24 @@ public class X80Pro implements IRobot, Runnable
 	public void shutdown()
 	{
 		//System.err.println("Shutting down robot");
+		socket.send(PMS5005.setDCMotorControlMode((byte) X80Pro.L, (byte) Motors.CONTROL_MODE_PWM));
+		socket.send(PMS5005.setDCMotorControlMode((byte) X80Pro.R, (byte) Motors.CONTROL_MODE_PWM));
+		
+		socket.send(PMS5005.setAllDCMotorPulses((short) Motors.PWM_N, (short) Motors.PWM_N, 
+				(short) Motors.NO_CTRL, (short) Motors.NO_CTRL, (short) Motors.NO_CTRL, (short) Motors.NO_CTRL));
+		
 		socket.send(PMS5005.suspendDCMotor((byte) 0));
 		socket.send(PMS5005.suspendDCMotor((byte) 1));
 		socket.send(PMS5005.suspendDCMotor((byte) 2));
 		socket.send(PMS5005.suspendDCMotor((byte) 3));
 		socket.send(PMS5005.suspendDCMotor((byte) 4));
 		socket.send(PMS5005.suspendDCMotor((byte) 5));
+		
+		//System.err.println("Lower Head");
+		socket.send(PMS5005.setAllServoPulses((short) (Motors.SERVO_Y_INI/2 + 500), (short) (Motors.SERVO_X_INI), 
+				(short) Motors.NO_CTRL, (short) Motors.NO_CTRL, (short) Motors.NO_CTRL, (short) Motors.NO_CTRL));
+
+		
 		socket.close();
 	}
 	

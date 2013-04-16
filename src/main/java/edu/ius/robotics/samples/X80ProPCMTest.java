@@ -21,7 +21,7 @@ public class X80ProPCMTest implements IRobotEventHandler
 		X80ProPCMTest pcmtest = new X80ProPCMTest();
 		try
 		{
-			robot = new X80Pro("192.168.0.202", pcmtest, false);
+			robot = new X80Pro("192.168.0.204", pcmtest, false);
 		}
 		catch (IOException e)
 		{

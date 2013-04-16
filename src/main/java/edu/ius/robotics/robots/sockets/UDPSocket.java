@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+
+import edu.ius.robotics.robots.boards.PMS5005;
 import edu.ius.robotics.robots.interfaces.IRobot;
 
 public class UDPSocket implements Runnable
@@ -49,7 +51,7 @@ public class UDPSocket implements Runnable
 	
 	public int getPort()
 	{
-		return this.port;
+		return port;
 	}
 	
 	public void setip(String ip)
@@ -65,13 +67,13 @@ public class UDPSocket implements Runnable
 	public boolean connect(IRobot iRobot)
 	{
 		this.iRobot = iRobot;
-		this.delay = DEFAULT_DELAY;
+		delay = DEFAULT_DELAY;
 		
 		boolean result;
 		
 		try
 		{
-			this.server = InetAddress.getByName(this.ip);
+			server = InetAddress.getByName(ip);
 			result = true;
 		}
 		catch (IOException ex)
@@ -93,25 +95,23 @@ public class UDPSocket implements Runnable
 		System.err.println("port = " + port);
 		System.err.println("delay = " + delay);
 		
-		this.server = InetAddress.getByName(ip);
+		server = InetAddress.getByName(ip);
 		this.ip = ip; 
 		this.port = port;
 		
-		this.socket = new DatagramSocket();
-		this.socket.setSoTimeout(delay);
-
-		this.rxBuf = new byte[4097];
-		this.rxPkt = new DatagramPacket(this.rxBuf, this.rxBuf.length);
+		socket = new DatagramSocket();
+		socket.setSoTimeout(delay);
 		
-		//this.txBuf = new byte[256];
-		this.txBuf = new byte[65];
-		this.txPkt = new DatagramPacket(this.txBuf, this.txBuf.length, this.server, this.port);
+		rxBuf = new byte[8192];
+		rxPkt = new DatagramPacket(rxBuf, rxBuf.length);
 		
-		this.socket.send(this.txPkt);
+		txBuf = new byte[256];
+		txPkt = new DatagramPacket(txBuf, txBuf.length, server, port);
 		
+		send(PMS5005.ping());
 		// wait synchronously for feedback from robot to be clear that we have established connection
-		//this.socket.setSoTimeout(CONNECT_WAIT);
-		//this.socket.receive(this.rxPkt);
+		socket.setSoTimeout(CONNECT_WAIT);
+		socket.receive(this.rxPkt);
 
 		new Thread(this).start(); // receive packet thread
 	}

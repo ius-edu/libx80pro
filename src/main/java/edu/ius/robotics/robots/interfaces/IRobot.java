@@ -2,7 +2,7 @@ package edu.ius.robotics.robots.interfaces;
 
 public interface IRobot
 {
-	public void socketEvent(String robotIP, int robotPort, byte[] sensorData, int dataLength);
+	public void socketEvent(String robotIP, int robotPort, byte[] sensorData, int length);
 	
 	public void startProgress();
 	public boolean isBusy();

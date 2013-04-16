@@ -109,7 +109,7 @@ public class PMS5005
 	 * 
 	 * @return The CRC value calculated from the given buffer.
 	 */
-	public static byte calcCRC(byte[] buf)
+	public static byte checksum(byte[] buf)
 	{
 		byte shift_reg, sr_lsb, data_bit, v;
 		byte fb_bit;
@@ -142,6 +142,23 @@ public class PMS5005
 		return shift_reg;
 	}
 	
+	public static byte[] ping()
+	{
+		byte[] msg = new byte[9];
+		
+		msg[0] = STX0;
+		msg[1] = STX1;
+		msg[2] = RID_PMS5005;
+		msg[3] = RESERVED;
+		msg[4] = (byte) (SETUP_COM & 0xFF);
+		msg[5] = 0x01; // ping
+		msg[6] = checksum(msg);
+		msg[7] = ETX0;
+		msg[8] = ETX1;
+		
+		return msg;
+	}
+	
 	public static byte[] ack()
 	{
 		byte[] msg = new byte[9];
@@ -150,10 +167,11 @@ public class PMS5005
 		msg[1] = STX1;
 		msg[2] = RID_PMS5005;
 		msg[3] = RESERVED;
-		msg[4] = 0x01; // pong
-		msg[5] = calcCRC(msg);
-		msg[6] = ETX0;
-		msg[7] = ETX1;
+		msg[4] = (byte) (SETUP_COM & 0xFF);
+		msg[5] = 0x01; // pong
+		msg[6] = checksum(msg);
+		msg[7] = ETX0;
+		msg[8] = ETX1;
 		
 		return msg;
 	}
@@ -185,7 +203,7 @@ public class PMS5005
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = calcCRC(cmd);
+		cmd[7] = checksum(cmd);
 		cmd[8] = ETX0;
 		cmd[9] = ETX1;
 		
@@ -219,7 +237,7 @@ public class PMS5005
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = calcCRC(cmd);
+		cmd[7] = checksum(cmd);
 		cmd[8] = ETX0;
 		cmd[9] = ETX1;
 		
@@ -253,7 +271,7 @@ public class PMS5005
 		cmd[4] = GET_CUSTOM_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = calcCRC(cmd);
+		cmd[7] = checksum(cmd);
 		cmd[8] = ETX0;
 		cmd[9] = ETX1;
 		
@@ -287,7 +305,7 @@ public class PMS5005
 		cmd[4] = GET_ALL_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = (byte) (packetNumber & 0xff);
-		cmd[7] = calcCRC(cmd);
+		cmd[7] = checksum(cmd);
 		cmd[8] = ETX0;
 		cmd[9] = ETX1;
 		
@@ -313,7 +331,7 @@ public class PMS5005
 		cmd[3] = RESERVED;
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 0; // len
-		cmd[6] = calcCRC(cmd);
+		cmd[6] = checksum(cmd);
 		cmd[7] = ETX0;
 		cmd[8] = ETX1;
 		
@@ -339,7 +357,7 @@ public class PMS5005
 		cmd[3] = RESERVED;
 		cmd[4] = GET_STANDARD_SENSOR_DATA;
 		cmd[5] = 0; // len
-		cmd[6] = calcCRC(cmd);
+		cmd[6] = checksum(cmd);
 		cmd[7] = ETX0;
 		cmd[8] = ETX1;
 		
@@ -365,7 +383,7 @@ public class PMS5005
 		cmd[3] = RESERVED;
 		cmd[4] = GET_CUSTOM_SENSOR_DATA;
 		cmd[5] = 0; // len
-		cmd[6] = calcCRC(cmd);
+		cmd[6] = checksum(cmd);
 		cmd[7] = ETX0;
 		cmd[8] = ETX1;
 		
@@ -391,7 +409,7 @@ public class PMS5005
 		cmd[3] = RESERVED;
 		cmd[4] = GET_ALL_SENSOR_DATA;
 		cmd[5] = 0; // len
-		cmd[6] = calcCRC(cmd);
+		cmd[6] = checksum(cmd);
 		cmd[7] = ETX0;
 		cmd[8] = ETX1;
 		
@@ -414,7 +432,7 @@ public class PMS5005
 		cmd[4] = GET_MOTOR_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = 0; // (byte) (0 & 0xff);
-		cmd[7] = calcCRC(cmd);
+		cmd[7] = checksum(cmd);
 		cmd[8] = ETX0;
 		cmd[9] = ETX1;
 		
@@ -437,7 +455,7 @@ public class PMS5005
 		cmd[4] = GET_STANDARD_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = 0; // (byte) (0 & 0xff);
-		cmd[7] = calcCRC(cmd);
+		cmd[7] = checksum(cmd);
 		cmd[8] = ETX0;
 		cmd[9] = ETX1;
 		
@@ -460,7 +478,7 @@ public class PMS5005
 		cmd[4] = GET_CUSTOM_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = 0; // (byte) (0 & 0xff);
-		cmd[7] = calcCRC(cmd);
+		cmd[7] = checksum(cmd);
 		cmd[8] = ETX0;
 		cmd[9] = ETX1;
 		
@@ -483,7 +501,7 @@ public class PMS5005
 		cmd[4] = GET_ALL_SENSOR_DATA;
 		cmd[5] = 1; // len
 		cmd[6] = 0; // (byte) (0 & 0xff);
-		cmd[7] = calcCRC(cmd);
+		cmd[7] = checksum(cmd);
 		cmd[8] = ETX0;
 		cmd[9] = ETX1;
 		
@@ -610,7 +628,7 @@ public class PMS5005
 		packet[6] = DC_SENSOR_USAGE; // Subcommand
 		packet[7] = channel; // 0-L | 1=R
 		packet[8] = polarity; // polarity 1 | -1
-		packet[9] = calcCRC(packet); // Checksum
+		packet[9] = checksum(packet); // Checksum
 		packet[10] = ETX0;
 		packet[11] = ETX1;
 		
@@ -639,7 +657,7 @@ public class PMS5005
 		packet[5] = 2; // LEN
 		packet[6] = 1; // 1 = Enable/Resume
 		packet[7] = channel; // 0=L | 1=R
-		packet[8] = calcCRC(packet); // Checksum
+		packet[8] = checksum(packet); // Checksum
 		packet[9] = ETX0;
 		packet[10] = ETX1;
 		
@@ -668,7 +686,7 @@ public class PMS5005
 		packet[5] = 2; // LEN
 		packet[6] = 0; // 0 = Disable/Suspend
 		packet[7] = channel; // 0=L | 1=R
-		packet[8] = calcCRC(packet); // Checksum
+		packet[8] = checksum(packet); // Checksum
 		packet[9] = ETX0;
 		packet[10] = ETX1;
 		
@@ -693,7 +711,7 @@ public class PMS5005
 		packet[5] = 2; // LEN
 		packet[6] = 1; // resume
 		packet[7] = channel; // 0=L | 1=R
-		packet[8] = calcCRC(packet); // Checksum
+		packet[8] = checksum(packet); // Checksum
 		packet[9] = ETX0;
 		packet[10] = ETX1;
 		
@@ -720,7 +738,7 @@ public class PMS5005
 		packet[5] = 2; // LEN
 		packet[6] = 0; // SUSPEND
 		packet[7] = channel; // 0=L | 1=R
-		packet[8] = calcCRC(packet); // Checksum
+		packet[8] = checksum(packet); // Checksum
 		packet[9] = ETX0;
 		packet[10] = ETX1;
 		
@@ -765,7 +783,7 @@ public class PMS5005
 		packet[14] = KI_ID; // Integral gain
 		packet[15] = (byte) (ki & 0xff);
 		packet[16] = (byte) ((ki >> 8) & 0xff);
-		packet[17] = calcCRC(packet); // Checksum
+		packet[17] = checksum(packet); // Checksum
 		packet[18] = ETX0;
 		packet[19] = ETX1;
 		
@@ -793,7 +811,7 @@ public class PMS5005
 		packet[14] = KI_ID; // Integral gain
 		packet[15] = (byte) (ki & 0xff);
 		packet[16] = (byte) ((ki >> 8) & 0xff);
-		packet[17] = calcCRC(packet); // Checksum
+		packet[17] = checksum(packet); // Checksum
 		packet[18] = ETX0;
 		packet[19] = ETX1;
 		
@@ -850,7 +868,7 @@ public class PMS5005
 		packet[6] = DC_SENSOR_USAGE; // Subcommand
 		packet[7] = channel; // 0-5 = Single Potentiometer, 0-2 = Dual Potentiometer, 0-1 = Encoder
 		packet[8] = sensorType; // 0x00 = Single Potentiometer, 0x01 = Dual Potentiometer, 0x02 = Encoder
-		packet[9] = calcCRC(packet); // Checksum
+		packet[9] = checksum(packet); // Checksum
 		packet[10] = ETX0;
 		packet[11] = ETX1;
 		
@@ -885,7 +903,7 @@ public class PMS5005
 		packet[6] = DC_CTRL_MODE; // Subcommand
 		packet[7] = channel; // channel 0-5
 		packet[8] = controlMode; // 0 = open, 1 = closed position, 2 = closed // velocity
-		packet[9] = calcCRC(packet); // Checksum
+		packet[9] = checksum(packet); // Checksum
 		packet[10] = ETX0;
 		packet[11] = ETX1;
 		
@@ -921,7 +939,7 @@ public class PMS5005
 		packet[8] = (byte) ((pos >> 8) & 0xff);
 		packet[9] = (byte) (timePeriod & 0xff); // time
 		packet[10] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[11] = calcCRC(packet); // Checksum
+		packet[11] = checksum(packet); // Checksum
 		packet[12] = ETX0;
 		packet[13] = ETX1;
 		
@@ -963,7 +981,7 @@ public class PMS5005
 		packet[6] = channel; // channel 0-5
 		packet[7] = (byte) (pos & 0xff); // cmdValue
 		packet[8] = (byte) ((pos >> 8) & 0xff);
-		packet[9] = calcCRC(packet); // Checksum
+		packet[9] = checksum(packet); // Checksum
 		packet[10] = ETX0;
 		packet[11] = ETX1;
 		
@@ -1010,7 +1028,7 @@ public class PMS5005
 		packet[9] = (byte) SINGLE_CHANNEL_TIMED_FLAG; // we have a flag
 		packet[10] = (byte) (timePeriod & 0xff); // time
 		packet[11] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[12] = calcCRC(packet); // Checksum
+		packet[12] = checksum(packet); // Checksum
 		packet[13] = ETX0;
 		packet[14] = ETX1;
 		
@@ -1054,7 +1072,7 @@ public class PMS5005
 		packet[6] = channel; // Channel 0-5
 		packet[7] = (byte) (pulseWidth & 0xff); // cmdValue
 		packet[8] = (byte) ((pulseWidth >> 8) & 0xff);
-		packet[9] = calcCRC(packet); // Checksum
+		packet[9] = checksum(packet); // Checksum
 		packet[10] = ETX0;
 		packet[11] = ETX1;
 		
@@ -1120,7 +1138,7 @@ public class PMS5005
 		packet[17] = (byte) ((pos6 >> 8) & 0xff);
 		packet[18] = (byte) (timePeriod & 0xff); // time
 		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[20] = calcCRC(packet); // Checksum
+		packet[20] = checksum(packet); // Checksum
 		packet[21] = ETX0;
 		packet[22] = ETX1;
 		
@@ -1183,7 +1201,7 @@ public class PMS5005
 		packet[15] = (byte) ((pos5 >> 8) & 0xff);
 		packet[16] = (byte) (pos6 & 0xff); // channel 6
 		packet[17] = (byte) ((pos6 >> 8) & 0xff);
-		packet[18] = calcCRC(packet); // Checksum
+		packet[18] = checksum(packet); // Checksum
 		packet[19] = ETX0;
 		packet[20] = ETX1;
 		return packet;
@@ -1247,7 +1265,7 @@ public class PMS5005
 		packet[17] = (byte) ((v5 >> 8) & 0xff);
 		packet[18] = (byte) (timePeriod & 0xff); // time
 		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[20] = calcCRC(packet); // Checksum
+		packet[20] = checksum(packet); // Checksum
 		packet[21] = ETX0;
 		packet[22] = ETX1;
 		
@@ -1309,7 +1327,7 @@ public class PMS5005
 		packet[16] = (byte) (v5 & 0xff); // MOTOR 6
 		packet[17] = (byte) ((v5 >> 8) & 0xff);
 		//packet[18] = (byte) 0x06; // we have a flag?
-		packet[18] = calcCRC(packet); // Checksum
+		packet[18] = checksum(packet); // Checksum
 		packet[19] = ETX0;
 		packet[20] = ETX1;
 		
@@ -1373,7 +1391,7 @@ public class PMS5005
 		packet[17] = (byte) ((p5 >> 8) & 0xff);
 		packet[18] = (byte) (timePeriod & 0xff); // time
 		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[20] = calcCRC(packet); // Checksum
+		packet[20] = checksum(packet); // Checksum
 		packet[21] = ETX0;
 		packet[22] = ETX1;
 		
@@ -1433,7 +1451,7 @@ public class PMS5005
 		packet[15] = (byte) ((p4 >> 8) & 0xff);
 		packet[16] = (byte) (p5 & 0xff); // MOTOR 6
 		packet[17] = (byte) ((p5 >> 8) & 0xff);
-		packet[18] = calcCRC(packet); // Checksum
+		packet[18] = checksum(packet); // Checksum
 		packet[19] = ETX0;
 		packet[20] = ETX1;
 		
@@ -1463,7 +1481,7 @@ public class PMS5005
 		packet[5] = 2; // LEN
 		packet[6] = 0; // 0 = Enable
 		packet[7] = channel; // 6-11 SERVO
-		packet[8] = calcCRC(packet); // Checksum
+		packet[8] = checksum(packet); // Checksum
 		packet[9] = ETX0;
 		packet[10] = ETX1;
 		
@@ -1493,7 +1511,7 @@ public class PMS5005
 		packet[5] = 2; // LEN
 		packet[6] = 0; // 0 = Disable
 		packet[7] = channel; // 6-11 = SERVO
-		packet[8] = calcCRC(packet); // Checksum
+		packet[8] = checksum(packet); // Checksum
 		packet[9] = ETX0;
 		packet[10] = ETX1;
 		
@@ -1540,7 +1558,7 @@ public class PMS5005
 		packet[9] = SINGLE_CHANNEL_TIMED_FLAG; // flag
 		packet[10] = (byte) (timePeriod & 0xff); // time low 8 bit
 		packet[11] = (byte) ((timePeriod >> 8) & 0xff); // high 8 bit
-		packet[12] = calcCRC(packet); // Checksum
+		packet[12] = checksum(packet); // Checksum
 		packet[13] = ETX0;
 		packet[14] = ETX1;
 		return packet;
@@ -1574,7 +1592,7 @@ public class PMS5005
 		packet[7] = (byte) (pulseWidth & 0xff); // command value low 8 bit
 		packet[8] = (byte) ((pulseWidth >> 8) & 0xff); // high 8 bit
 		packet[9] = SINGLE_CHANNEL_TIMED_FLAG; // flag
-		packet[10] = calcCRC(packet); // Checksum
+		packet[10] = checksum(packet); // Checksum
 		packet[11] = ETX0;
 		packet[12] = ETX1;
 		
@@ -1632,7 +1650,7 @@ public class PMS5005
 		packet[17] = (byte) ((p5 >> 8) & 0xff);
 		packet[18] = (byte) (timePeriod & 0xff); // time
 		packet[19] = (byte) ((timePeriod >> 8) & 0xff);
-		packet[20] = calcCRC(packet); // Checksum
+		packet[20] = checksum(packet); // Checksum
 		packet[21] = ETX0;
 		packet[22] = ETX1;
 		
@@ -1687,7 +1705,7 @@ public class PMS5005
 		packet[15] = (byte) ((p4 >> 8) & 0xff);
 		packet[16] = (byte) (p5 & 0xff); // motor 6
 		packet[17] = (byte) ((p5 >> 8) & 0xff);
-		packet[18] = calcCRC(packet); // Checksum
+		packet[18] = checksum(packet); // Checksum
 		packet[19] = ETX0;
 		packet[20] = ETX1;
 		
@@ -1705,7 +1723,7 @@ public class PMS5005
 	 */
 	public static byte[] setLCDDisplayPMS(byte frameNumber, byte[] frame) // LCD PMS
 	{
-		byte[] packet = new byte[73];
+		byte[] packet = new byte[74];
 		
 		packet[0] = STX0;
 		packet[1] = STX1;
@@ -1715,7 +1733,7 @@ public class PMS5005
 		packet[5] = 1 + FRAME_LENGTH; // LEN (1 frame slice byte + 64 bytes of bitmap image data)
 		packet[6] = (byte) (frameNumber & 0xFF);
 		for (int i = 0; i < FRAME_LENGTH; ++i) packet[7+i] = (byte) (frame[i] & 0xFF);
-		packet[71] = calcCRC(packet);
+		packet[71] = checksum(packet);
 		packet[72] = ETX0;
 		packet[73] = ETX1;
 		
