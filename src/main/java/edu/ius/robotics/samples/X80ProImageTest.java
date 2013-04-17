@@ -27,7 +27,7 @@ public class X80ProImageTest implements IRobotEventHandler
 		ImageIO.setUseCache(false);
 		
 		X80ProImageTest imageTest = new X80ProImageTest();
-		X80Pro robot = new X80Pro("192.168.0.202", imageTest);
+		X80Pro robot = new X80Pro("192.168.0.204", imageTest);
 		robot.resetHead();
 		robot.suspendAllSensors();
 		
@@ -78,16 +78,16 @@ public class X80ProImageTest implements IRobotEventHandler
 	{
 		System.err.println("*** IMAGE RECEIVED EVENT ***");
 		
-        BufferedImage bi = new BufferedImage(176, 144, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bi = new BufferedImage(176, 144, BufferedImage.TYPE_INT_RGB); // Type is YUV.
         byte[] rawBytes = imageBuffer.toByteArray();
 		int count = 0; 
-//        for (int h = 0; h < 144; h++)
-//        {
-//            for (int w = 0; w < 176; w++)
-//            {
-//                bi.setRGB(w, h, rawBytes[count++]);
-//            }
-//        }
+        for (int h = 0; h < 144; h++)
+        {
+            for (int w = 0; w < 176; w++)
+            {
+                bi.setRGB(w, h, rawBytes[count++]);
+            }
+        }
 		FileOutputStream fos = null;
 		try
 		{
@@ -95,6 +95,7 @@ public class X80ProImageTest implements IRobotEventHandler
 			try
 			{
 				fos.write(imageBuffer.toByteArray());
+				System.out.println("wrote /tmp/output0.jpeg");
 			}
 			catch (IOException e)
 			{
@@ -131,6 +132,7 @@ public class X80ProImageTest implements IRobotEventHandler
             imageWriter.setOutput(ios);
             imageWriter.write(bi);
             ios.close();
+            System.out.println("wrote /tmp/outputFile1.jpeg");
         }
         catch (IOException ex)
         {

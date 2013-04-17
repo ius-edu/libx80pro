@@ -111,21 +111,21 @@ public class ADPCM
 		
 		for (int i = output.length - 1; 0 <= i; i--)
 		{
-			System.err.println("i: " + i);
+			//System.err.println("i: " + i);
 			/* Step 1: Get the data value */
-			System.err.println("step 1: get the data value");
+			//System.err.println("step 1: get the data value");
 			if (bufferStep) delta = (input.getInt(inputIndex) & 0x0F);
 			else delta = (((input.getInt(++inputIndex) & 0x0F) >> 4) & 0xFF);
 			bufferStep = !bufferStep;
 			
 			/* Step 2: Find new index value (for later) */
-			System.err.println("step 2: find new index value (for later)");
+			//System.err.println("step 2: find new index value (for later)");
 			index += indexTable[delta];
 			if (index < 0) index = 0;
 			else if (88 < index) index = 88;
 			
 			/* Step 3: Separate sign and magnitude */
-			System.err.println("step 3: separate sign and magnitude");
+			//System.err.println("step 3: separate sign and magnitude");
 			sign = delta & 0x08;
 			delta = delta & 0x07;
 			
@@ -134,7 +134,7 @@ public class ADPCM
 			 * Computes predictedOutputDelta = (delta + 0.5)*step/4, but see comment
 			 * in encodeADPCM();
 			 */
-			System.err.println("step 4: combine difference and new predicted value");
+			//System.err.println("step 4: combine difference and new predicted value");
 			predictedOutputDelta = ((step & 0xFF) >> 3);
 			if (0 < (delta & 0x04)) predictedOutputDelta += step;
 			if (0 < (delta & 0x02)) predictedOutputDelta += step >> 1;
@@ -144,22 +144,22 @@ public class ADPCM
 			else predictedOutput += predictedOutputDelta;
 			
 			/* Step 5: Clamp output value */
-			System.err.println("step 5: clamp output value");
+			//System.err.println("step 5: clamp output value");
 			if (32767 < predictedOutput) predictedOutput = 32767;
 			else if (predictedOutput < -32768) predictedOutput = -32768;
 			
 			/* Step 6: Update step value */
-			System.err.println("step 6: update step value");
+			//System.err.println("step 6: update step value");
 			step = stepsizeTable[index];
 			
 			/* Step 7: Output value */
-			System.err.println("step 7: output value");
+			//System.err.println("step 7: output value");
 			output[outputIndex] = predictedOutput;
 			
-			System.err.println("*** increment outputIndex ***");
+			//System.err.println("*** increment outputIndex ***");
 			++outputIndex;
 			
-			System.err.println();
+			//System.err.println();
 		}
 		adpcmState.previousOutput = predictedOutput;
 		adpcmState.index = index;
