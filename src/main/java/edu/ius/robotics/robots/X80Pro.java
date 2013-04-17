@@ -383,32 +383,32 @@ public class X80Pro implements IRobot, Runnable
 			
 			for (i = 0; i < Sensors.NUM_HUMAN_SENSORS; ++i)
 			{
-				humanAlarm[i] = standardSensorData.getShort(offset + 4*i) & 0xFFFF;
+				humanAlarm[i] = standardSensorData.getShort(offset + 2*(Short.SIZE >> 3)*i) & 0x7FFF;
 			}
 			offset += Short.SIZE >> 3;
 			
 			for (i = 0; i < Sensors.NUM_HUMAN_SENSORS; ++i)
 			{
-				motionDetect[i] = standardSensorData.getShort(offset + 4*i) & 0xFFFF;
+				motionDetect[i] = standardSensorData.getShort(offset + 2*(Short.SIZE >> 3)*i) & 0x7FFF;
 			}
 			offset += 3*(Short.SIZE >> 3);
 			
 			for (i = 0; i < Sensors.NUM_TILTING_SENSORS; ++i)
 			{
-				tiltingAD[i] = standardSensorData.getShort(offset + 2*i) & 0xFFFF;
+				tiltingAD[i] = standardSensorData.getShort(offset + (Short.SIZE >> 3)*i) & 0x7FFF;
 			}
 			offset += Sensors.NUM_TILTING_SENSORS*(Short.SIZE >> 3);
 			
 			for (i = 0; i < Sensors.NUM_OVERHEAT_SENSORS; ++i)
 			{
-				overheatAD[i] = standardSensorData.getShort(offset + 2*i) & 0xFFFF;
+				overheatAD[i] = standardSensorData.getShort(offset + (Short.SIZE >> 3)*i) & 0x7FFF;
 			}
 			offset += Sensors.NUM_OVERHEAT_SENSORS*(Short.SIZE >> 3);
 			
-			temperatureAD = standardSensorData.getShort(offset + 2*i) & 0xFFFF;
+			temperatureAD = standardSensorData.getShort(offset + (Short.SIZE >> 3)*i) & 0x7FFF;
 			offset += (Short.SIZE >> 3);
 			
-			infraredRangeAD = standardSensorData.getShort(offset) & 0xFFFF;
+			infraredRangeAD = standardSensorData.getShort(offset) & 0x7FFF;
 			offset += (Short.SIZE >> 3);
 			
 			for (i = 0; i < Sensors.NUM_INFRARED_RECEIVERS; ++i)
@@ -417,19 +417,19 @@ public class X80Pro implements IRobot, Runnable
 			}
 			offset += Sensors.NUM_INFRARED_RECEIVERS*(Byte.SIZE >> 3);
 			
-			mainboardBatteryVoltageAD_0to9V = standardSensorData.getShort(offset) & 0xFFFF;
+			mainboardBatteryVoltageAD_0to9V = standardSensorData.getShort(offset) & 0x7FFF;
 			offset += (Short.SIZE >> 3);
 			
-			motorBatteryVoltageAD_0to24V = standardSensorData.getShort(offset) & 0xFFFF;
+			motorBatteryVoltageAD_0to24V = standardSensorData.getShort(offset) & 0x7FFF;
 			offset += (Short.SIZE >> 3);
 			
-			servoBatteryVoltageAD_0to9V = standardSensorData.getShort(offset) & 0xFFFF;
+			servoBatteryVoltageAD_0to9V = standardSensorData.getShort(offset) & 0x7FFF;
 			offset += (Short.SIZE >> 3);
 			
-			referenceVoltageAD_Vcc = standardSensorData.getShort(offset) & 0xFFFF;
+			referenceVoltageAD_Vcc = standardSensorData.getShort(offset) & 0x7FFF;
 			offset += (Short.SIZE >> 3);
 			
-			potentiometerVoltageAD_Vref = standardSensorData.getShort(offset) & 0xFFFF;
+			potentiometerVoltageAD_Vref = standardSensorData.getShort(offset) & 0x7FFF;
 		}
 	}
 	
@@ -487,9 +487,9 @@ public class X80Pro implements IRobot, Runnable
 		encoderPulseInitial = new int[Sensors.NUM_DC_MOTOR_CHANNELS];
 	}
 	
-	private void postInit(boolean resumeSensorSending)
+	private void postInit(boolean shouldResumeSensorSending)
 	{
-		if (resumeSensorSending)
+		if (shouldResumeSensorSending)
 		{
 			txBufferLength = PMS5005.enableMotorSensorSending(txBuffer); 
 			socket.send(txBuffer, txBufferLength);
@@ -570,12 +570,12 @@ public class X80Pro implements IRobot, Runnable
 		postInit(true);
 	}
 	
-	public X80Pro(String ipAddress, IRobotEventHandler iRobotEventHandler, boolean resumeSensorSending) throws IOException
+	public X80Pro(String ipAddress, IRobotEventHandler iRobotEventHandler, boolean shouldResumeSensorSending) throws IOException
 	{
 		preInit();
 		this.iRobotEventHandler = iRobotEventHandler;
 		socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
-		postInit(resumeSensorSending);
+		postInit(shouldResumeSensorSending);
 	}
 	
 	public X80Pro(String ipAddress, int port, IRobotEventHandler iRobotEventHandler) throws IOException
@@ -586,12 +586,12 @@ public class X80Pro implements IRobot, Runnable
 		postInit(true);
 	}
 	
-	public X80Pro(String ipAddress, int port, IRobotEventHandler iRobotEventHandler, boolean resumeSensorSending) throws IOException
+	public X80Pro(String ipAddress, int port, IRobotEventHandler iRobotEventHandler, boolean shouldResumeSensorSending) throws IOException
 	{
 		preInit();
 		this.iRobotEventHandler = iRobotEventHandler;
 		socket = new UDPSocket(this, ipAddress, port);
-		postInit(resumeSensorSending);
+		postInit(shouldResumeSensorSending);
 	}
 	
 	/**
