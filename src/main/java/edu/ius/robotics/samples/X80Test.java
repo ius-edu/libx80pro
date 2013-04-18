@@ -2,7 +2,7 @@ package edu.ius.robotics.samples;
 
 import java.io.IOException;
 
-import edu.ius.robotics.robots.X80Pro;
+import edu.ius.robotics.robots.x80pro.X80Pro;
 
 public class X80Test
 {

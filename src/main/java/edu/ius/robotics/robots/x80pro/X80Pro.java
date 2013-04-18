@@ -6,7 +6,7 @@
  * program.
  */
 
-package edu.ius.robotics.robots;
+package edu.ius.robotics.robots.x80pro;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -23,14 +23,14 @@ import edu.ius.robotics.robots.interfaces.IRobot;
 import edu.ius.robotics.robots.interfaces.IRobotEventHandler;
 
 import edu.ius.robotics.robots.sockets.UDPSocket;
-import edu.ius.robotics.robots.worker.Worker;
+
+import static edu.ius.robotics.robots.dependencies.Type.*;
 
 public class X80Pro implements IRobot, Runnable
 {
 	public static final int DEFAULT_ROBOT_PORT = 10001;
 
 	private static final int TX_BUFFER_SIZE = 1024;
-	private static final int RX_BUFFER_SIZE = 8192;
 	
 	public static final byte L = 0;
 	public static final byte R = 1;
@@ -91,29 +91,31 @@ public class X80Pro implements IRobot, Runnable
 		public static double[] INFRARED_SENSOR_POSITION;
 		public static double[] SONAR_SENSOR_POSITION;
 		
-		public static int FRONT_FAR_LEFT_INFRARED_SENSOR = 0;
+		public static int FRONT_FAR_LEFT_INFRARED_SENSOR_INDEX = 0;
 		public static int FRONT_MID_LEFT_INFRARED_SENSOR_INDEX = 1;
 		public static int FRONT_MID_RIGHT_INFRARED_SENSOR_INDEX = 2;
-		public static int FRONT_FAR_RIGHT_INFRARED_SENSOR = 3;
+		public static int FRONT_FAR_RIGHT_INFRARED_SENSOR_INDEX = 3;
 		
-		public static int FRONT_LEFT_SONAR_SENSOR = 0;
-		public static int FRONT_MIDDLE_SONAR_SENSOR = 1;
-		public static int FRONT_RIGHT_SONAR_SENSOR = 2;
+		public static int FRONT_LEFT_SONAR_SENSOR_INDEX = 0;
+		public static int FRONT_MIDDLE_SONAR_SENSOR_INDEX = 1;
+		public static int FRONT_RIGHT_SONAR_SENSOR_INDEX = 2;
 		
 		public static final int ACCEPTABLE_ENCODER_DEVIATION = 16;
 		
 		static 
 		{
-			INFRARED_SENSOR_POSITION = new double[4];
-			INFRARED_SENSOR_POSITION[0] = 0.785;
-			INFRARED_SENSOR_POSITION[1] = 0.35;
-			INFRARED_SENSOR_POSITION[2] = -0.35;
-			INFRARED_SENSOR_POSITION[3] = -0.785;
+			INFRARED_SENSOR_POSITION = new double[NUM_INFRARED_SENSORS];
+			INFRARED_SENSOR_POSITION[FRONT_FAR_LEFT_INFRARED_SENSOR_INDEX] = 0.785;
+			INFRARED_SENSOR_POSITION[FRONT_MID_LEFT_INFRARED_SENSOR_INDEX] = 0.35;
+			INFRARED_SENSOR_POSITION[FRONT_MID_RIGHT_INFRARED_SENSOR_INDEX] = -0.35;
+			INFRARED_SENSOR_POSITION[FRONT_FAR_RIGHT_INFRARED_SENSOR_INDEX] = -0.785;
+			// ...
 			
-			SONAR_SENSOR_POSITION = new double[3];
-			SONAR_SENSOR_POSITION[0] = 0.8;
-			SONAR_SENSOR_POSITION[1] = 0;
-			SONAR_SENSOR_POSITION[2] = -0.8;
+			SONAR_SENSOR_POSITION = new double[NUM_SONAR_SENSORS];
+			SONAR_SENSOR_POSITION[FRONT_LEFT_SONAR_SENSOR_INDEX] = 0.8;
+			SONAR_SENSOR_POSITION[FRONT_MIDDLE_SONAR_SENSOR_INDEX] = 0;
+			SONAR_SENSOR_POSITION[FRONT_RIGHT_SONAR_SENSOR_INDEX] = -0.8;
+			// ...
 		}
 	}
 	
@@ -143,296 +145,6 @@ public class X80Pro implements IRobot, Runnable
 		public static final short DUTY_CYCLE_UNIT = 8383;
 	}
 	
-	public static class Pkg
-	{
-		public static final int STX0_OFFSET = 0;
-		public static final int STX1_OFFSET = 1;
-		public static final int RID_OFFSET = 2;
-		public static final int SEQ_OFFSET = 3;
-		public static final int DID_OFFSET = 4;
-		public static final int LENGTH_OFFSET = 5;
-		public static final int DATA_OFFSET = 6;
-		public static final int CHECKSUM_RELATIVE_OFFSET = 0;
-		public static final int ETX0_RELATIVE_OFFSET = 1;
-		public static final int ETX1_RELATIVE_OFFSET = 2;
-		public static final int HEADER_LENGTH = 6;
-		public static final int FOOTER_LENGTH = 3;
-		public static final int METADATA_SIZE = 9;
-		public static final int IMAGE_PKG_COUNT_RELATIVE_OFFSET = 1;
-		public static final int IMAGE_DATA_RELATIVE_OFFSET = 2;
-		
-		public static final int MAX_DATA_SIZE = 0xFF;
-		public static final int STX0 = 0x5E;
-		public static final int STX1 = 0x02;
-		public static final int ETX0 = 0x5E;
-		public static final int ETX1 = 0x0D;
-		
-		int offset;
-		int length;
-		public ByteBuffer data;
-		public ByteBuffer msg;
-		
-		public String robotIP;
-		public int robotPort;
-		
-		public void clear()
-		{
-			robotIP = "";
-			offset = length = robotPort = 0;
-			data.clear();
-			msg.clear();
-		}
-		
-		public Pkg()
-		{
-			data = ByteBuffer.allocate(MAX_DATA_SIZE);
-			msg = ByteBuffer.allocate(MAX_DATA_SIZE + METADATA_SIZE);
-			clear();
-		}
-		
-		// This is from PMS5005 and PMB5010 protocol documentation
-		public byte checksum() // could, maybe should, be static (checksum(byte[] buf))
-		{
-			int shift_reg, sr_lsb, data_bit, v;
-			int fb_bit;
-			int z;
-			shift_reg = 0; // initialize the shift register
-			z = length - 5;
-			for (int i = 0; i < z; ++i) 
-			{
-			    v = (msg.get(2 + i) & 0xFF); // start from RID
-			    // for each bit
-			    for (int j = 0; j < 8; ++j) 
-			    {
-					// isolate least sign bit
-					data_bit = ((v & 0x01) & 0xFF);
-					sr_lsb = ((shift_reg & 0x01) & 0xFF);
-					// calculate the feed back bit
-					fb_bit = (((data_bit ^ sr_lsb) & 0x01) & 0xFF);
-					shift_reg = ((shift_reg & 0xFF) >> 1);
-					if (fb_bit == 1)
-					{
-					    shift_reg = ((shift_reg ^ 0x8C) & 0xFF);
-					}
-					v = ((v & 0xFF) >> 1);
-			    }
-			}
-			return (byte) shift_reg;
-		}
-		
-		public void print()
-		{
-			System.out.println("length: " + length);
-			System.out.print("data: ");
-			for (int i = 0; i < MAX_DATA_SIZE; ++i)
-			{
-				System.out.print(data.get(i) + " ");
-			}
-			System.out.println();
-			System.out.println("robotIP: " + robotIP);
-			System.out.println("robotPort: " + robotPort);
-		}
-	}
-	
-	private class MotorSensorData
-	{
-		public int[] potentiometerAD;
-		public int[] motorCurrentAD;
-		public int[] encoderPulse;
-		public int[] encoderSpeed;
-		public int[] encoderDirection;
-		
-		public MotorSensorData()
-		{
-			potentiometerAD = new int[Sensors.NUM_POTENTIOMETER_AD_SENSORS];
-			motorCurrentAD = new int[Sensors.NUM_MOTOR_CURRENT_AD_SENSORS];
-			encoderPulse = new int[Sensors.NUM_ENCODER_PULSE_SENSORS];
-			encoderSpeed = new int[Sensors.NUM_ENCODER_SPEED_SENSORS];
-			encoderDirection = new int[Sensors.NUM_ENCODER_DIRECTION_SENSORS];
-		}
-		
-		public void setMotorSensorData(ByteBuffer motorSensorData)
-		{
-			int offset = 0, i;
-			
-			for (i = 0; i < Sensors.NUM_POTENTIOMETER_AD_SENSORS; ++i) 
-			{
-				potentiometerAD[i] = motorSensorData.getShort(offset + 2*i) & 0xFFFF;
-			}
-			offset += Sensors.NUM_POTENTIOMETER_AD_SENSORS*(Short.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_MOTOR_CURRENT_AD_SENSORS; ++i) 
-			{
-				motorCurrentAD[i] = motorSensorData.getShort(offset + 2*i) & 0xFFFF;
-			}
-			offset += Sensors.NUM_MOTOR_CURRENT_AD_SENSORS*(Short.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_ENCODER_PULSE_SENSORS; ++i) 
-			{
-				encoderPulse[i] = motorSensorData.getShort(offset + 4*i) & 0xFFFF;
-			}
-			offset += (Short.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_ENCODER_SPEED_SENSORS; ++i) 
-			{
-				encoderSpeed[i] = motorSensorData.getShort(offset + 4*i) & 0xFFFF;
-			}
-			offset += 3*(Short.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_ENCODER_DIRECTION_SENSORS; ++i) 
-			{
-				encoderDirection[i] = motorSensorData.get(offset) & (i+1);
-			}
-		}
-	}
-	
-	private class CustomSensorData
-	{
-		public int[] customAD;
-		
-		public int[] ioPort;
-		public int[] mmDistanceToLeftConstellation;
-		public int[] mmDistanceToRightConstellation;
-		public int[] mmDistanceToRelativeConstellation;
-		
-		public CustomSensorData()
-		{
-			customAD = new int[Sensors.NUM_CUSTOM_AD_SENSORS];
-			ioPort = new int[Sensors.NUM_IO_PORT_SENSORS];
-			mmDistanceToLeftConstellation = new int[Sensors.NUM_LEFT_CONSTELLATION_SENSORS];
-			mmDistanceToRightConstellation = new int[Sensors.NUM_RIGHT_CONSTELLATION_SENSORS];
-			mmDistanceToRelativeConstellation = new int[Sensors.NUM_RELATIVE_CONSTELLATION_SENSORS];
-		}
-		
-		public void setCustomSensorData(ByteBuffer customSensorData)
-		{
-			int offset = 0, i;
-			
-			for (i = 0; i < Sensors.NUM_CUSTOM_AD_SENSORS; ++i)
-			{
-				customAD[i] = customSensorData.getShort(offset + 2*i) & 0xFFFF;
-			}
-			offset += Sensors.NUM_CUSTOM_AD_SENSORS*(Short.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_IO_PORT_SENSORS; ++i)
-			{
-				ioPort[i] = (byte) customSensorData.get(offset) & (0x01 << i);
-			}
-			offset += (Sensors.NUM_IO_PORT_SENSORS >> 3)*(Byte.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_LEFT_CONSTELLATION_SENSORS; ++i)
-			{
-				mmDistanceToLeftConstellation[i] = customSensorData.getShort(offset + 2*i) & 0xFFFF;
-			}
-			offset += Sensors.NUM_LEFT_CONSTELLATION_SENSORS*(Short.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_RIGHT_CONSTELLATION_SENSORS; ++i)
-			{
-				mmDistanceToRightConstellation[i] = customSensorData.getShort(offset + 2*i) & 0xFFFF;
-			}
-			offset += Sensors.NUM_RIGHT_CONSTELLATION_SENSORS*(Short.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_RELATIVE_CONSTELLATION_SENSORS; ++i)
-			{
-				mmDistanceToRelativeConstellation[i] = customSensorData.getShort(offset + 2*i) & 0xFFFF; 				
-			}
-		}
-	}
-	
-	private class StandardSensorData
-	{
-		public int[] sonarDistance;
-		public int[] humanAlarm;
-		public int[] motionDetect;
-		public int[] tiltingAD;
-		public int[] overheatAD;
-		public int temperatureAD;
-		public int infraredRangeAD;
-		public int[] infraredCommand;
-		public int mainboardBatteryVoltageAD_0to9V;
-		public int motorBatteryVoltageAD_0to24V;
-		public int servoBatteryVoltageAD_0to9V;
-		public int referenceVoltageAD_Vcc;
-		public int potentiometerVoltageAD_Vref;
-		
-		public StandardSensorData()
-		{
-			sonarDistance = new int[Sensors.NUM_SONAR_SENSORS];
-			humanAlarm = new int[Sensors.NUM_HUMAN_SENSORS];
-			motionDetect = new int[Sensors.NUM_HUMAN_SENSORS];
-			tiltingAD = new int[Sensors.NUM_TILTING_SENSORS];
-			overheatAD = new int[Sensors.NUM_TEMPERATURE_SENSORS];
-			temperatureAD = -1;
-			infraredRangeAD = -1;
-			infraredCommand = new int[Sensors.NUM_INFRARED_RECEIVERS];
-			mainboardBatteryVoltageAD_0to9V = -1;
-			motorBatteryVoltageAD_0to24V = -1;
-			servoBatteryVoltageAD_0to9V = -1;
-			referenceVoltageAD_Vcc = -1;
-			potentiometerVoltageAD_Vref = -1;
-		}
-		
-		public void setStandardSensorData(ByteBuffer standardSensorData)
-		{
-			int offset = 0, i;
-			for (i = 0; i < Sensors.NUM_SONAR_SENSORS; ++i)
-			{
-				sonarDistance[i] = standardSensorData.get(offset + i) & 0xFF;
-			}
-			offset += Sensors.NUM_SONAR_SENSORS*(Byte.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_HUMAN_SENSORS; ++i)
-			{
-				humanAlarm[i] = standardSensorData.getShort(offset + 2*(Short.SIZE >> 3)*i) & 0x7FFF;
-			}
-			offset += Short.SIZE >> 3;
-			
-			for (i = 0; i < Sensors.NUM_HUMAN_SENSORS; ++i)
-			{
-				motionDetect[i] = standardSensorData.getShort(offset + 2*(Short.SIZE >> 3)*i) & 0x7FFF;
-			}
-			offset += 3*(Short.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_TILTING_SENSORS; ++i)
-			{
-				tiltingAD[i] = standardSensorData.getShort(offset + (Short.SIZE >> 3)*i) & 0x7FFF;
-			}
-			offset += Sensors.NUM_TILTING_SENSORS*(Short.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_OVERHEAT_SENSORS; ++i)
-			{
-				overheatAD[i] = standardSensorData.getShort(offset + (Short.SIZE >> 3)*i) & 0x7FFF;
-			}
-			offset += Sensors.NUM_OVERHEAT_SENSORS*(Short.SIZE >> 3);
-			
-			temperatureAD = standardSensorData.getShort(offset + (Short.SIZE >> 3)*i) & 0x7FFF;
-			offset += (Short.SIZE >> 3);
-			
-			infraredRangeAD = standardSensorData.getShort(offset) & 0x7FFF;
-			offset += (Short.SIZE >> 3);
-			
-			for (i = 0; i < Sensors.NUM_INFRARED_RECEIVERS; ++i)
-			{
-				infraredCommand[i] = standardSensorData.get(offset + i) & 0xFF; 
-			}
-			offset += Sensors.NUM_INFRARED_RECEIVERS*(Byte.SIZE >> 3);
-			
-			mainboardBatteryVoltageAD_0to9V = standardSensorData.getShort(offset) & 0x7FFF;
-			offset += (Short.SIZE >> 3);
-			
-			motorBatteryVoltageAD_0to24V = standardSensorData.getShort(offset) & 0x7FFF;
-			offset += (Short.SIZE >> 3);
-			
-			servoBatteryVoltageAD_0to9V = standardSensorData.getShort(offset) & 0x7FFF;
-			offset += (Short.SIZE >> 3);
-			
-			referenceVoltageAD_Vcc = standardSensorData.getShort(offset) & 0x7FFF;
-			offset += (Short.SIZE >> 3);
-			
-			potentiometerVoltageAD_Vref = standardSensorData.getShort(offset) & 0x7FFF;
-		}
-	}
-	
 	/** wheel distance */
 	public static final short WHEEL_CIRCUMFERENCE_ENCODER_COUNT = 800; // encoder units
 	public static final double WHEEL_CIRCUMFERENCE = 0.265; // meters
@@ -451,7 +163,7 @@ public class X80Pro implements IRobot, Runnable
 	//private int[] powerSensorData;
 	
 	//private boolean[] lockIRRange;
-	private Pkg pkg;
+	private DataPackage pkg;
 	private UDPSocket socket;
 	private ADPCM adpcm;
 	private ByteArrayOutputStream imageBuffer;
@@ -460,19 +172,15 @@ public class X80Pro implements IRobot, Runnable
 	
 	private boolean busyFlag;
 	private int busyProgress;
-	private Worker worker;
 	
-	private byte[] txBuffer; // sending
-	private byte[] rxBuffer; // receiving
+	private byte[] txBuffer;
 	int txBufferLength;
-	int rxBufferLength;
 	
 	private void preInit()
 	{
-		pkg = new Pkg();
+		pkg = new DataPackage();
 		
 		txBuffer = new byte[TX_BUFFER_SIZE];
-		rxBuffer = new byte[RX_BUFFER_SIZE];
 		
 		iRobotEventHandler = null;
 		adpcm = new ADPCM();
@@ -604,12 +312,12 @@ public class X80Pro implements IRobot, Runnable
 		socket.send(data.array(), dataLength);
 	}
 	
-	private void dispatch(Pkg pkg)
+	private void dispatch(DataPackage pkg)
 	{
 		// These two offsets are currently the same, but the actual sources are different. 
 		// Could change with a firmware update?
-		int pms5005MessageType = pkg.msg.get(PMS5005.DID_OFFSET) & 0xFF;
-		int pmb5010MessageType = pkg.msg.get(PMB5010.DID_OFFSET) & 0xFF;
+		int pms5005MessageType = unsigned(pkg.buffer.get(PMS5005.DID_OFFSET));
+		int pmb5010MessageType = unsigned(pkg.buffer.get(PMB5010.DID_OFFSET));
 		
 		if (PMS5005.GET_MOTOR_SENSOR_DATA == pms5005MessageType)
 		{
@@ -643,7 +351,7 @@ public class X80Pro implements IRobot, Runnable
 		{
 			////System.err.println("-*- ADPCM Reset Command Package Received -*-");
 			adpcm.init();
-			txBufferLength = PMB5010.ack(txBuffer, pkg.msg.get(Pkg.SEQ_OFFSET) & 0xFF);
+			txBufferLength = PMB5010.ack(txBuffer, unsigned(pkg.buffer.get(DataPackage.SEQ_OFFSET)));
 			socket.send(txBuffer, txBufferLength);
 		}
 		else if (PMB5010.AUDIO_PACKAGE == pmb5010MessageType)
@@ -651,7 +359,7 @@ public class X80Pro implements IRobot, Runnable
 			////System.err.println("-*- Audio Data Package Received -*-");
 			if (null != iRobotEventHandler)
 			{
-				iRobotEventHandler.audioDataReceivedEvent(pkg.robotIP, pkg.robotPort, adpcm.decode(pkg.data, pkg.length));
+				iRobotEventHandler.audioDataReceivedEvent(pkg.robotIP, pkg.robotPort, adpcm.decode(pkg.data, pkg.dataLength));
 			}
 		}
 		else if (PMB5010.VIDEO_PACKAGE == pmb5010MessageType)
@@ -660,7 +368,7 @@ public class X80Pro implements IRobot, Runnable
 			if (null != iRobotEventHandler)
 			{
 				// Step 1: Clear buffer sizes if we're receiving first JPEG packet.
-				if (PMB5010.SEQ_BEGIN == (byte) (pkg.msg.get(PMB5010.VIDEO_SEQ_OFFSET) & 0xFF))
+				if (PMB5010.SEQ_BEGIN == unsigned(pkg.buffer.get(PMB5010.VIDEO_SEQ_OFFSET)))
 				//if (0 == this.numImagePkgs)
 				{
 					////System.err.println("Beginning jpeg image assembly");
@@ -676,20 +384,20 @@ public class X80Pro implements IRobot, Runnable
 				}
 				
 				if (0 == imageBuffer.size() || 
-					PMB5010.SEQ_TERMINATE == (pkg.data.get(PMB5010.VIDEO_SEQ_OFFSET) & 0xFF) || 
-					previousSEQ == (pkg.data.get(PMB5010.VIDEO_SEQ_OFFSET) & 0xFF) - 1)
+					PMB5010.SEQ_TERMINATE == unsigned(pkg.data.get(PMB5010.VIDEO_SEQ_OFFSET)) || 
+					previousSEQ == unsigned(pkg.data.get(PMB5010.VIDEO_SEQ_OFFSET)) - 1)
 				{
 					// Step 2: Assemble complete data in buffer.
 					////System.err.println("Continuing jpeg image assembly");
-					imageBuffer.write(pkg.data.array(), Pkg.IMAGE_DATA_RELATIVE_OFFSET, pkg.length);
-					previousSEQ = pkg.data.get(PMB5010.VIDEO_SEQ_OFFSET) & 0xFF;
+					imageBuffer.write(pkg.data.array(), DataPackage.IMAGE_DATA_RELATIVE_OFFSET, pkg.dataLength);
+					previousSEQ = unsigned(pkg.data.get(PMB5010.VIDEO_SEQ_OFFSET));
 				}
-				else if (previousSEQ != (pkg.data.get(PMB5010.VIDEO_SEQ_OFFSET) & 0xFF) - 1)
+				else if (previousSEQ != unsigned(pkg.data.get(PMB5010.VIDEO_SEQ_OFFSET)) - 1)
 				{
 					//System.err.println("Warning: Image pieces out of sequence");
 				}
 				
-				if (PMB5010.SEQ_TERMINATE == (pkg.data.get(PMB5010.VIDEO_SEQ_OFFSET) & 0xFF)) // || this.numImagePkgs - 1 <= pkg[PMB5010.VIDEO_SEQ_OFFSET])
+				if (PMB5010.SEQ_TERMINATE == unsigned(pkg.data.get(PMB5010.VIDEO_SEQ_OFFSET))) // || this.numImagePkgs - 1 <= pkg[PMB5010.VIDEO_SEQ_OFFSET])
 				{
 					// Step 3: Decode complete data from buffer if we have finished receiving.
 					////System.err.println("Finished jpeg image assembly");
@@ -701,9 +409,9 @@ public class X80Pro implements IRobot, Runnable
 		else if (PMS5005.SETUP_COM == pms5005MessageType)
 		{
 			////System.err.println("-*- SETUP_COM Command Received -*-");
-			for (int i = 0; i < pkg.length; ++i)
+			for (int i = 0; i < pkg.bufferLength; ++i)
 			{
-				////System.err.printf("%2x ", (byte) (pkg.data[i] & 0xFF));
+				////System.err.printf("%2x ", unsignedByte(pkg.buffer[i]));
 			}
 			////System.err.println();
 			txBufferLength = PMS5005.ack(txBuffer);
@@ -711,25 +419,25 @@ public class X80Pro implements IRobot, Runnable
 		}
 	}
 	
-	public void socketEvent(String robotIP, int robotPort, byte[] data, int dataLength)
+	public void socketEvent(String robotIP, int robotPort, byte[] message, int messageLength)
 	{
 		//System.err.println("-*- New Message -*-");
 		//System.err.println("message length: " + dataLength);
 		//System.err.println("pkg.offset: " + pkg.offset);
 		//System.err.print("DEBUG message: ");
-		for (int i = 0; i < dataLength; ++i)
+		for (int i = 0; i < messageLength; ++i)
 		{
-			//System.err.printf("%2x ", data[i] & 0xFF);
+			//System.err.printf("%2x ", unsignedByte(data[i]));
 		}
 		//System.err.println();
 		
 		int i = 0;
-		while (i < dataLength)
+		while (i < messageLength)
 		{
-			if (i < dataLength && Pkg.STX0_OFFSET == pkg.offset)
+			if (i < messageLength && DataPackage.STX0_OFFSET == pkg.offset)
 			{
-				pkg.msg.put(Pkg.STX0_OFFSET, data[i]);
-				if (Pkg.STX0 != data[i]) 
+				pkg.buffer.put(DataPackage.STX0_OFFSET, message[i]);
+				if (DataPackage.STX0 != message[i]) 
 				{
 					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] STX0 isn't where it is expected to be: %2x", data[i]);
 					//System.err.println();
@@ -742,10 +450,10 @@ public class X80Pro implements IRobot, Runnable
 				++i;
 				++pkg.offset;
 			}
-			if (i < dataLength && Pkg.STX1_OFFSET == pkg.offset)
+			if (i < messageLength && DataPackage.STX1_OFFSET == pkg.offset)
 			{
-				pkg.msg.put(Pkg.STX1_OFFSET, data[i]);
-				if (Pkg.STX1 != data[i])
+				pkg.buffer.put(DataPackage.STX1_OFFSET, message[i]);
+				if (DataPackage.STX1 != message[i])
 				{
 					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] STX1 isn't where it is expected to be: %2x", data[i]);
 					//System.err.println();
@@ -758,82 +466,82 @@ public class X80Pro implements IRobot, Runnable
 				++i;
 				++pkg.offset;
 			}
-			if (i < dataLength && Pkg.RID_OFFSET == pkg.offset)
+			if (i < messageLength && DataPackage.RID_OFFSET == pkg.offset)
 			{
-				pkg.msg.put(Pkg.RID_OFFSET, data[i]);
+				pkg.buffer.put(DataPackage.RID_OFFSET, message[i]);
 				//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found RID: %2x", data[i]);
 				//System.err.println();
 				++i;
 				++pkg.offset;
 			}
-			if (i < dataLength && Pkg.SEQ_OFFSET == pkg.offset)
+			if (i < messageLength && DataPackage.SEQ_OFFSET == pkg.offset)
 			{
-				pkg.msg.put(Pkg.SEQ_OFFSET, data[i]);
+				pkg.buffer.put(DataPackage.SEQ_OFFSET, message[i]);
 				//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found SEQ: %2x", data[i]);
 				//System.err.println();
 				++i;
 				++pkg.offset;
 			}
-			if (i < dataLength && Pkg.DID_OFFSET == pkg.offset)
+			if (i < messageLength && DataPackage.DID_OFFSET == pkg.offset)
 			{
-				pkg.msg.put(Pkg.DID_OFFSET, data[i]);
+				pkg.buffer.put(DataPackage.DID_OFFSET, message[i]);
 				//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found DID: %2x", data[i]);
 				//System.err.println();
 				++i;
 				++pkg.offset;
 			}
-			if (i < dataLength && Pkg.LENGTH_OFFSET == pkg.offset)
+			if (i < messageLength && DataPackage.LENGTH_OFFSET == pkg.offset)
 			{
-				pkg.msg.put(Pkg.LENGTH_OFFSET, data[i]); 
-				pkg.length = data[i] & 0xFF;
+				pkg.buffer.put(DataPackage.LENGTH_OFFSET, message[i]); 
+				pkg.dataLength = unsigned(message[i]);
 				//System.err.println("DEBUG: pkg[" + pkg.offset + "] Found LENGTH: " + pkg.length);
 				++i;
 				++pkg.offset;
 				//System.err.print("DEBUG: pkg header: ");
-				for (int k = 0; k < Pkg.HEADER_LENGTH; ++k)
+				for (int k = 0; k < DataPackage.HEADER_LENGTH; ++k)
 				{
-					//System.err.printf("%2x ", pkg.msg.get(k) & 0xFF);
+					//System.err.printf("%2x ", unsignedByte(pkg.msg.get(k)));
 				}
 				//System.err.println();
 			}
-			if (i < dataLength && Pkg.DATA_OFFSET <= pkg.offset && pkg.offset < Pkg.HEADER_LENGTH + pkg.length)
+			if (i < messageLength && DataPackage.DATA_OFFSET <= pkg.offset && pkg.offset < DataPackage.HEADER_LENGTH + pkg.dataLength)
 			{
-				int j = pkg.offset - Pkg.HEADER_LENGTH;
+				int j = pkg.offset - DataPackage.HEADER_LENGTH;
 				//System.err.println("DEBUG: pkg.offset - Pkg.HEADER_LENGTH => j: " + j);
 				//System.err.print("DEBUG: pkg[" + pkg.offset + "] Found DATA: ");
-				while (i < dataLength && j < pkg.length)
+				while (i < messageLength && j < pkg.dataLength)
 				{
-					pkg.msg.put(Pkg.HEADER_LENGTH + j, data[i]);
-					pkg.data.put(j, data[i]);
-					//System.err.printf("%2x ", pkg.data.get(j) & 0xFF);
+					pkg.buffer.put(DataPackage.HEADER_LENGTH + j, message[i]);
+					pkg.data.put(j, message[i]);
+					//System.err.printf("%2x ", unsignedByte(pkg.data.get(j)));
 					++i;
 					++j;
 					++pkg.offset;
 				}
 				//System.err.println();
-				if (dataLength <= i)
+				if (messageLength <= i)
 				{
 					//System.err.println("package overflowed packet in data region, last entry: ");
-					//System.err.printf("pkg.data[" + (pkg.offset - 1) + "]: %2x", pkg.data.get(pkg.offset - 1) & 0xFF);
+					//System.err.printf("pkg.data[" + (pkg.offset - 1) + "]: %2x", unsignedByte(pkg.data.get(pkg.offset - 1)));
 					//System.err.println();
 				}
 			}
-			int offsetChecksum = Pkg.HEADER_LENGTH + pkg.length + Pkg.CHECKSUM_RELATIVE_OFFSET;
-			if (i < dataLength && offsetChecksum == pkg.offset)
+			int offsetChecksum = DataPackage.HEADER_LENGTH + pkg.dataLength + DataPackage.CHECKSUM_RELATIVE_OFFSET;
+			if (i < messageLength && offsetChecksum == pkg.offset)
 			{
-				pkg.msg.put(offsetChecksum, pkg.checksum());
-				if ((data[i] & 0xFF) != (pkg.checksum() & 0xFF))
+				pkg.buffer.put(offsetChecksum, pkg.checksum());
+				if (unsigned(message[i]) != unsigned(pkg.checksum()))
 				{
 					//System.err.println("DEBUG: Incorrect package checksum (ignore for now)");
-					//System.err.printf("DEBUG: Calculation Expected: %2x", pkg.checksum() & 0xFF);
+					//System.err.printf("DEBUG: Calculation Expected: %2x", unsignedByte(pkg.checksum()));
 					//System.err.println();
-					//System.err.printf("DEBUG: Package Actual: %2x", data[i] & 0xFF);
+					//System.err.printf("DEBUG: Package Actual: %2x", unsignedByte(data[i]));
 					//System.err.println();
 					//System.err.print("Raw data: ");
-					for (int k = 0; k < pkg.length; ++k)
-					{
-						//System.err.printf("%2x ", pkg.data.get(k) & 0xFF);
-					}
+					//for (int k = 0; k < pkg.length; ++k)
+					//{
+						//System.err.printf("%2x ", unsignedByte(pkg.data.get(k)));
+					//}
 					//System.err.println();
 				}
 				else
@@ -843,41 +551,43 @@ public class X80Pro implements IRobot, Runnable
 				++i;
 				++pkg.offset;
 			}
-			int offsetETX0 = Pkg.HEADER_LENGTH + pkg.length + Pkg.ETX0_RELATIVE_OFFSET;
-			if (i < dataLength && offsetETX0 == pkg.offset)
+			int offsetETX0 = DataPackage.HEADER_LENGTH + pkg.dataLength + DataPackage.ETX0_RELATIVE_OFFSET;
+			if (i < messageLength && offsetETX0 == pkg.offset)
 			{
-				pkg.msg.put(offsetETX0, data[i]);
-				if (Pkg.ETX0 != (data[i] & 0xFF))
+				pkg.buffer.put(offsetETX0, message[i]);
+				if (DataPackage.ETX0 != unsigned(message[i]))
 				{
-					//System.err.printf("DEBUG: ETX0 isn't where it is expected to be (found %2x)", data[i] & 0xFF);
+					//System.err.printf("DEBUG: ETX0 isn't where it is expected to be (found %2x)", unsignedByte(data[i]));
 					//System.err.println();
 				}
 				else
 				{
-					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found ETX0: %2x", data[i] & 0xFF);
+					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found ETX0: %2x", unsignedByte(data[i]));
 					//System.err.println();
 				}
 				++i;
 				++pkg.offset;
 			}
-			int offsetETX1 = Pkg.HEADER_LENGTH + pkg.length + Pkg.ETX1_RELATIVE_OFFSET;
-			if (i < dataLength && offsetETX1 == pkg.offset)
+			int offsetETX1 = DataPackage.HEADER_LENGTH + pkg.dataLength + DataPackage.ETX1_RELATIVE_OFFSET;
+			if (i < messageLength && offsetETX1 == pkg.offset)
 			{
-				pkg.msg.put(offsetETX1, data[i]);
-				if (Pkg.ETX1 != (data[i] & 0xFF))
+				pkg.buffer.put(offsetETX1, message[i]);
+				if (DataPackage.ETX1 != unsigned(message[i]))
 				{
-					//System.err.printf("DEBUG: ETX1 isn't where it is expected to be (found %2x)", data[i] & 0xFF);
+					//System.err.printf("DEBUG: ETX1 isn't where it is expected to be (found %2x)", unsignedByte(data[i]));
 					//System.err.println();
 				}
 				else
 				{
-					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found ETX1: %2x, dispatching", data[i] & 0xFF);
+					//System.err.printf("DEBUG: pkg[" + pkg.offset + "] Found ETX1: %2x, dispatching", unsignedByte(data[i]));
 					//System.err.println();
 				}
+				pkg.offset++;
 				pkg.robotIP = robotIP;
 				pkg.robotPort = robotPort;
 				//System.err.println("DEBUG: len: " + dataLength + ", pkg.offset: " + pkg.offset + ", i: " + i);
 				//System.err.println("DEBUG: dispatching...");
+				pkg.bufferLength = pkg.offset;
 				dispatch(pkg); // or produce/enqueue
 				//System.err.println("DEBUG: resetting package");
 				pkg.clear();
@@ -1512,7 +1222,8 @@ public class X80Pro implements IRobot, Runnable
      */
     void setInfraredControlOutput(int lowWord, int highWord)
     {
-    	// TODO unimplemented
+    	txBufferLength = PMS5005.setInfraredControlOutput(txBuffer, lowWord, highWord);
+    	socket.send(txBuffer, txBufferLength);
     }
     
     /**
@@ -2437,7 +2148,7 @@ public class X80Pro implements IRobot, Runnable
 		{
 			for (int j = 0; j < imageBytesFor8Rows.length; ++j)
 			{
-				imageBytesFor8Rows[j] = (byte) (imageBytes[(frameSlice << 6) + j] & 0xFF);
+				imageBytesFor8Rows[j] = imageBytes[(frameSlice << 6) + j];
 			}
 			txBufferLength = PMS5005.setLCDDisplayPMS(txBuffer, imageBytesFor8Rows, frameSlice);
 			socket.send(txBuffer, txBufferLength);
@@ -2708,13 +2419,13 @@ public class X80Pro implements IRobot, Runnable
 	
 	public void startAudioPlayback(int sampleLength)
 	{
-		for (byte seq = 0; seq < sampleLength / 0xff; ++seq)
+		for (byte seq = 0; seq < sampleLength/0xFF; ++seq)
 		{
-			txBufferLength = PMB5010.startAudioPlayback(txBuffer, (short) sampleLength, seq);
+			txBufferLength = PMB5010.startAudioPlayback(txBuffer, sampleLength, seq);
 			socket.send(txBuffer, txBufferLength);
 		}
 		
-		txBufferLength = PMB5010.startAudioPlayback(txBuffer, (short) sampleLength, (byte) (0xff & 0xff));
+		txBufferLength = PMB5010.startAudioPlayback(txBuffer, sampleLength, PMB5010.SEQ_TERMINATE);
 		socket.send(txBuffer, txBufferLength);
 	}
 	

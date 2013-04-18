@@ -15,6 +15,7 @@ public class PMB5010
 	public static final int HEADER_LENGTH = 6;
 	public static final int FOOTER_LENGTH = 3;
 	public static final int METADATA_SIZE = 9;
+	public static final int RID_OFFSET = 2;
 	public static final int DID_OFFSET = 4;
 	public static final int PAYLOAD_OFFSET = 6;
 	public static final int LENGTH_OFFSET = 5;
@@ -59,30 +60,24 @@ public class PMB5010
     /*
      * calcCRC method comes directly from PMB5010 Protocol documentation.
      */
-    public static byte checksum(byte[] buf) 
+    public static byte checksum(byte[] buffer) 
     {
-		int shift_reg, sr_lsb, data_bit, v;
-		int fb_bit;
-		int z;
+		byte shift_reg, sr_lsb, data_bit, v, fb_bit;
+		
 		shift_reg = 0; // initialize the shift register
-		z = buf.length - 5;
-		for (int i = 0; i < z; ++i) 
+		for (int i = RID_OFFSET, z = buffer.length - FOOTER_LENGTH; i < z; ++i)
 		{
-		    v = buf[2 + i]; // start from RID
-		    // for each bit
-		    for (int j = 0; j < 8; ++j) 
+		    v = buffer[i];
+		    for (int j = 0; j < 8; ++j) // for each bit
 		    {
-				// isolate least sign bit
-				data_bit = ((v & 0x01) & 0xFF);
-				sr_lsb = ((shift_reg & 0x01) & 0xFF);
-				// calculate the feed back bit
-				fb_bit = (((data_bit ^ sr_lsb) & 0x01) & 0xFF);
-				shift_reg = ((shift_reg & 0xFF) >> 1);
-				if (fb_bit == 1)
-				{
-				    shift_reg = ((shift_reg ^ 0x8C) & 0xFF);
+				data_bit = (byte) (v & 0x01); // isolate least sign bit
+				sr_lsb = (byte) (shift_reg & 0x01);
+				fb_bit = (byte) ((data_bit ^ sr_lsb) & 0x01); // calculate the feedback bit
+				shift_reg = (byte) (shift_reg >>> 1);
+				if (1 == fb_bit) {
+					shift_reg = (byte) (shift_reg ^ 0x8C);
 				}
-				v = ((v & 0xFF) >> 1);
+				v = (byte) (v >>> 1);
 		    }
 		}
 		return (byte) shift_reg;
@@ -116,7 +111,7 @@ public class PMB5010
     	msg.order(PMB5010.BYTE_ORDER);
     	int dataLength = (Byte.SIZE >> 3);
     	msg.put(STX0).put(STX1).put(RID_PMB5010).put(RESERVED).put(START_AUDIO_RECORDING).put((byte) dataLength);
-    	msg.put(voiceSegmentLength); // voiceSegmentLength * 255
+    	msg.put(voiceSegmentLength); // voiceSegmentLength * 255 will be used in the codec
     	msg.put(checksum(msg.array())).put(ETX0).put(ETX1);
     	return dataLength + METADATA_SIZE;
     }
@@ -131,22 +126,12 @@ public class PMB5010
     	return dataLength + METADATA_SIZE;
     }
     
-    public static int startAudioPlayback(byte[] buffer, short sampleLength, byte seq)
+    public static int startAudioPlayback(byte[] buffer, int sampleLength, int seq)
     {
-    	byte abbreviatedSampleLength = 4;
-    	
-    	if (sampleLength < 16000)
-    	{
-    		abbreviatedSampleLength = 1;
-    	}
-    	else if (sampleLength < 16000*20)
-    	{
-    		abbreviatedSampleLength = 2;
-    	}
-    	else if (sampleLength < 16000*32)
-    	{
-    		abbreviatedSampleLength = 3;
-    	}
+    	byte abbreviatedSampleLength = 4; // bufferest
+    	if (sampleLength < 16000) abbreviatedSampleLength = 1; // wee buffer
+    	else if (sampleLength < 16000*20) abbreviatedSampleLength = 2; // buffer
+    	else if (sampleLength < 16000*32) abbreviatedSampleLength = 3; // bufferer
     	
     	ByteBuffer msg = ByteBuffer.wrap(buffer);
     	int dataLength = (Byte.SIZE >> 3);

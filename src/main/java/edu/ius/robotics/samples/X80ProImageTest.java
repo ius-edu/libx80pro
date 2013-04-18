@@ -17,8 +17,8 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 
-import edu.ius.robotics.robots.X80Pro;
 import edu.ius.robotics.robots.interfaces.IRobotEventHandler;
+import edu.ius.robotics.robots.x80pro.X80Pro;
 
 public class X80ProImageTest implements IRobotEventHandler
 {

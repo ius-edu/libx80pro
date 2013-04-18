@@ -34,6 +34,7 @@ public class PMS5005
 	public static final int HEADER_LENGTH = 6;
 	public static final int FOOTER_LENGTH = 3;
 	public static final int METADATA_SIZE = 9;
+	public static final int RID_OFFSET = 2;
 	public static final int DID_OFFSET = 4;
 	
 	/* Start transmission, End transmission */
@@ -101,29 +102,23 @@ public class PMS5005
 	 */
 	public static byte checksum(byte[] buffer)
 	{
-		int shift_reg, sr_lsb, data_bit, v;
-		int fb_bit;
-		int z;
+		byte shift_reg, sr_lsb, data_bit, v, fb_bit;
+		
 		shift_reg = 0; // initialize the shift register
-		z = buffer.length - 3;// Don't include CRC and ETX (z=length-3)
-		for (int i = 2; i < z; ++i)// Don't include STX (i=2)
+		for (int i = RID_OFFSET, z = buffer.length - FOOTER_LENGTH; i < z; ++i) 
 		{
-			v = buffer[i];
-			// for each bit
-			for (int j = 0; j < 8; ++j) 
-			{
-				// isolate least sign bit
-				data_bit = ((v & 0x01) & 0xff);
-				sr_lsb = ((shift_reg & 0x01) & 0xff);
-				// calculate the feed back bit
-				fb_bit = (((data_bit ^ sr_lsb) & 0x01) & 0xff);
-				shift_reg = ((shift_reg & 0xff) >> 1);
-				if (fb_bit == 1) 
-				{
-					shift_reg = ((shift_reg ^ 0x8C) & 0xff);
+		    v = buffer[i];
+		    for (int j = 0; j < 8; ++j) // for each bit 
+		    {
+				data_bit = (byte) (v & 0x01); // isolate least sign bit
+				sr_lsb = (byte) (shift_reg & 0x01);
+				fb_bit = (byte) ((data_bit ^ sr_lsb) & 0x01); // calculate the feedback bit
+				shift_reg = (byte) (shift_reg >>> 1);
+				if (1 == fb_bit) {
+				    shift_reg = (byte) (shift_reg ^ 0x8C);
 				}
-				v = ((v & 0xff) >> 1);
-			}
+				v = (byte) (v >>> 1);
+		    }
 		}
 		return (byte) shift_reg;
 	}
@@ -486,8 +481,31 @@ public class PMS5005
 	public static int setCustomDOut(byte[] buffer, byte ival)
 	{
 		return 0;
-		// TODO Auto-generated method stub
-		
+	}
+	
+	/**
+	 * The following is a description of this method from the WiRobot X80 User Manual pdf
+	 * 
+	 * sends two 16-bit words infrared communication output data to
+	 * the Sensing and Motion Controller (PMS5005). The PMS5005 will then send the data out
+	 * through the infrared Remote Controller Module (MIR5500). In the case of being used for
+	 * infrared remote control, the output data serves as the remote control command.
+	 * 
+	 * Remarks:
+	 * 1. In infrared communication application, the data format and the interpretation can
+	 * 	be defined by the user at the application level.
+	 * 2. In infrared remote control application, the control command should be compatible
+	 * 	to the device to which the command is sent.
+	 * 3. This API function is under development and will be available shortly.
+	 *
+	 * @param buffer command buffer to assign to this command
+	 * @param lowWord 1st word
+	 * @param highWord 2nd word
+	 * @return
+	 */
+	public static int setInfraredControlOutput(byte[] buffer, int lowWord, int highWord)
+	{
+		return 0;
 	}
 	
 	/**
