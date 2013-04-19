@@ -5,7 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-import edu.ius.robotics.robots.boards.PMS5005;
+import edu.ius.robotics.robots.boards.PMB5010;
 import edu.ius.robotics.robots.interfaces.IRobot;
 
 public class UDPSocket implements Runnable
@@ -16,7 +16,7 @@ public class UDPSocket implements Runnable
 	
 	public static final int DEFAULT_PORT = 10001;
 	public static final int DEFAULT_DELAY = 100;
-	public static final int CONNECT_WAIT = 5000;
+	public static final int CONNECT_WAIT = 9000;
 	
 	private DatagramSocket socket;
 	private String ip;
@@ -109,7 +109,7 @@ public class UDPSocket implements Runnable
 		txPkt = new DatagramPacket(txBuf, txBuf.length, server, port);
 		
 		byte[] sendBuffer = new byte[1024];
-		int dataLength = PMS5005.ping(sendBuffer);
+		int dataLength = PMB5010.ping(sendBuffer, 0);
 		send(sendBuffer, dataLength);
 		// wait synchronously for feedback from robot to be clear that we have established connection
 		socket.setSoTimeout(CONNECT_WAIT);
@@ -154,7 +154,16 @@ public class UDPSocket implements Runnable
 	
 	public void close()
 	{
-		isFinished = true;
+		isFinished = true; // notify other thread
+		// wait for any commands to finish processing
+		try
+		{
+			Thread.sleep(delay);
+		}
+		catch (InterruptedException ex)
+		{
+		}
+		
 		socket.close();
 	}
 	
@@ -163,13 +172,13 @@ public class UDPSocket implements Runnable
 	 */
 	public void run() 
 	{
-		while (!this.isFinished) 
+		while (!this.isFinished)
 		{
-			try 
+			try
 			{
 				socket.setSoTimeout(10);
 				socket.receive(rxPkt);
-				if (0 < rxPkt.getLength())
+				if (!this.isFinished && 0 < rxPkt.getLength())
 				{
 					iRobot.socketEvent(ip, port, rxPkt.getData(), rxPkt.getLength());
 				}

@@ -23,6 +23,8 @@ public class PMB5010
 	public static final int RESERVED_OFFSET = 3;
 	public static final int VIDEO_SEQ_OFFSET = 0;
 	public static final int VIDEO_LENGTH_OFFSET = 1;
+	public static final int IMAGE_PKG_COUNT_RELATIVE_OFFSET = 1;
+	public static final int IMAGE_DATA_RELATIVE_OFFSET = 2;
 	
 	/* Start transmission, End transmission */
 	public static final byte STX0 = 0x5E; // 94
@@ -40,7 +42,7 @@ public class PMB5010
 	/* FLAGS */
 	public static final byte FLAG_VALUE = 0x06;
 	public static final int SEQ_BEGIN = 0x00;
-	public static final int SEQ_TERMINATE = 0xFF;
+	public static final int SEQ_END = 0xFF;
 	
 	/* DID Listing */
 	public static final byte RX_PING = 0x00;

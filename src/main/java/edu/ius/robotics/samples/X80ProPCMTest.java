@@ -21,7 +21,7 @@ public class X80ProPCMTest implements IRobotEventHandler
 		X80ProPCMTest pcmtest = new X80ProPCMTest();
 		try
 		{
-			robot = new X80Pro("192.168.0.204", pcmtest, false);
+			robot = new X80Pro("192.168.0.204", pcmtest, false, true, true);
 		}
 		catch (IOException e)
 		{
@@ -47,24 +47,29 @@ public class X80ProPCMTest implements IRobotEventHandler
 	}
 	
 	@Override
-	public void imageDataReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream imageData)
+	public void imageDataReceivedEvent(IRobot sender, ByteArrayOutputStream imageData)
 	{
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void sensorDataReceivedEvent(String robotIP, int robotPort, int sensorDataType)
+	public void sensorDataReceivedEvent(IRobot sender, int sensorDataType)
 	{
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void audioDataReceivedEvent(String robotIP, int robotPort, short[] audioData)
+	public void audioDataReceivedEvent(IRobot sender, short[] audioData)
 	{
 		System.out.println("*** AUDIO DATA RECEIVED ***");
-		System.out.println("Buffer length: " + audioData.length);
+		System.out.println("Buffer Length: " + audioData.length);
+		System.out.print("Buffer Content: ");
+		for (int i = 0, z = audioData.length; i < z; ++i) {
+			System.out.printf("%2x ", audioData[i]);
+		}
+		System.out.println();
 	}
 
 }

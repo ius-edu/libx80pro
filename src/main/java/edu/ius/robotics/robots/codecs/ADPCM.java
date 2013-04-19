@@ -50,17 +50,15 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 package edu.ius.robotics.robots.codecs;
 
-import java.nio.ByteBuffer;
-
 public class ADPCM
 {
-	public static int[] indexTable = 
+	public static int[] stepSizeModifierTable = 
 	{
 		-1, -1, -1, -1, 2, 4, 6, 8, 
 		-1, -1, -1, -1, 2, 4, 6, 8
 	};
 	
-	public static int[] stepsizeTable = 
+	public static int[] stepSizeTable = 
 	{
 		7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 
 		19, 21, 23, 25, 28, 31, 34, 37, 41, 45, 
@@ -95,39 +93,42 @@ public class ADPCM
 		adpcmState.index = 0;
 	}
 	
-	public short[] decode(ByteBuffer input, int length)
+	private boolean isEven(int i)
 	{
-		int outputLength = (length & 0xFF)*(Short.SIZE >> 3);
+		return 0 == i % 2;
+	}
+	
+	public short[] decode(byte[] input, int inputLength)
+	{
+		int outputLength = 2*inputLength; // 1:4 ratio of expansion: 1/2 byte (nibble) -> 2 bytes (word, aka short)
 		short[] output = new short[outputLength];
-		short predictedOutput = adpcmState.previousOutput;	/* Predicted output value */
-		char index = adpcmState.index;						/* Current step change index */
-		int step = stepsizeTable[index];					/* Stepsize */
+		short predictedOutput = adpcmState.previousOutput;	/* Predicted output value (signed) */
+		char stepSizeIndex = adpcmState.index;				/* Current step change index */
+		int step = stepSizeTable[stepSizeIndex];			/* Step size */
 		int predictedOutputDelta;							/* Current change to valpred */
 		int sign;											/* Current adpcm sign bit */
 		int delta;											/* Current adpcm output value */
-		int outputIndex = 0;								/* Current index in output buffer */
-		int inputIndex = 0;									/* Current index in input buffer */
-		boolean bufferStep = false;							/* toggle between outputbuffer/output */
+		int inputIndex = 0;									/* Current adpcm input index */
 		
-		for (int i = output.length - 1; 0 <= i; i--)
+		for (int outputIndex = 0; outputIndex < outputLength; ++outputIndex)
 		{
 			//System.err.println("i: " + i);
 			/* Step 1: Get the data value */
 			//System.err.println("step 1: get the data value");
-			if (bufferStep) delta = (input.getInt(inputIndex) & 0x0F);
-			else delta = (((input.getInt(++inputIndex) & 0x0F) >> 4) & 0xFF);
-			bufferStep = !bufferStep;
+			// The first byte seems to be skipped entirely here, but that's the way the cookie crumbles
+			if (isEven(outputIndex)) delta = (input[++inputIndex] >>> 4) & 0x0F;
+			else delta = input[inputIndex] & 0x0F;
 			
 			/* Step 2: Find new index value (for later) */
 			//System.err.println("step 2: find new index value (for later)");
-			index += indexTable[delta];
-			if (index < 0) index = 0;
-			else if (88 < index) index = 88;
+			stepSizeIndex += stepSizeModifierTable[delta];
+			if (stepSizeIndex < 0) stepSizeIndex = 0;
+			else if (88 < stepSizeIndex) stepSizeIndex = 88;
 			
 			/* Step 3: Separate sign and magnitude */
 			//System.err.println("step 3: separate sign and magnitude");
-			sign = delta & 0x08;
-			delta = delta & 0x07;
+			sign = delta & 0x08; // nibble's sign
+			delta = delta & 0x07; // unsigned nibble value
 			
 			/* Step 4: Combine difference and new predicted value */
 			/*
@@ -135,7 +136,7 @@ public class ADPCM
 			 * in encodeADPCM();
 			 */
 			//System.err.println("step 4: combine difference and new predicted value");
-			predictedOutputDelta = ((step & 0xFF) >> 3);
+			predictedOutputDelta = step >> 3;
 			if (0 < (delta & 0x04)) predictedOutputDelta += step;
 			if (0 < (delta & 0x02)) predictedOutputDelta += step >> 1;
 			if (0 < (delta & 0x01))	predictedOutputDelta += step >> 2;
@@ -150,29 +151,26 @@ public class ADPCM
 			
 			/* Step 6: Update step value */
 			//System.err.println("step 6: update step value");
-			step = stepsizeTable[index];
+			step = stepSizeTable[stepSizeIndex];
 			
 			/* Step 7: Output value */
 			//System.err.println("step 7: output value");
 			output[outputIndex] = predictedOutput;
 			
-			//System.err.println("*** increment outputIndex ***");
-			++outputIndex;
-			
 			//System.err.println();
 		}
 		adpcmState.previousOutput = predictedOutput;
-		adpcmState.index = index;
+		adpcmState.index = stepSizeIndex;
 		return output;
 	}
 	
-	public byte[] encode(short[] input, int length)
+	public byte[] encode(short[] input, int inputLength)
 	{
-		int outputLength = (length & 0xFFFF)*(Short.SIZE >> 3);
+		int outputLength = inputLength/2;
 		byte[] output = new byte[outputLength];
 		short predictedOutput = adpcmState.previousOutput;
 		char index = adpcmState.index;
-		int step = stepsizeTable[index];					
+		int step = stepSizeTable[index];					
 		int outputHolder = 0;								/* place to keep previous 4-bit value */
 		
 		boolean bufferStep = true;
@@ -232,20 +230,20 @@ public class ADPCM
 			/* Step 5: Assemble value, update index and step values */
 			delta |= sign;
 			
-			index += indexTable[delta];
+			index += stepSizeModifierTable[delta];
 			if (index < 0) index = 0;
 			else if (88 < index) index = 88;
 			
 			/* Step 6: Output value */
 			if (bufferStep) outputHolder = (byte) ((delta << 4) & 0xF0);
-			else output[outputIndex] = (byte) (((delta & 0x0F) | outputHolder) & 0xFF);
+			else output[outputIndex] = (byte) ((delta & 0x0F) | outputHolder);
 			
 			bufferStep = !bufferStep;
 			outputIndex++;
 		}
 		
 		/* Output last step, if needed */
-		if (!bufferStep) output[outputIndex] = (byte) (outputHolder & 0xFF);
+		if (!bufferStep) output[outputIndex] = (byte) outputHolder;
 		
 		adpcmState.previousOutput = predictedOutput;
 		adpcmState.index = index;

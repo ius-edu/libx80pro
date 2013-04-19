@@ -17,6 +17,7 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 
+import edu.ius.robotics.robots.interfaces.IRobot;
 import edu.ius.robotics.robots.interfaces.IRobotEventHandler;
 import edu.ius.robotics.robots.x80pro.X80Pro;
 
@@ -74,7 +75,7 @@ public class X80ProImageTest implements IRobotEventHandler
 	}
 	
 	@Override
-	public void imageDataReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream imageBuffer)
+	public void imageDataReceivedEvent(IRobot sender, ByteArrayOutputStream imageBuffer)
 	{
 		System.err.println("*** IMAGE RECEIVED EVENT ***");
 		
@@ -192,14 +193,14 @@ public class X80ProImageTest implements IRobotEventHandler
 	}
 	
 	@Override
-	public void sensorDataReceivedEvent(String robotIP, int robotPort, int sensorDataType)
+	public void sensorDataReceivedEvent(IRobot sender, int sensorDataType)
 	{
 		// TODO Auto-generated method stub
 		
 	}
 	
 	@Override
-	public void audioDataReceivedEvent(String robotIP, int robotPort, short[] audioBuffer)
+	public void audioDataReceivedEvent(IRobot sender, short[] audioBuffer)
 	{
 		// TODO Auto-generated method stub
 		

@@ -9,7 +9,7 @@ public interface IRobotEventHandler
 //	public void motorSensorDataReceivedEvent(String robotIP, int robotPort);
 //	public void powerSensorReceivedEvent(String robotIP, int robotPort);
 	
-	public void sensorDataReceivedEvent(String robotIP, int robotPort, int sensorDataType);
-	public void audioDataReceivedEvent(String robotIP, int robotPort, short[] audioData);
-	public void imageDataReceivedEvent(String robotIP, int robotPort, ByteArrayOutputStream imageData);
+	public void sensorDataReceivedEvent(IRobot sender, int sensorDataType);
+	public void audioDataReceivedEvent(IRobot sender, short[] audioData);
+	public void imageDataReceivedEvent(IRobot sender, ByteArrayOutputStream imageData);
 }

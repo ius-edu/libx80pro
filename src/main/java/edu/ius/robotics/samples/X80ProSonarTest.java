@@ -1,10 +1,13 @@
 package edu.ius.robotics.samples;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import edu.ius.robotics.robots.interfaces.IRobot;
+import edu.ius.robotics.robots.interfaces.IRobotEventHandler;
 import edu.ius.robotics.robots.x80pro.X80Pro;
 
-public class X80ProSonarTest
+public class X80ProSonarTest implements IRobotEventHandler
 {
 	
 	/**
@@ -36,22 +39,28 @@ public class X80ProSonarTest
 		robot.resumeAllSensors();
 		robot.resetHead();
 		
-		while (true)
-		{
-			System.err.println(robot.getSonarRange(1));
-			try
-			{
-				Thread.sleep(100);
-			}
-			catch (InterruptedException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
 		//robot.lowerHead();
 		//robot.shutdown();
 	}
-	
+
+	@Override
+	public void sensorDataReceivedEvent(IRobot sender, int sensorDataType)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void audioDataReceivedEvent(IRobot sender, short[] audioData)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void imageDataReceivedEvent(IRobot sender, ByteArrayOutputStream imageData)
+	{
+		// TODO Auto-generated method stub
+		
+	}
 }

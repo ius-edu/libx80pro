@@ -1,53 +1,38 @@
 package edu.ius.robotics.samples;
 
+import edu.ius.robotics.robots.interfaces.IRobot;
+import edu.ius.robotics.robots.interfaces.IRobotEventHandler;
 import edu.ius.robotics.robots.x80pro.X80Pro;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.Math;
 
-public class APLite implements Runnable
+public class APLite implements IRobotEventHandler
 {
-	public static final double RANGE = 0.30;
+	public static final int PERSONAL_SPACE_IN_CM = 30;
 	public static double velocity = 1.0;
-	
-	X80Pro robot;
-	
-	APLite(X80Pro robot)
-	{
-		this.robot = robot;
-	}
 	
 	public static void main(String args[])
 	{
+		APLite aplite = new APLite();
 		X80Pro robot = null;
 		try
 		{
-			robot = new X80Pro("192.168.0.203", null, true);
+			robot = new X80Pro("192.168.0.204", aplite);
 		}
 		catch (Exception ex)
 		{
 			ex.printStackTrace();
 		}
+		
 		if (null == robot)
 		{
 			System.err.println("No robot instance!");
 			return;
 		}
-		APLite aplite = new APLite(robot);
-		while (true)
-		{
-			try
-			{
-				Thread.sleep(50);
-			}
-			catch (InterruptedException ex)
-			{
-				ex.printStackTrace();
-			}
-			aplite.directRobot();
-		}
 	}
 	
-	public void directRobot()
+	synchronized public void direct(IRobot robot)
 	{
 		double v, F, kmid, kside, Fx, Fy, theta, alpha; //, w, friction, mass, heading;
 		double powerL;
@@ -66,28 +51,18 @@ public class APLite implements Runnable
 		//heading = heading; // current heading
 		
 		//int count = 0;
-		for (i = 0; i < X80Pro.Sensors.NUM_INFRARED_SENSORS_FRONT; ++i) 
+		for (i = 0; i < X80Pro.SensorCount.NUM_INFRARED_SENSORS_FRONT; ++i) 
 		{
-			int irr = (int) (100*robot.getIRRange(i));
-			System.err.println("robot.getSensorIRRange(" + i + "): " + irr);
-			if (irr <= RANGE) // object detected
+			int reading = ((X80Pro) robot).getIRRangeInCM(i);
+			System.err.println("robot.getIRRange(" + i + "): " + reading);
+			if (reading <= PERSONAL_SPACE_IN_CM) // object detected
 			{
-				if (X80Pro.Sensors.IR_DISTANCE_MINIMUM != irr)
-				{
-					x = irr;
-				}
-				else
-				{
-					x = 0;
-				}
-				//System.err.println("object too close, or object too far? sometimes gives same readings (incorrect deltaV?)");
+				if (X80Pro.SensorDistance.MIN_IR_DISTANCE_IN_CM != reading) x = reading;
+				else x = 0;
 			}
-			else // nothing seen
-			{
-				x = 0;
-			}
-			if (i == X80Pro.Sensors.FRONT_MID_LEFT_INFRARED_SENSOR_INDEX || 
-				i == X80Pro.Sensors.FRONT_MID_RIGHT_INFRARED_SENSOR_INDEX) // interior IR sensors
+			else x = 0;
+			
+			if (X80Pro.Sensor.FRONT_LEFT_MID_IR_SENSOR == i || i == X80Pro.Sensor.FRONT_RIGHT_MID_IR_SENSOR) // interior IR sensors
 			{
 				F = kmid*x; // compute force from two inside sensors
 			}
@@ -96,8 +71,8 @@ public class APLite implements Runnable
 				F = kside*x; // compute force from two outside sensors
 			}
 			
-			Fx = Fx - (F*Math.cos(X80Pro.Sensors.INFRARED_SENSOR_POSITION[i])); // Repulsive x component
-			Fy = Fy - (F*Math.sin(X80Pro.Sensors.INFRARED_SENSOR_POSITION[i])); // Repulsive y component
+			Fx = Fx - (F*Math.cos(X80Pro.SensorDirection.IR_SENSOR_DIRECTION[i])); // Repulsive x component
+			Fy = Fy - (F*Math.sin(X80Pro.SensorDirection.IR_SENSOR_DIRECTION[i])); // Repulsive y component
 		}
 		
 		v = Math.sqrt(Fx*Fx + Fy*Fy); // v = magnitude of force vector
@@ -106,26 +81,38 @@ public class APLite implements Runnable
 		powerL = (int)(v - v*alpha*theta); // power to left motor (v - v*alpha*w)
 		powerR = (int)(v + v*alpha*theta); // power to right motor (v + v*alpha*w)
 		
-		powerL /= Math.PI/2; // get percentage output.
-		powerR /= Math.PI/2; // get percentage output.
+		//powerL /= Math.PI/2; // get percentage output.
+		//powerR /= Math.PI/2; // get percentage output.
 		
-		robot.setBothDCMotorPulsePercentages((int) powerL, (int) powerR);
+		System.err.println();
+		System.err.println("powerL: " + powerL);
+		System.err.println("powerR: " + powerR);
+		System.err.println();
+		
+		((X80Pro) robot).setBothDCMotorPulsePercentages((int) powerL, (int) powerR);
 	}
 	
-	public void run()
+	@Override
+	public void sensorDataReceivedEvent(IRobot sender, int sensorDataType)
 	{
-		for (int i = 0; i < 100; ++i)
+		// TODO Auto-generated method stub
+		if (X80Pro.SensorDataType.TYPE_STANDARD == sensorDataType || sensorDataType == X80Pro.SensorDataType.TYPE_CUSTOM)
 		{
-			directRobot();
-			try
-			{
-				Thread.sleep(60);
-			}
-			catch (Exception ex)
-			{
-				ex.printStackTrace();
-			}
-			
+			direct(sender);
 		}
+	}
+	
+	@Override
+	public void audioDataReceivedEvent(IRobot sender, short[] audioData)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void imageDataReceivedEvent(IRobot sender, ByteArrayOutputStream imageData)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }
