@@ -25,7 +25,7 @@ public class X80ProResetHeadTest
 			System.err.println("No robot instance");
 			return;
 		}
-		robot.resetHead();
+		robot.raiseHead();
 		try
 		{
 			Thread.sleep(5000);

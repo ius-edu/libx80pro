@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import edu.ius.robotics.robots.boards.PMS5005;
 import edu.ius.robotics.robots.x80pro.X80Pro.SensorCount;
-import static edu.ius.robotics.dependencies.Type.*;
+import static edu.ius.robotics.convenience.Type.*;
 
 public class StandardSensorData
 {

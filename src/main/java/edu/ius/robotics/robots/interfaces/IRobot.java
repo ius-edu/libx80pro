@@ -4,6 +4,9 @@ public interface IRobot
 {
 	public void socketEvent(String robotIP, int robotPort, byte[] sensorData, int length);
 	
+	public String getIP();
+	public int getPort();
+	
 	public void startProgress();
 	public boolean isBusy();
 	public int reportProgress();

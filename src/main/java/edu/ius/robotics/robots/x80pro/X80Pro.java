@@ -13,12 +13,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.Runtime;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 import javax.imageio.ImageIO;
 
 import edu.ius.robotics.robots.boards.PMS5005;
 import edu.ius.robotics.robots.boards.PMB5010;
-import edu.ius.robotics.robots.codecs.ADPCM;
+
 import edu.ius.robotics.robots.interfaces.IRobot;
 import edu.ius.robotics.robots.interfaces.IRobotEventHandler;
 
@@ -26,13 +29,14 @@ import edu.ius.robotics.robots.sockets.UDPSocket;
 import edu.ius.robotics.robots.x80pro.data.CustomSensorData;
 import edu.ius.robotics.robots.x80pro.data.MotorSensorData;
 import edu.ius.robotics.robots.x80pro.data.StandardSensorData;
+import edu.ius.robots.event.RobotEvent;
+import edu.ius.robots.event.RobotEventType;
 
-import static edu.ius.robotics.dependencies.Type.*;
+import static edu.ius.robotics.convenience.Type.*;
 
 public class X80Pro implements IRobot, Runnable
 {
-	private volatile boolean isReadyToRespondToSensorEvents;
-	private volatile boolean isIRobotHandlerReadyToReceiveEvents;
+	private volatile boolean isReadyToRespondToSocketEvents;
 	
 	public static final int DEFAULT_ROBOT_PORT = 10001;
 	private static final int TX_BUFFER_SIZE = 1024;
@@ -45,9 +49,9 @@ public class X80Pro implements IRobot, Runnable
 	
 	public static class SensorDataType
 	{
-		public static final byte TYPE_STANDARD = PMS5005.GET_STANDARD_SENSOR_DATA;
-		public static final byte TYPE_CUSTOM = PMS5005.GET_CUSTOM_SENSOR_DATA;
-		public static final byte TYPE_MOTOR = PMS5005.GET_MOTOR_SENSOR_DATA;
+		public static final byte STANDARD = PMS5005.GET_STANDARD_SENSOR_DATA;
+		public static final byte CUSTOM = PMS5005.GET_CUSTOM_SENSOR_DATA;
+		public static final byte MOTOR = PMS5005.GET_MOTOR_SENSOR_DATA;
 	}
 	
 	public static class SensorUsage
@@ -189,7 +193,8 @@ public class X80Pro implements IRobot, Runnable
 	//private boolean[] lockIRRange;
 	private DataPackage pkg;
 	private UDPSocket socket;
-	private ADPCM adpcm;
+	//private ADPCM adpcm;
+	private ByteArrayOutputStream audioBuffer;
 	private ByteArrayOutputStream imageBuffer;
 	private IRobotEventHandler iRobotEventHandler;
 	private int previousSEQ;
@@ -199,7 +204,11 @@ public class X80Pro implements IRobot, Runnable
 	private int busyProgress;
 	
 	private byte[] txBuffer;
-	int txBufferLength;
+	private int txBufferLength;
+	//private RobotEventDispatcher robotEventDispatcher;
+	private ExecutorService executorService;
+	//private BlockingQueue<RobotEvent> eventQueue;
+	RobotEvent robotEvent;
 	
 	private void doPreInit()
 	{
@@ -208,19 +217,81 @@ public class X80Pro implements IRobot, Runnable
 		txBuffer = new byte[TX_BUFFER_SIZE];
 		
 		iRobotEventHandler = null;
-		adpcm = new ADPCM();
+		//adpcm = new ADPCM();
 		imageBuffer = new ByteArrayOutputStream();
 		
 		motorSensorData = new MotorSensorData();
 		customSensorData = new CustomSensorData();
 		standardSensorData = new StandardSensorData();
-
+		
 		// encoderPulseInitial is used as an independent variable to determine the robot's heading in radians.
 		// encoderPulseInitial may be reset at any time by calling resetHeading();
 		encoderPulseInitial = new int[SensorCount.NUM_DC_MOTOR_CHANNELS];
+		
+		//eventQueue = new LinkedBlockingQueue<RobotEvent>();
+		executorService = Executors.newSingleThreadExecutor();
 	}
 	
-	private void doPostInit(boolean shouldResumeSensorSendingOnStartup, boolean shouldResetHeadOnStartup, boolean shouldLowerHeadOnShutdown)
+//	private void doPostInit(boolean shouldResumeSensorSendingOnStartup, boolean shouldResetHeadOnStartup, boolean shouldLowerHeadOnShutdown)
+//	{
+//		if (shouldResumeSensorSendingOnStartup)
+//		{
+//			txBufferLength = PMS5005.enableMotorSensorSending(txBuffer); 
+//			socket.send(txBuffer, txBufferLength);
+//			txBufferLength = PMS5005.enableCustomSensorSending(txBuffer); 
+//			socket.send(txBuffer, txBufferLength);
+//			txBufferLength = PMS5005.enableStandardSensorSending(txBuffer);
+//			socket.send(txBuffer, txBufferLength);
+//			
+//			encoderPulseInitial[L] = absEncoderPulseValue(motorSensorData.encoderPulse[L]);
+//			encoderPulseInitial[R] = absEncoderPulseValue(motorSensorData.encoderPulse[R]);
+//		}
+//		else  
+//		{
+//			txBufferLength = PMS5005.disableMotorSensorSending(txBuffer);
+//			socket.send(txBuffer, txBufferLength);
+//			PMS5005.disableCustomSensorSending(txBuffer);
+//			socket.send(txBuffer, txBufferLength);
+//			PMS5005.disableStandardSensorSending(txBuffer);
+//			socket.send(txBuffer, txBufferLength);
+//			
+//			encoderPulseInitial[L] = -1;
+//			encoderPulseInitial[R] = -1;
+//		}
+//		
+//		txBufferLength = PMS5005.setMotorPolarity(txBuffer, L, MotorPolarity.POSITIVE);
+//		socket.send(txBuffer, txBufferLength);
+//		txBufferLength = PMS5005.setMotorPolarity(txBuffer, R, MotorPolarity.NEGATIVE);
+//		socket.send(txBuffer, txBufferLength);
+//		
+//		txBufferLength = PMS5005.setDCMotorSensorUsage(txBuffer, L, SensorUsage.USAGE_ENCODER);
+//		socket.send(txBuffer, txBufferLength);
+//		txBufferLength = PMS5005.setDCMotorSensorUsage(txBuffer, R, SensorUsage.USAGE_ENCODER);
+//		socket.send(txBuffer, txBufferLength);
+//		
+//		txBufferLength = PMS5005.setDCMotorControlMode(txBuffer, L, ControlMode.MODE_PWM);
+//		socket.send(txBuffer, txBufferLength);
+//		txBufferLength = PMS5005.setDCMotorControlMode(txBuffer, R, ControlMode.MODE_PWM);
+//		socket.send(txBuffer, txBufferLength);		
+//		
+//		if (shouldResetHeadOnStartup)
+//		{
+//			txBufferLength = PMS5005.setAllServoPulses(txBuffer, Motor.SERVO_Y_INI, Motor.SERVO_X_INI, 
+//					Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL);
+//			socket.send(txBuffer, txBufferLength);
+//		}
+//
+//		if (null != iRobotEventHandler)
+//		{
+//			robotEvent = new RobotEvent(this, iRobotEventHandler);
+//		}
+//		
+//		// This shutdown hook indicates other threads should terminate as well (e.g. sensor data collection thread).
+//		attachShutdownHook(shouldLowerHeadOnShutdown);
+//		isReadyToRespondToSensorEvents = true;
+//	}
+	
+	private void doPostInit(boolean shouldResumeSensorSendingOnStartup) //, boolean shouldResetHeadOnStartup, boolean shouldLowerHeadOnShutdown)
 	{
 		if (shouldResumeSensorSendingOnStartup)
 		{
@@ -262,17 +333,24 @@ public class X80Pro implements IRobot, Runnable
 		txBufferLength = PMS5005.setDCMotorControlMode(txBuffer, R, ControlMode.MODE_PWM);
 		socket.send(txBuffer, txBufferLength);		
 		
-		if (shouldResetHeadOnStartup)
+//		if (shouldResetHeadOnStartup)
+//		{
+//			txBufferLength = PMS5005.setAllServoPulses(txBuffer, Motor.SERVO_Y_INI, Motor.SERVO_X_INI, 
+//					Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL);
+//			socket.send(txBuffer, txBufferLength);
+//		}
+
+		if (null != iRobotEventHandler)
 		{
-			txBufferLength = PMS5005.setAllServoPulses(txBuffer, Motor.SERVO_Y_INI, Motor.SERVO_X_INI, 
-					Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL);
-			socket.send(txBuffer, txBufferLength);
+			//robotEvent = new RobotEvent(this, iRobotEventHandler);
+			iRobotEventHandler.startupEvent(this);
 		}
 		
 		// This shutdown hook indicates other threads should terminate as well (e.g. sensor data collection thread).
 		attachShutdownHook(shouldLowerHeadOnShutdown);
-		isReadyToRespondToSensorEvents = true;
+		isReadyToRespondToSocketEvents = true;
 	}
+
 	
 	/**
 	 * Creates a new instance of X80Pro
@@ -283,7 +361,8 @@ public class X80Pro implements IRobot, Runnable
 	{
 		doPreInit();
 		socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
-		doPostInit(true, true, true);
+		//doPostInit(true, true, true);
+		doPostInit(true);
 	}
 	
 	/**
@@ -296,7 +375,8 @@ public class X80Pro implements IRobot, Runnable
 	{
 		doPreInit();
 		socket = new UDPSocket(this, ipAddress, port);
-		doPostInit(true, true, true);
+		//doPostInit(true, true, true);
+		doPostInit(true);
 	}
 	
 	public X80Pro(String ipAddress, IRobotEventHandler iRobotEventHandler) throws IOException
@@ -304,7 +384,8 @@ public class X80Pro implements IRobot, Runnable
 		doPreInit();
 		this.iRobotEventHandler = iRobotEventHandler;
 		socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
-		doPostInit(true, true, true);
+		//doPostInit(true, true, true);
+		doPostInit(true);
 	}
 	
 	public X80Pro(String ipAddress, IRobotEventHandler iRobotEventHandler, boolean shouldResumeSensorSendingOnStartup, boolean shouldResetHeadOnStartup, boolean shouldLowerHeadOnShutdown) throws IOException
@@ -312,7 +393,8 @@ public class X80Pro implements IRobot, Runnable
 		doPreInit();
 		this.iRobotEventHandler = iRobotEventHandler;
 		socket = new UDPSocket(this, ipAddress, DEFAULT_ROBOT_PORT);
-		doPostInit(shouldResumeSensorSendingOnStartup, shouldResetHeadOnStartup, shouldLowerHeadOnShutdown);
+		//doPostInit(shouldResumeSensorSendingOnStartup, shouldResetHeadOnStartup, shouldLowerHeadOnShutdown);
+		doPostInit(shouldResumeSensorSendingOnStartup);
 	}
 	
 	public X80Pro(String ipAddress, int port, IRobotEventHandler iRobotEventHandler) throws IOException
@@ -320,7 +402,8 @@ public class X80Pro implements IRobot, Runnable
 		doPreInit();
 		this.iRobotEventHandler = iRobotEventHandler;
 		socket = new UDPSocket(this, ipAddress, port);
-		doPostInit(true, true, true);
+		//doPostInit(true, true, true);
+		doPostInit(true);
 	}
 	
 	public X80Pro(String ipAddress, int port, IRobotEventHandler iRobotEventHandler, boolean shouldResumeSensorSendingOnStartup, boolean shouldResetHeadOnStartup, boolean shouldLowerHeadOnShutdown) throws IOException
@@ -328,14 +411,17 @@ public class X80Pro implements IRobot, Runnable
 		doPreInit();
 		this.iRobotEventHandler = iRobotEventHandler;
 		socket = new UDPSocket(this, ipAddress, port);
-		doPostInit(shouldResumeSensorSendingOnStartup, shouldResetHeadOnStartup, shouldLowerHeadOnShutdown);
+		//doPostInit(shouldResumeSensorSendingOnStartup, shouldResetHeadOnStartup, shouldLowerHeadOnShutdown);
+		doPostInit(shouldResumeSensorSendingOnStartup);
 	}
 	
+	@Override
 	public String getIP()
 	{
 		return socket.getip();
 	}
 	
+	@Override
 	public int getPort()
 	{
 		return socket.getPort();
@@ -364,9 +450,17 @@ public class X80Pro implements IRobot, Runnable
 			//System.err.println("-*- Motor Sensor Data Package Received -*-");
 			motorSensorData.setMotorSensorData(pkgData.array());
 			updateHeading();
-			if (null != iRobotEventHandler) 
+			if (null != iRobotEventHandler)
 			{
-				iRobotEventHandler.sensorDataReceivedEvent(this, pms5005MessageType);
+				//iRobotEventHandler.sensorDataReceivedEvent(this, pms5005MessageType);
+				try
+				{
+					executorService.submit(new RobotEvent(this, iRobotEventHandler, RobotEventType.SENSOR_DATA_RECEIVED_EVENT, pms5005MessageType));
+				}
+				catch (RejectedExecutionException ex)
+				{
+					ex.printStackTrace();
+				}
 			}
 		}
 		else if (PMS5005.GET_CUSTOM_SENSOR_DATA == pms5005MessageType)
@@ -375,7 +469,15 @@ public class X80Pro implements IRobot, Runnable
 			customSensorData.setCustomSensorData(pkgData.array());
 			if (null != iRobotEventHandler) 
 			{
-				iRobotEventHandler.sensorDataReceivedEvent(this, pms5005MessageType);
+				//iRobotEventHandler.sensorDataReceivedEvent(this, pms5005MessageType);
+				try
+				{
+					executorService.submit(new RobotEvent(this, iRobotEventHandler, RobotEventType.SENSOR_DATA_RECEIVED_EVENT, pms5005MessageType));
+				}
+				catch (RejectedExecutionException ex)
+				{
+					ex.printStackTrace();
+				}
 			}
 		}
 		else if (PMS5005.GET_STANDARD_SENSOR_DATA == pms5005MessageType)
@@ -384,22 +486,61 @@ public class X80Pro implements IRobot, Runnable
 			standardSensorData.setStandardSensorData(pkgData.array());
 			if (null != iRobotEventHandler) 
 			{
-				iRobotEventHandler.sensorDataReceivedEvent(this, pms5005MessageType);
+				//iRobotEventHandler.sensorDataReceivedEvent(this, pms5005MessageType);
+				try
+				{
+					executorService.submit(new RobotEvent(this, iRobotEventHandler, RobotEventType.SENSOR_DATA_RECEIVED_EVENT, pms5005MessageType));
+				}
+				catch (RejectedExecutionException ex)
+				{
+					ex.printStackTrace();
+				}
 			}
 		}
 		else if (PMB5010.ADPCM_RESET == pmb5010MessageType)
 		{
 			////System.err.println("-*- ADPCM Reset Command Package Received -*-");
-			adpcm.init();
+			//adpcm.init();
 			txBufferLength = PMB5010.ack(txBuffer, unsigned(pkg.get(DataPackage.SEQ_OFFSET)));
 			socket.send(txBuffer, txBufferLength);
+			try
+			{
+				executorService.execute(new RobotEvent(this, iRobotEventHandler, RobotEventType.AUDIO_CODEC_RESET_EVENT));
+			}
+			catch (RejectedExecutionException ex)
+			{
+				ex.printStackTrace();
+			}
 		}
 		else if (PMB5010.AUDIO_PACKAGE == pmb5010MessageType)
 		{
 			////System.err.println("-*- Audio Data Package Received -*-");
 			if (null != iRobotEventHandler)
 			{
-				iRobotEventHandler.audioDataReceivedEvent(this, adpcm.decode(pkg.getData().array(), pkg.getDataLength()));
+				if (PMB5010.SEQ_BEGIN == unsigned(pkg.get(PMB5010.SEQ_OFFSET)))
+				{
+					executorService.execute(new RobotEvent(this, iRobotEventHandler, RobotEventType.AUDIO_CODEC_RESET_EVENT));
+					audioBuffer.write(pkgData.array(), 0, pkg.getDataLength());
+				}
+				else if (PMB5010.SEQ_END == unsigned(pkg.get(PMB5010.SEQ_OFFSET)))
+				{
+					// collect final audio data packages from this packet, decode and then hand off to user class on another thread.
+					//iRobotEventHandler.audioDataReceivedEvent(this, adpcm.decode(pkg.getData().array(), pkg.getDataLength()));
+					audioBuffer.write(pkgData.array(), 0, pkg.getDataLength());
+					try
+					{
+						executorService.execute(new RobotEvent(this, iRobotEventHandler, RobotEventType.AUDIO_DATA_RECEIVED_EVENT, audioBuffer));
+					}
+					catch (RejectedExecutionException ex)
+					{
+						ex.printStackTrace();
+						// we may need to enqueue this?
+					}
+				}
+				else
+				{
+					audioBuffer.write(pkgData.array(), 0, pkg.getDataLength());
+				}
 			}
 		}
 		else if (PMB5010.VIDEO_PACKAGE == pmb5010MessageType)
@@ -409,9 +550,8 @@ public class X80Pro implements IRobot, Runnable
 			{
 				// Step 1: Clear buffer sizes if we're receiving first JPEG packet.
 				if (PMB5010.SEQ_BEGIN == unsigned(pkgData.get(PMB5010.VIDEO_SEQ_OFFSET)))
-				//if (0 == this.numImagePkgs)
 				{
-					////System.err.println("Beginning jpeg image assembly");
+					//System.err.println("Beginning jpeg image assembly");
 					try
 					{
 						imageBuffer.flush();
@@ -420,7 +560,6 @@ public class X80Pro implements IRobot, Runnable
 					{
 						e.printStackTrace();
 					}
-					
 					imageBuffer.reset();
 				}
 				
@@ -443,9 +582,17 @@ public class X80Pro implements IRobot, Runnable
 				
 				if (PMB5010.SEQ_END == unsigned(pkgData.get(PMB5010.VIDEO_SEQ_OFFSET)))
 				{
-					// Step 3: Decode complete data from buffer if we have finished receiving.
-					////System.err.println("Finished jpeg image assembly");
-					iRobotEventHandler.imageDataReceivedEvent(this, imageBuffer);
+					//iRobotEventHandler.imageDataReceivedEvent(this, imageBuffer.toByteArray());
+					imageBuffer.write(pkgData.array(), 0, pkg.getDataLength());
+					try
+					{
+						executorService.execute(new RobotEvent(this, iRobotEventHandler, RobotEventType.IMAGE_DATA_RECEIVED_EVENT, imageBuffer));
+					}
+					catch (RejectedExecutionException ex)
+					{
+						ex.printStackTrace();
+						// we may need to queue this
+					}
 				}
 			}
 			// else if null == iRobotEventHandler (no delegate), we won't do anything with the data.
@@ -466,74 +613,73 @@ public class X80Pro implements IRobot, Runnable
 	@Override
 	public void socketEvent(String robotIP, int robotPort, byte[] message, int messageLength)
 	{
-		if (this.isReadyToRespondToSensorEvents && robotIP.equals(this.socket.getip()) && robotPort == this.socket.getPort())
+		//System.err.println("-*- New Message -*-");
+		//System.err.println("message length: " + messageLength);
+		//System.err.println("pkg.offset: " + pkg.getOffset());
+		//System.err.print("DEBUG message: ");
+		//for (int i = 0; i < messageLength; ++i)
+		//{
+		//	System.err.printf("%2x ", unsigned(message[i]));
+		//}
+		//System.err.println();
+		
+		int messageOffset = 0;
+		while (messageOffset < messageLength)
 		{
-			//System.err.println("-*- New Message -*-");
-			//System.err.println("message length: " + messageLength);
-			//System.err.println("pkg.offset: " + pkg.getOffset());
-			//System.err.print("DEBUG message: ");
-			//for (int i = 0; i < messageLength; ++i)
-			//{
-			//	System.err.printf("%2x ", unsigned(message[i]));
-			//}
-			//System.err.println();
-			
-			int messageOffset = 0;
-			while (messageOffset < messageLength)
+			int z = pkg.read(message, messageOffset, messageLength);
+			//System.err.println("DEBUG: READ " + z + " BYTES");
+			messageOffset += z;
+			if (pkg.isReady()) // successfully read package
 			{
-				int z = pkg.read(message, messageOffset, messageLength);
-				//System.err.println("DEBUG: READ " + z + " BYTES");
-				messageOffset += z;
-				if (pkg.isReady()) // successfully read package
-				{
-					//System.err.println("DEBUG: Dispatching...");
-					dispatch(pkg); // dispatch the package, then 
-					pkg.clear(); // amnesia.
-					//System.err.println();
-				}
-				else if (messageOffset <= messageLength) // package didn't overflow the message?
-				{
-					pkg.clear(); // couldn't read the package. drop it. bummer.
-					System.err.println("!!! Unresolved error !!!: unable to decode package");
-					System.err.println();
-				}
+				//System.err.println("DEBUG: Dispatching...");
+				if (this.isReadyToRespondToSocketEvents) dispatch(pkg); // dispatch the package, then 
+				pkg.clear(); // amnesia.
+				//System.err.println();
+			}
+			else if (messageOffset <= messageLength) // package didn't overflow the message?
+			{
+				pkg.clear(); // couldn't read the package. drop it. bummer.
+				System.err.println("!!! Unresolved error !!!: unable to decode package");
+				System.err.println();
 			}
 		}
 	}
 	
 	public void attachShutdownHook(boolean shouldLowerHeadOnShutdown)
 	{
-		this.shouldLowerHeadOnShutdown = shouldLowerHeadOnShutdown;
+		//this.shouldLowerHeadOnShutdown = shouldLowerHeadOnShutdown;
 		Runtime.getRuntime().addShutdownHook(new Thread(this));
 	}
 	
 	private void doShutdown()
 	{
-		isReadyToRespondToSensorEvents = false;
+		isReadyToRespondToSocketEvents = false;
 		
-		txBufferLength = PMS5005.disableCustomSensorSending(txBuffer);
-		socket.send(txBuffer, txBufferLength);
-		txBufferLength = PMS5005.disableStandardSensorSending(txBuffer);
-		socket.send(txBuffer, txBufferLength);
-		txBufferLength = PMS5005.disableMotorSensorSending(txBuffer);
-		socket.send(txBuffer, txBufferLength);
+		executorService.shutdown();
 		
-		if (shouldLowerHeadOnShutdown)
-		{
-			txBufferLength = PMS5005.setAllServoPulses(txBuffer, 
-					(short) (Motor.SERVO_Y_INI/2 + 500), Motor.SERVO_X_INI, 
-					Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL);
-			socket.send(txBuffer, txBufferLength);
-		}
+//		txBufferLength = PMS5005.disableCustomSensorSending(txBuffer);
+//		socket.send(txBuffer, txBufferLength);
+//		txBufferLength = PMS5005.disableStandardSensorSending(txBuffer);
+//		socket.send(txBuffer, txBufferLength);
+//		txBufferLength = PMS5005.disableMotorSensorSending(txBuffer);
+//		socket.send(txBuffer, txBufferLength);
 		
-		txBufferLength = PMS5005.setDCMotorControlMode(txBuffer, L, ControlMode.MODE_PWM); 
-		socket.send(txBuffer, txBufferLength);
-		txBufferLength = PMS5005.setDCMotorControlMode(txBuffer, R, ControlMode.MODE_PWM);
-		socket.send(txBuffer, txBufferLength);
+//		if (shouldLowerHeadOnShutdown)
+//		{
+//			txBufferLength = PMS5005.setAllServoPulses(txBuffer, 
+//					(short) (Motor.SERVO_Y_INI/2 + 500), Motor.SERVO_X_INI, 
+//					Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL);
+//			socket.send(txBuffer, txBufferLength);
+//		}
 		
-		txBufferLength = PMS5005.setAllDCMotorPulses(txBuffer, Motor.PWM_N, Motor.PWM_N, 
-				Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL);
-		socket.send(txBuffer, txBufferLength);
+//		txBufferLength = PMS5005.setDCMotorControlMode(txBuffer, L, ControlMode.MODE_PWM); 
+//		socket.send(txBuffer, txBufferLength);
+//		txBufferLength = PMS5005.setDCMotorControlMode(txBuffer, R, ControlMode.MODE_PWM);
+//		socket.send(txBuffer, txBufferLength);
+		
+//		txBufferLength = PMS5005.setAllDCMotorPulses(txBuffer, Motor.PWM_N, Motor.PWM_N, 
+//				Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL);
+//		socket.send(txBuffer, txBufferLength);
 		
 		txBufferLength = PMS5005.suspendDCMotor(txBuffer, (byte) 5);
 		socket.send(txBuffer, txBufferLength);
@@ -548,13 +694,15 @@ public class X80Pro implements IRobot, Runnable
 		txBufferLength = PMS5005.suspendDCMotor(txBuffer, (byte) 0);
 		socket.send(txBuffer, txBufferLength);
 		
+		iRobotEventHandler.shutdownEvent(this);
+		
 		socket.close();
 	}
 	
-	public void shutdown()
-	{
-		doShutdown();
-	}
+	//public void shutdown()
+	//{
+	//	doShutdown();
+	//}
 	
 	public void run()
 	{
@@ -627,38 +775,20 @@ public class X80Pro implements IRobot, Runnable
 		return distance;
 	}
 	
-	public void resetHead()
+	public void raiseHead()
 	{
-		System.err.println("Reset Head");
+		//System.err.println("Raise Head");
 		txBufferLength = PMS5005.setAllServoPulses(txBuffer, Motor.SERVO_Y_INI, Motor.SERVO_X_INI, 
 				Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL);
-		System.err.println("txBufferLength: " + txBufferLength);
-		System.err.println("txBuffer: ");
-		for (int i = 0; i < txBufferLength; ++i)
-		{
-			System.err.printf("%2x ", txBuffer[i]);
-		}
-		System.err.println();
 		socket.send(txBuffer, txBufferLength);
-		System.err.println("txBuffer sent");
-		System.err.println();
 	}
 	
 	public void lowerHead()
 	{
-		System.err.println("Lower Head");
+		//System.err.println("Lower Head");
 		txBufferLength = PMS5005.setAllServoPulses(txBuffer, (short) (Motor.SERVO_Y_INI/2 + 500), Motor.SERVO_X_INI, 
 				Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL, Motor.NO_CTRL);
-		System.err.println("txBufferLength: " + txBufferLength);
-		System.err.println("txBuffer: ");
-		for (int i = 0; i < txBufferLength; ++i)
-		{
-			System.err.printf("%2x ", txBuffer[i]);
-		}
-		System.err.println();
 		socket.send(txBuffer, txBufferLength);
-		System.err.println("txBuffer sent");
-		System.err.println();
 	}
 	
 	public void resumeAllSensors()

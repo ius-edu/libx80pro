@@ -1,6 +1,5 @@
 package edu.ius.robotics.samples;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import edu.ius.robotics.robots.interfaces.IRobot;
@@ -90,7 +89,7 @@ public class X80ProIRSensorTest implements IRobotEventHandler
 	}
 
 	@Override
-	public void imageDataReceivedEvent(IRobot sender, ByteArrayOutputStream imageData)
+	public void imageDataReceivedEvent(IRobot sender, byte[] imageData)
 	{
 		// TODO Auto-generated method stub
 		

@@ -1,66 +1,75 @@
 package edu.ius.robotics.samples;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import edu.ius.robotics.robots.interfaces.IRobot;
 import edu.ius.robotics.robots.interfaces.IRobotEventHandler;
 import edu.ius.robotics.robots.x80pro.X80Pro;
+import edu.ius.robotics.robots.x80pro.X80Pro.SensorDataType;
 
 public class X80ProSonarTest implements IRobotEventHandler
 {
+	X80Pro robot;
 	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args)
 	{
+		X80ProSonarTest test = new X80ProSonarTest();
 		X80Pro robot = null;
-		//X80Pro otherRobot = null;
-		
 		try
 		{
-			robot = new X80Pro("192.168.0.204");
-			//otherRobot = new X80Pro("192.168.0.202");
+			robot = new X80Pro("192.168.0.204", test);
 		}
 		catch (IOException ex)
 		{
 			ex.printStackTrace();
 		}
 		
-		if (robot == null) // || otherRobot == null)
+		if (robot == null)
 		{
+			System.err.println("Unresolved error: No robot instance");
 			return;
 		}
-		
-		//otherRobot.resumeAllSensors();
-		//otherRobot.resetHead();
-		
-		robot.resumeAllSensors();
-		robot.resetHead();
-		
-		//robot.lowerHead();
-		//robot.shutdown();
 	}
-
+	
 	@Override
 	public void sensorDataReceivedEvent(IRobot sender, int sensorDataType)
 	{
-		// TODO Auto-generated method stub
-		
+		if (sender == robot && SensorDataType.STANDARD == sensorDataType)
+		{
+			System.out.println(robot.getSonarRange(1));
+		}
 	}
-
+	
 	@Override
 	public void audioDataReceivedEvent(IRobot sender, short[] audioData)
 	{
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	@Override
-	public void imageDataReceivedEvent(IRobot sender, ByteArrayOutputStream imageData)
+	public void imageDataReceivedEvent(IRobot sender, byte[] imageData)
 	{
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public void shutdownEvent(IRobot sender)
+	{
+		if (sender == robot)
+		{
+			robot.lowerHead();
+		}
+	}
+	
+	@Override
+	public void startupEvent(IRobot sender)
+	{
+		this.robot = (X80Pro)sender;
+		robot.raiseHead();
 	}
 }

@@ -1,6 +1,6 @@
 package edu.ius.robotics.robots.x80pro;
 
-import static edu.ius.robotics.dependencies.Type.unsigned;
+import static edu.ius.robotics.convenience.Type.unsigned;
 
 import java.nio.ByteBuffer;
 

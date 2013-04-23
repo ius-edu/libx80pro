@@ -3,7 +3,6 @@ package edu.ius.robotics.samples;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,7 +28,7 @@ public class X80ProImageTest implements IRobotEventHandler
 		
 		X80ProImageTest imageTest = new X80ProImageTest();
 		X80Pro robot = new X80Pro("192.168.0.204", imageTest);
-		robot.resetHead();
+		robot.raiseHead();
 		robot.suspendAllSensors();
 		
 		try
@@ -75,12 +74,12 @@ public class X80ProImageTest implements IRobotEventHandler
 	}
 	
 	@Override
-	public void imageDataReceivedEvent(IRobot sender, ByteArrayOutputStream imageBuffer)
+	public void imageDataReceivedEvent(IRobot sender, byte[] imageBuffer)
 	{
 		System.err.println("*** IMAGE RECEIVED EVENT ***");
 		
         BufferedImage bi = new BufferedImage(176, 144, BufferedImage.TYPE_INT_RGB); // Type is YUV.
-        byte[] rawBytes = imageBuffer.toByteArray();
+        byte[] rawBytes = imageBuffer; //imageBuffer.toByteArray();
 		int count = 0; 
         for (int h = 0; h < 144; h++)
         {
@@ -95,7 +94,8 @@ public class X80ProImageTest implements IRobotEventHandler
 			fos = new FileOutputStream("/tmp/output0.jpeg");
 			try
 			{
-				fos.write(imageBuffer.toByteArray());
+				//fos.write(imageBuffer.toByteArray());
+				fos.write(rawBytes);
 				System.out.println("wrote /tmp/output0.jpeg");
 			}
 			catch (IOException e)
@@ -145,7 +145,7 @@ public class X80ProImageTest implements IRobotEventHandler
 		ImageInputStream iis = null;
 		try
 		{
-			iis = ImageIO.createImageInputStream(new ByteArrayInputStream(imageBuffer.toByteArray()));
+			iis = ImageIO.createImageInputStream(new ByteArrayInputStream(rawBytes)); //imageBuffer.toByteArray()));
 		}
 		catch (IOException e)
 		{

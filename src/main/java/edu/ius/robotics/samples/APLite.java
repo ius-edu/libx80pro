@@ -4,7 +4,6 @@ import edu.ius.robotics.robots.interfaces.IRobot;
 import edu.ius.robotics.robots.interfaces.IRobotEventHandler;
 import edu.ius.robotics.robots.x80pro.X80Pro;
 
-import java.io.ByteArrayOutputStream;
 import java.lang.Math;
 
 public class APLite implements IRobotEventHandler
@@ -12,13 +11,15 @@ public class APLite implements IRobotEventHandler
 	public static final int PERSONAL_SPACE_IN_CM = 30;
 	public static double velocity = 1.0;
 	
+	private X80Pro robot;
+	
 	public static void main(String args[])
 	{
 		APLite aplite = new APLite();
 		X80Pro robot = null;
 		try
 		{
-			robot = new X80Pro("192.168.0.204", aplite);
+			robot = new X80Pro("192.168.0.202", aplite);
 		}
 		catch (Exception ex)
 		{
@@ -32,7 +33,7 @@ public class APLite implements IRobotEventHandler
 		}
 	}
 	
-	synchronized public void direct(IRobot robot)
+	public void direct(IRobot robot)
 	{
 		double v, F, kmid, kside, Fx, Fy, theta, alpha; //, w, friction, mass, heading;
 		double powerL;
@@ -81,8 +82,8 @@ public class APLite implements IRobotEventHandler
 		powerL = (int)(v - v*alpha*theta); // power to left motor (v - v*alpha*w)
 		powerR = (int)(v + v*alpha*theta); // power to right motor (v + v*alpha*w)
 		
-		//powerL /= Math.PI/2; // get percentage output.
-		//powerR /= Math.PI/2; // get percentage output.
+		powerL /= Math.PI/2; // get percentage output.
+		powerR /= Math.PI/2; // get percentage output.
 		
 		System.err.println();
 		System.err.println("powerL: " + powerL);
@@ -96,7 +97,7 @@ public class APLite implements IRobotEventHandler
 	public void sensorDataReceivedEvent(IRobot sender, int sensorDataType)
 	{
 		// TODO Auto-generated method stub
-		if (X80Pro.SensorDataType.TYPE_STANDARD == sensorDataType || sensorDataType == X80Pro.SensorDataType.TYPE_CUSTOM)
+		if (sender == robot && X80Pro.SensorDataType.STANDARD == sensorDataType || sensorDataType == X80Pro.SensorDataType.CUSTOM)
 		{
 			direct(sender);
 		}
@@ -110,9 +111,24 @@ public class APLite implements IRobotEventHandler
 	}
 	
 	@Override
-	public void imageDataReceivedEvent(IRobot sender, ByteArrayOutputStream imageData)
+	public void imageDataReceivedEvent(IRobot sender, byte[] imageData)
 	{
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void shutdownEvent(IRobot sender)
+	{
+		// TODO Auto-generated method stub
+		robot.lowerHead();
+	}
+
+	@Override
+	public void startupEvent(IRobot sender)
+	{
+		// TODO Auto-generated method stub
+		robot = (X80Pro)sender;
+		robot.raiseHead();
 	}
 }

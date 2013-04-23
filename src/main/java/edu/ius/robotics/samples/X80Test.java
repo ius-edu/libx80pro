@@ -30,7 +30,7 @@ public class X80Test
 		//otherRobot.resetHead();
 		
 		robot.resumeAllSensors();
-		robot.resetHead();
+		robot.raiseHead();
 		
 		robot.setBothDCMotorSensorUsages(X80Pro.SensorUsage.USAGE_ENCODER);
 		robot.setBothDCMotorControlModes(X80Pro.ControlMode.MODE_VELOCITY);

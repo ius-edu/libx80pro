@@ -47,7 +47,7 @@ public class X80ProPCMTest implements IRobotEventHandler
 	}
 	
 	@Override
-	public void imageDataReceivedEvent(IRobot sender, ByteArrayOutputStream imageData)
+	public void imageDataReceivedEvent(IRobot sender, byte[] imageData)
 	{
 		// TODO Auto-generated method stub
 		

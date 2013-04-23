@@ -1,4 +1,6 @@
-package edu.ius.robotics.dependencies;
+// For static import
+
+package edu.ius.robotics.convenience;
 
 public class Type
 {
